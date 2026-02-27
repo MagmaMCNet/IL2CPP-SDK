@@ -1,0 +1,82 @@
+#pragma once
+#include <IL2CPP.Common/il2cpp_shared.hpp>
+
+// ============================================================================
+//  IL2CPP.Module::Unity::Callbacks
+//
+//  High-level wrapper for Unity event callbacks. Allows modules to register
+//  functions that get called during Unity's update loop events.
+//
+//  USAGE:
+//      #include <IL2CPP.Module/include/Unity/UnityCallbacks.hpp>
+//
+//      void MyUpdate() {
+//          // Called every Unity Update
+//      }
+//
+//      void MyOnSceneLoaded(int scene, int loadMode) {
+//          // Called when a scene is loaded
+//      }
+//
+//      // In your module init:
+//      IL2CPP::Module::Unity::Callbacks::Initialize();  // Must call once
+//      IL2CPP::Module::Unity::Callbacks::Register<MyUpdate>(IL2CPP::UnityEvent::Update);
+//      IL2CPP::Module::Unity::Callbacks::Register<MyOnSceneLoaded>(IL2CPP::UnityEvent::OnSceneLoaded);
+// ============================================================================
+
+namespace IL2CPP::Module {
+    [[nodiscard]] il2cpp_exports const* GetExports() noexcept;
+}
+
+namespace IL2CPP::Module::Unity {
+
+    class Callbacks {
+    public:
+        Callbacks() = delete;
+
+        /// Initialize the Unity callback system.
+        /// Must be called before registering any callbacks.
+        static void Initialize() {
+            auto* e = GetExports();
+            if (!e || !e->m_helperCallbackInitialize) return;
+            reinterpret_cast<void(IL2CPP_CALLTYPE)()>(e->m_helperCallbackInitialize)();
+        }
+
+        /// Uninitialize the Unity callback system.
+        /// Call during module shutdown to clean up hooks.
+        static void Uninitialize() {
+            auto* e = GetExports();
+            if (!e || !e->m_helperCallbackUninitialize) return;
+            reinterpret_cast<void(IL2CPP_CALLTYPE)()>(e->m_helperCallbackUninitialize)();
+        }
+
+        /// Register a callback function for a Unity event.
+        /// @param callback Function pointer to register
+        /// @param event The Unity event to hook (Update, LateUpdate, etc.)
+        static void Register(void* callback, UnityEvent event = UnityEvent::Update) {
+            auto* e = GetExports();
+            if (!e || !e->m_helperCallbackRegister || !callback) return;
+            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, uint8_t)>(
+                e->m_helperCallbackRegister)(callback, static_cast<uint8_t>(event));
+        }
+
+        /// Register a callback function (template version for function pointers).
+        template <auto Fn>
+        static void Register(UnityEvent event = UnityEvent::Update) {
+            Register(reinterpret_cast<void*>(Fn), event);
+        }
+
+        /// Register a callback function (template version for lambdas/functors).
+        template <typename Fn>
+        static void Register(Fn fn, UnityEvent event = UnityEvent::Update) {
+            Register(reinterpret_cast<void*>(+fn), event);
+        }
+
+        /// Register a callback function (explicit function pointer version).
+        template <typename R, typename... Args>
+        static void Register(R(*fn)(Args...), UnityEvent event = UnityEvent::Update) {
+            Register(reinterpret_cast<void*>(fn), event);
+        }
+    };
+
+} // namespace IL2CPP::Module::Unity

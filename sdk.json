@@ -1,0 +1,15 @@
+{
+  "version": "1.0.0",
+  "min_loader_version": "5.0.0",
+  "projects": [
+    "Bootstrap.Common",
+    "Bootstrap.Module",
+    "Hooking.Common",
+    "Hooking.Module",
+    "IL2CPP.Common",
+    "IL2CPP.Module",
+    "Logging.Common",
+    "Logging.Module"
+  ],
+  "generated": "2026-02-27T00:00:00Z"
+}
