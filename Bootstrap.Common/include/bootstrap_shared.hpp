@@ -12,7 +12,7 @@
 namespace Bootstrap {
 
     constexpr uint32_t invalid_id = ~0u;
-    constexpr uint32_t vtable_version = 4;
+    constexpr uint32_t vtable_version = 5;
     
     // Shared memory prefix + suffix - append PID between them for multi-instance support
     constexpr wchar_t const* shared_memory_prefix = L"Local\\UNIx_PID_";
@@ -72,6 +72,43 @@ namespace Bootstrap {
     using fn_unregister_player_event = void(__cdecl*)(uint32_t module_id, uint32_t callback_id);
     using fn_invoke_player_event = void(__cdecl*)(void* player, PlayerEvent event);
 
+    // Config — per-module persistent key-value store
+    using fn_config_set_int    = void(__cdecl*)(uint32_t module_id, char const* key, uint32_t key_len, int32_t value);
+    using fn_config_get_int    = int32_t(__cdecl*)(uint32_t module_id, char const* key, uint32_t key_len, int32_t default_val);
+    using fn_config_set_float  = void(__cdecl*)(uint32_t module_id, char const* key, uint32_t key_len, float value);
+    using fn_config_get_float  = float(__cdecl*)(uint32_t module_id, char const* key, uint32_t key_len, float default_val);
+    using fn_config_set_string = void(__cdecl*)(uint32_t module_id, char const* key, uint32_t key_len, char const* val, uint32_t val_len);
+    using fn_config_get_string = uint32_t(__cdecl*)(uint32_t module_id, char const* key, uint32_t key_len, char* out_buf, uint32_t buf_size);
+    using fn_config_set_bool   = void(__cdecl*)(uint32_t module_id, char const* key, uint32_t key_len, bool value);
+    using fn_config_get_bool   = bool(__cdecl*)(uint32_t module_id, char const* key, uint32_t key_len, bool default_val);
+    using fn_config_save       = void(__cdecl*)(uint32_t module_id);
+    using fn_config_has_key    = bool(__cdecl*)(uint32_t module_id, char const* key, uint32_t key_len);
+    using fn_config_remove_key = void(__cdecl*)(uint32_t module_id, char const* key, uint32_t key_len);
+
+    // Message bus — broadcast pub/sub between mods
+    using fn_message_callback    = void(__cdecl*)(uint32_t sender_module_id,
+        char const* topic, uint32_t topic_len,
+        uint8_t const* data, uint32_t data_len);
+    using fn_subscribe_message   = uint32_t(__cdecl*)(uint32_t module_id, char const* topic, uint32_t topic_len, fn_message_callback cb);
+    using fn_unsubscribe_message = void(__cdecl*)(uint32_t module_id, uint32_t subscription_id);
+    using fn_publish_message     = void(__cdecl*)(uint32_t module_id, char const* topic, uint32_t topic_len, uint8_t const* data, uint32_t data_len);
+
+    // QuickMenu API
+    using fn_menu_button_callback = void(__cdecl*)(uint32_t button_id);
+    using fn_qm_create_page       = uint32_t(__cdecl*)(uint32_t module_id,
+        char const* name, uint32_t name_len, char const* tooltip, uint32_t tooltip_len);
+    using fn_qm_create_sub_page   = uint32_t(__cdecl*)(uint32_t module_id,
+        uint32_t parent_page_id, char const* name, uint32_t name_len);
+    using fn_qm_remove_page       = void(__cdecl*)(uint32_t module_id, uint32_t page_id);
+    using fn_qm_add_button        = uint32_t(__cdecl*)(uint32_t module_id, uint32_t page_id,
+        char const* text, uint32_t text_len, fn_menu_button_callback callback);
+    using fn_qm_remove_button     = void(__cdecl*)(uint32_t module_id, uint32_t button_id);
+    using fn_qm_set_button_text   = void(__cdecl*)(uint32_t module_id, uint32_t button_id,
+        char const* text, uint32_t text_len);
+    using fn_qm_navigate_to       = void(__cdecl*)(uint32_t page_id);
+    using fn_qm_navigate_back     = void(__cdecl*)();
+    using fn_qm_is_ready          = bool(__cdecl*)();
+
     struct BootstrapVtable {
         uint32_t version;
         fn_register_module register_module;
@@ -98,6 +135,35 @@ namespace Bootstrap {
         fn_register_player_event register_player_event;
         fn_unregister_player_event unregister_player_event;
         fn_invoke_player_event invoke_player_event;
+
+        // Config
+        fn_config_set_int config_set_int;
+        fn_config_get_int config_get_int;
+        fn_config_set_float config_set_float;
+        fn_config_get_float config_get_float;
+        fn_config_set_string config_set_string;
+        fn_config_get_string config_get_string;
+        fn_config_set_bool config_set_bool;
+        fn_config_get_bool config_get_bool;
+        fn_config_save config_save;
+        fn_config_has_key config_has_key;
+        fn_config_remove_key config_remove_key;
+
+        // Message bus
+        fn_subscribe_message subscribe_message;
+        fn_unsubscribe_message unsubscribe_message;
+        fn_publish_message publish_message;
+
+        // QuickMenu
+        fn_qm_create_page qm_create_page;
+        fn_qm_create_sub_page qm_create_sub_page;
+        fn_qm_remove_page qm_remove_page;
+        fn_qm_add_button qm_add_button;
+        fn_qm_remove_button qm_remove_button;
+        fn_qm_set_button_text qm_set_button_text;
+        fn_qm_navigate_to qm_navigate_to;
+        fn_qm_navigate_back qm_navigate_back;
+        fn_qm_is_ready qm_is_ready;
     };
 
 } // namespace Bootstrap

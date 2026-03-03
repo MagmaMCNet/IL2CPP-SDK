@@ -24,6 +24,37 @@ namespace IL2CPP::Module {
             uintptr_t val = reinterpret_cast<uintptr_t>(ptr);
             return val > 0x10000 && val < 0x7FFFFFFFFFFF;
         }
+
+        inline const char* extract_member_name(const char* result) {
+            const char* colonPos = std::strstr(result, "::");
+            return colonPos ? colonPos + 2 : result;
+        }
+
+        // Resolve a member name by trying deobfuscated class name first, then stabilized.
+        // Chain: rawClassName -> stableClassName -> humanClassName
+        // Lookup "humanClassName::rawMemberName" for deobfuscated name,
+        // falling back to "stableClassName::rawMemberName" for stabilized name.
+        inline const char* resolve_member_name(const char* rawClassName, const char* rawMemberName) {
+            const char* stableClassName = Deobfuscation::GetStableName(rawClassName);
+
+            // Chain-resolve: stable class -> human class name
+            const char* humanClassName = Deobfuscation::GetStableName(stableClassName);
+            if (humanClassName && humanClassName != stableClassName &&
+                std::strcmp(humanClassName, stableClassName) != 0) {
+                std::string humanKey = build_member_key(humanClassName, rawMemberName);
+                const char* deobf = Deobfuscation::GetStableName(humanKey.c_str());
+                if (deobf && deobf != humanKey.c_str() && std::strcmp(deobf, humanKey.c_str()) != 0)
+                    return extract_member_name(deobf);
+            }
+
+            // Fall back to stabilized name
+            std::string key = build_member_key(stableClassName, rawMemberName);
+            const char* stable = Deobfuscation::GetStableName(key.c_str());
+            if (stable && stable != key.c_str() && std::strcmp(stable, key.c_str()) != 0)
+                return extract_member_name(stable);
+
+            return nullptr;
+        }
     }
 
     const char* Type::raw_name() const {
@@ -135,22 +166,14 @@ namespace IL2CPP::Module {
         const char* raw = raw_name();
         if (!raw || !*raw) return raw;
 
-        // Try qualified lookup: "StableClassName::rawFieldName"
+        // Try qualified lookup: deobfuscated name first, then stabilized
         void* parentClass = *reinterpret_cast<void**>(static_cast<char*>(m_native) + 2 * sizeof(void*));
         if (isValidPointer(parentClass)) {
             const char* rawClassName = *reinterpret_cast<const char**>(
                 static_cast<char*>(parentClass) + 2 * sizeof(void*));
             if (isValidPointer(rawClassName)) {
-                const char* stableClassName = Deobfuscation::GetStableName(rawClassName);
-
-                std::string key = build_member_key(stableClassName, raw);
-                const char* stable = Deobfuscation::GetStableName(key.c_str());
-
-                if (stable && stable != key.c_str() && std::strcmp(stable, key.c_str()) != 0) {
-                    const char* colonPos = std::strstr(stable, "::");
-                    if (colonPos) return colonPos + 2;
-                    return stable;
-                }
+                const char* resolved = resolve_member_name(rawClassName, raw);
+                if (resolved) return resolved;
             }
         }
 
@@ -287,16 +310,8 @@ namespace IL2CPP::Module {
                 static_cast<char*>(parentClass) + 2 * sizeof(void*));
 
             if (isValidPointer(rawClassName)) {
-                const char* stableClassName = Deobfuscation::GetStableName(rawClassName);
-
-                std::string key = build_member_key(stableClassName, raw);
-                const char* stable = Deobfuscation::GetStableName(key.c_str());
-
-                if (stable && stable != key.c_str() && std::strcmp(stable, key.c_str()) != 0) {
-                    const char* colonPos = std::strstr(stable, "::");
-                    if (colonPos) return colonPos + 2;
-                    return stable;
-                }
+                const char* resolved = resolve_member_name(rawClassName, raw);
+                if (resolved) return resolved;
             }
         }
 
@@ -448,16 +463,8 @@ namespace IL2CPP::Module {
             const char* rawClassName = *reinterpret_cast<const char**>(
                 static_cast<char*>(parentClass) + 2 * sizeof(void*));
             if (isValidPointer(rawClassName)) {
-                const char* stableClassName = Deobfuscation::GetStableName(rawClassName);
-
-                std::string key = build_member_key(stableClassName, raw);
-                const char* stable = Deobfuscation::GetStableName(key.c_str());
-
-                if (stable && stable != key.c_str() && std::strcmp(stable, key.c_str()) != 0) {
-                    const char* colonPos = std::strstr(stable, "::");
-                    if (colonPos) return colonPos + 2;
-                    return stable;
-                }
+                const char* resolved = resolve_member_name(rawClassName, raw);
+                if (resolved) return resolved;
             }
         }
 

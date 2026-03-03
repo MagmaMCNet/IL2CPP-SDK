@@ -78,14 +78,22 @@ namespace IL2CPP::Module {
         /// Returns a wrapped Class handle (or empty if not found).
         ///
         /// SIGNATURE SYNTAX:
-        ///   "fieldName"   - match if class has field or method with this name
-        ///   "~fieldName"  - match if class has field with this name
-        ///   "-methodName" - match if class has method with this name
-        ///   "!name"       - negative: must NOT have field/method with this name
+        ///   "fieldName"      - match if class has field or method with this name
+        ///   "~fieldName"     - match if class has field with this name
+        ///   "-methodName"    - match if class has method with this name
+        ///   "^className"     - match if direct parent class has this name
+        ///   "^^className"    - match if any ancestor class has this name
+        ///   "!name"          - negative: must NOT match (combinable with any prefix)
         ///
-        /// EXAMPLE:
+        /// EXAMPLES:
         ///   cache.Filter({ "~_vrcplayer", "~_USpeaker" }, "Assembly-CSharp");
         ///   // Finds class with both _vrcplayer and _USpeaker fields
+        ///
+        ///   cache.Filter({ "^MonoBehaviour", "~_field" }, "Assembly-CSharp");
+        ///   // Finds class whose direct parent is MonoBehaviour and has _field
+        ///
+        ///   cache.Filter({ "^^VRCNetworkBehaviour" }, "Assembly-CSharp");
+        ///   // Finds class that inherits from VRCNetworkBehaviour (any depth)
         [[nodiscard]] Class Filter(
             std::initializer_list<const char*> signatures,
             std::string_view assembly) {

@@ -108,4 +108,60 @@ namespace Bootstrap::Module {
         Rendering() = default;
     };
 
+    class ModuleConfig {
+    public:
+        explicit ModuleConfig(uint32_t module_id);
+
+        void set_int(std::string_view key, int32_t value);
+        int32_t get_int(std::string_view key, int32_t default_val = 0);
+        void set_float(std::string_view key, float value);
+        float get_float(std::string_view key, float default_val = 0.f);
+        void set_string(std::string_view key, std::string_view value);
+        std::string get_string(std::string_view key, std::string_view default_val = "");
+        void set_bool(std::string_view key, bool value);
+        bool get_bool(std::string_view key, bool default_val = false);
+        void save();
+        bool has_key(std::string_view key);
+        void remove_key(std::string_view key);
+
+    private:
+        uint32_t m_module_id;
+    };
+
+    class MessageBus {
+    public:
+        static MessageBus& Get();
+
+        uint32_t subscribe(uint32_t module_id, std::string_view topic, Bootstrap::fn_message_callback cb);
+        void unsubscribe(uint32_t module_id, uint32_t subscription_id);
+        void publish(uint32_t module_id, std::string_view topic, const void* data, uint32_t data_len);
+        void publish(uint32_t module_id, std::string_view topic, std::string_view message);
+
+    private:
+        MessageBus() = default;
+    };
+
+    class QuickMenu {
+    public:
+        static QuickMenu& Get();
+
+        [[nodiscard]] bool valid() const noexcept;
+        [[nodiscard]] bool is_ready();
+
+        uint32_t create_page(uint32_t module_id, std::string_view name, std::string_view tooltip = "");
+        uint32_t create_sub_page(uint32_t module_id, uint32_t parent_page_id, std::string_view name);
+        void remove_page(uint32_t module_id, uint32_t page_id);
+
+        uint32_t add_button(uint32_t module_id, uint32_t page_id, std::string_view text,
+                            Bootstrap::fn_menu_button_callback callback);
+        void remove_button(uint32_t module_id, uint32_t button_id);
+        void set_button_text(uint32_t module_id, uint32_t button_id, std::string_view text);
+
+        void navigate_to(uint32_t page_id);
+        void navigate_back();
+
+    private:
+        QuickMenu() = default;
+    };
+
 } // namespace Bootstrap::Module

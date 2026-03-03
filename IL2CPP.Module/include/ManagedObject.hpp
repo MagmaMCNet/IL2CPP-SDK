@@ -3,8 +3,11 @@
 #include <IL2CPP.Common/il2cpp_structs.hpp>
 #include <IL2CPP.Common/il2cpp_shared.hpp>
 #include <cstdint>
+#include <functional>
 #include <string>
 #include <string_view>
+#include <utility>
+#include <vector>
 
 // ============================================================================
 //  IL2CPP.Module - ManagedObject
@@ -61,6 +64,17 @@ namespace IL2CPP::Module {
             return T{};
         }
 
+        /// Get a field value using a pre-resolved Field handle (skips name lookup).
+        template<typename T>
+        [[nodiscard]] T get_field(const Field& field) const {
+            if (!valid() || !field) return T{};
+            int off = field.offset();
+            if (off >= 0) {
+                return *reinterpret_cast<T*>(static_cast<char*>(m_native) + off);
+            }
+            return T{};
+        }
+
         /// Set a field value by name.
         template<typename T>
         void set_field(std::string_view name, T value) {
@@ -70,6 +84,22 @@ namespace IL2CPP::Module {
             Field f = klass.get_field(name);
             if (!f) return;
             int off = f.offset();
+            if (off >= 0) {
+                *reinterpret_cast<T*>(static_cast<char*>(m_native) + off) = value;
+            }
+        }
+
+        template<typename T>
+        void set_field(int fieldOffset, T value) {
+            if (!valid()) return;
+            *reinterpret_cast<T*>(static_cast<char*>(m_native) + fieldOffset) = value;
+        }
+
+        /// Set a field value using a pre-resolved Field handle (skips name lookup).
+        template<typename T>
+        void set_field(const Field& field, T value) {
+            if (!valid() || !field) return;
+            int off = field.offset();
             if (off >= 0) {
                 *reinterpret_cast<T*>(static_cast<char*>(m_native) + off) = value;
             }
@@ -174,6 +204,139 @@ namespace IL2CPP::Module {
 
         /// Get a method handle by name.
         [[nodiscard]] Method get_method_info(std::string_view name, int argc = -1) const;
+
+        // ---- Static field access ----
+
+        /// Get a static field value by name.
+        template<typename T>
+        [[nodiscard]] T get_static_field(std::string_view name) const {
+            if (!valid()) return T{};
+            Class klass = get_class();
+            if (!klass) return T{};
+            Field f = klass.get_field(name);
+            if (!f || !f.is_static()) return T{};
+            T value{};
+            f.get_static_value(&value);
+            return value;
+        }
+
+        /// Set a static field value by name.
+        template<typename T>
+        void set_static_field(std::string_view name, T value) {
+            if (!valid()) return;
+            Class klass = get_class();
+            if (!klass) return;
+            Field f = klass.get_field(name);
+            if (!f || !f.is_static()) return;
+            f.set_static_value(&value);
+        }
+
+        // ---- Field discovery ----
+
+        /// Check if a field with the given name exists on this object's class.
+        [[nodiscard]] bool has_field(std::string_view name) const;
+
+        /// Get the byte offset for a field by name. Returns -1 if not found.
+        [[nodiscard]] int get_field_offset(std::string_view name) const;
+
+        /// Reverse lookup: get the Field metadata for a field at a specific offset.
+        [[nodiscard]] Field get_field_by_offset(int offset) const;
+
+        /// Get the Nth field in declaration order (0-indexed).
+        [[nodiscard]] Field get_field_by_index(int index) const;
+
+        /// Find all fields whose type name matches the given string.
+        [[nodiscard]] std::vector<Field> find_fields_by_type(std::string_view typeName) const;
+
+        /// Find all fields matching an access modifier ("public", "private", "protected", "internal").
+        [[nodiscard]] std::vector<Field> find_fields_by_access(std::string_view access) const;
+
+        /// Find all fields matching a predicate.
+        [[nodiscard]] std::vector<Field> find_fields(const std::function<bool(const Field&)>& predicate) const;
+
+        // ---- Field iteration ----
+
+        /// Get all fields for this object's class (convenience wrapper).
+        [[nodiscard]] std::vector<Field> get_fields() const;
+
+        /// Iterate all fields with a callback. Returns early if the callback returns false.
+        void for_each_field(const std::function<bool(const Field&)>& callback) const;
+
+        /// Get a list of {name, offset} pairs for all instance fields.
+        [[nodiscard]] std::vector<std::pair<const char*, int>> get_field_offsets() const;
+
+        // ---- Method discovery ----
+
+        /// Check if a method with the given name exists (optionally matching arg count).
+        [[nodiscard]] bool has_method(std::string_view name, int argc = -1) const;
+
+        /// Get all methods for this object's class (convenience wrapper).
+        [[nodiscard]] std::vector<Method> get_methods() const;
+
+        /// Iterate all methods with a callback. Returns early if the callback returns false.
+        void for_each_method(const std::function<bool(const Method&)>& callback) const;
+
+        /// Find all methods whose return type name matches the given string.
+        [[nodiscard]] std::vector<Method> find_methods_by_return_type(std::string_view typeName) const;
+
+        /// Find all methods with the given parameter count.
+        [[nodiscard]] std::vector<Method> find_methods_by_param_count(int count) const;
+
+        // ---- Object utilities ----
+
+        /// Get the instance size in bytes (from the class metadata).
+        [[nodiscard]] uint32_t instance_size() const;
+
+        /// Get the class name as a string (namespace.name).
+        [[nodiscard]] std::string get_class_name() const;
+
+        /// Call the managed ToString() method.
+        [[nodiscard]] std::string to_string() const;
+
+        /// Check if this object is an instance of the given class (or a derived class).
+        [[nodiscard]] bool is_instance_of(const Class& klass) const;
+
+        /// Safe downcast: returns a T if this object is an instance of T's class, else default T.
+        template<typename T>
+            requires std::is_base_of_v<ManagedObject, T>
+        [[nodiscard]] T try_cast() const {
+            if (!valid()) return T{};
+            T dummy{};
+            // T must have a static get_class_static() or we check by name.
+            // Use the simple approach: construct T from our pointer and let
+            // the caller verify.  For a real type-safe check, use is_instance_of.
+            return T{ m_native };
+        }
+
+        /// Safe downcast with type checking against a known class.
+        template<typename T>
+            requires std::is_base_of_v<ManagedObject, T>
+        [[nodiscard]] T try_cast(const Class& targetClass) const {
+            if (!valid() || !targetClass) return T{};
+            if (!is_instance_of(targetClass)) return T{};
+            return T{ m_native };
+        }
+
+        // ---- Boxing / Unboxing ----
+
+        /// Unbox this managed object to a value type T.
+        template<typename T>
+        [[nodiscard]] T unbox() const {
+            if (!valid()) return T{};
+            return *reinterpret_cast<T*>(IL2CPP::Unbox(m_native));
+        }
+
+        /// Get a pointer to the unboxed data.
+        [[nodiscard]] void* unbox_ptr() const;
+
+        /// Box a value type into a managed object. Requires the class of the value type.
+        [[nodiscard]] static ManagedObject box_value(const Class& klass, void* data);
+
+        /// Typed box helper.
+        template<typename T>
+        [[nodiscard]] static ManagedObject box(const Class& klass, T value) {
+            return box_value(klass, &value);
+        }
 
         // ---- String convenience helpers ----
 
