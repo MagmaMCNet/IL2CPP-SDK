@@ -157,6 +157,27 @@ namespace Bootstrap::Module {
         void remove_button(uint32_t module_id, uint32_t button_id);
         void set_button_text(uint32_t module_id, uint32_t button_id, std::string_view text);
 
+        // Toggle buttons
+        uint32_t add_toggle(uint32_t module_id, uint32_t page_id, std::string_view text,
+                            bool default_state, Bootstrap::fn_menu_toggle_callback callback,
+                            std::string_view config_key = "");
+        void set_toggle_state(uint32_t module_id, uint32_t button_id, bool state);
+        bool get_toggle_state(uint32_t module_id, uint32_t button_id);
+
+        // Icons & colors
+        void set_button_icon(uint32_t module_id, uint32_t button_id, void* sprite_ptr);
+        void set_button_icon(uint32_t module_id, uint32_t button_id, int32_t sprite_id);
+        void set_button_color(uint32_t module_id, uint32_t button_id, float r, float g, float b, float a);
+
+        // Page customization
+        void set_page_title(uint32_t module_id, uint32_t page_id, std::string_view title);
+        void set_page_icon(uint32_t module_id, uint32_t page_id, void* sprite_ptr);
+        void set_page_icon(uint32_t module_id, uint32_t page_id, int32_t sprite_id);
+        void set_page_badge(uint32_t module_id, uint32_t page_id, bool visible,
+                            std::string_view text = "", float r = 0, float g = 0, float b = 0, float a = 0);
+        void set_page_badge(uint32_t module_id, uint32_t page_id, bool visible, std::string_view text,
+                            std::nullptr_t no_color);
+
         void navigate_to(uint32_t page_id);
         void navigate_back();
 

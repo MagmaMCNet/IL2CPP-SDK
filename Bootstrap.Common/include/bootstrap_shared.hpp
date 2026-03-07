@@ -12,7 +12,7 @@
 namespace Bootstrap {
 
     constexpr uint32_t invalid_id = ~0u;
-    constexpr uint32_t vtable_version = 5;
+    constexpr uint32_t vtable_version = 6;
     
     // Shared memory prefix + suffix - append PID between them for multi-instance support
     constexpr wchar_t const* shared_memory_prefix = L"Local\\UNIx_PID_";
@@ -95,6 +95,7 @@ namespace Bootstrap {
 
     // QuickMenu API
     using fn_menu_button_callback = void(__cdecl*)(uint32_t button_id);
+    using fn_menu_toggle_callback = void(__cdecl*)(uint32_t button_id, bool is_on);
     using fn_qm_create_page       = uint32_t(__cdecl*)(uint32_t module_id,
         char const* name, uint32_t name_len, char const* tooltip, uint32_t tooltip_len);
     using fn_qm_create_sub_page   = uint32_t(__cdecl*)(uint32_t module_id,
@@ -108,6 +109,23 @@ namespace Bootstrap {
     using fn_qm_navigate_to       = void(__cdecl*)(uint32_t page_id);
     using fn_qm_navigate_back     = void(__cdecl*)();
     using fn_qm_is_ready          = bool(__cdecl*)();
+
+    // QuickMenu — toggles, icons, colors, badges (v6)
+    using fn_qm_add_toggle        = uint32_t(__cdecl*)(uint32_t module_id, uint32_t page_id,
+        char const* text, uint32_t text_len, bool default_state, fn_menu_toggle_callback callback,
+        char const* config_key, uint32_t config_key_len);
+    using fn_qm_set_toggle_state  = void(__cdecl*)(uint32_t module_id, uint32_t button_id, bool state);
+    using fn_qm_get_toggle_state  = bool(__cdecl*)(uint32_t module_id, uint32_t button_id);
+    using fn_qm_set_button_icon_ptr = void(__cdecl*)(uint32_t module_id, uint32_t button_id, void* sprite_ptr);
+    using fn_qm_set_button_icon_vrc = void(__cdecl*)(uint32_t module_id, uint32_t button_id, int32_t sprite_id);
+    using fn_qm_set_button_color  = void(__cdecl*)(uint32_t module_id, uint32_t button_id,
+        float r, float g, float b, float a);
+    using fn_qm_set_page_title    = void(__cdecl*)(uint32_t module_id, uint32_t page_id,
+        char const* title, uint32_t title_len);
+    using fn_qm_set_page_icon_ptr = void(__cdecl*)(uint32_t module_id, uint32_t page_id, void* sprite_ptr);
+    using fn_qm_set_page_icon_vrc = void(__cdecl*)(uint32_t module_id, uint32_t page_id, int32_t sprite_id);
+    using fn_qm_set_page_badge    = void(__cdecl*)(uint32_t module_id, uint32_t page_id, bool visible,
+        char const* text, uint32_t text_len, float const* bg_rgba);
 
     struct BootstrapVtable {
         uint32_t version;
@@ -164,6 +182,18 @@ namespace Bootstrap {
         fn_qm_navigate_to qm_navigate_to;
         fn_qm_navigate_back qm_navigate_back;
         fn_qm_is_ready qm_is_ready;
+
+        // QuickMenu — toggles, icons, colors, badges (v6)
+        fn_qm_add_toggle qm_add_toggle;
+        fn_qm_set_toggle_state qm_set_toggle_state;
+        fn_qm_get_toggle_state qm_get_toggle_state;
+        fn_qm_set_button_icon_ptr qm_set_button_icon_ptr;
+        fn_qm_set_button_icon_vrc qm_set_button_icon_vrc;
+        fn_qm_set_button_color qm_set_button_color;
+        fn_qm_set_page_title qm_set_page_title;
+        fn_qm_set_page_icon_ptr qm_set_page_icon_ptr;
+        fn_qm_set_page_icon_vrc qm_set_page_icon_vrc;
+        fn_qm_set_page_badge qm_set_page_badge;
     };
 
 } // namespace Bootstrap

@@ -395,6 +395,72 @@ namespace Bootstrap::Module {
             text.data(), static_cast<uint32_t>(text.size()));
     }
 
+    uint32_t QuickMenu::add_toggle(uint32_t module_id, uint32_t page_id, std::string_view text,
+                                    bool default_state, Bootstrap::fn_menu_toggle_callback callback,
+                                    std::string_view config_key) {
+        if (!valid() || !callback) return Bootstrap::invalid_id;
+        return g_conn.vtable->qm_add_toggle(module_id, page_id,
+            text.data(), static_cast<uint32_t>(text.size()),
+            default_state, callback,
+            config_key.data(), static_cast<uint32_t>(config_key.size()));
+    }
+
+    void QuickMenu::set_toggle_state(uint32_t module_id, uint32_t button_id, bool state) {
+        if (!valid()) return;
+        g_conn.vtable->qm_set_toggle_state(module_id, button_id, state);
+    }
+
+    bool QuickMenu::get_toggle_state(uint32_t module_id, uint32_t button_id) {
+        if (!valid()) return false;
+        return g_conn.vtable->qm_get_toggle_state(module_id, button_id);
+    }
+
+    void QuickMenu::set_button_icon(uint32_t module_id, uint32_t button_id, void* sprite_ptr) {
+        if (!valid()) return;
+        g_conn.vtable->qm_set_button_icon_ptr(module_id, button_id, sprite_ptr);
+    }
+
+    void QuickMenu::set_button_icon(uint32_t module_id, uint32_t button_id, int32_t sprite_id) {
+        if (!valid()) return;
+        g_conn.vtable->qm_set_button_icon_vrc(module_id, button_id, sprite_id);
+    }
+
+    void QuickMenu::set_button_color(uint32_t module_id, uint32_t button_id, float r, float g, float b, float a) {
+        if (!valid()) return;
+        g_conn.vtable->qm_set_button_color(module_id, button_id, r, g, b, a);
+    }
+
+    void QuickMenu::set_page_title(uint32_t module_id, uint32_t page_id, std::string_view title) {
+        if (!valid()) return;
+        g_conn.vtable->qm_set_page_title(module_id, page_id,
+            title.data(), static_cast<uint32_t>(title.size()));
+    }
+
+    void QuickMenu::set_page_icon(uint32_t module_id, uint32_t page_id, void* sprite_ptr) {
+        if (!valid()) return;
+        g_conn.vtable->qm_set_page_icon_ptr(module_id, page_id, sprite_ptr);
+    }
+
+    void QuickMenu::set_page_icon(uint32_t module_id, uint32_t page_id, int32_t sprite_id) {
+        if (!valid()) return;
+        g_conn.vtable->qm_set_page_icon_vrc(module_id, page_id, sprite_id);
+    }
+
+    void QuickMenu::set_page_badge(uint32_t module_id, uint32_t page_id, bool visible,
+                                    std::string_view text, float r, float g, float b, float a) {
+        if (!valid()) return;
+        float rgba[4] = { r, g, b, a };
+        g_conn.vtable->qm_set_page_badge(module_id, page_id, visible,
+            text.data(), static_cast<uint32_t>(text.size()), rgba);
+    }
+
+    void QuickMenu::set_page_badge(uint32_t module_id, uint32_t page_id, bool visible,
+                                    std::string_view text, std::nullptr_t) {
+        if (!valid()) return;
+        g_conn.vtable->qm_set_page_badge(module_id, page_id, visible,
+            text.data(), static_cast<uint32_t>(text.size()), nullptr);
+    }
+
     void QuickMenu::navigate_to(uint32_t page_id) {
         if (!valid()) return;
         g_conn.vtable->qm_navigate_to(page_id);
