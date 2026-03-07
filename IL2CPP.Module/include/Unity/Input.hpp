@@ -1,5 +1,5 @@
 #pragma once
-#include "Object.hpp"
+#include "../MethodHandler.hpp"
 #include <IL2CPP.Common/il2cpp_types.hpp>
 #include <IL2CPP.Common/il2cpp_shared.hpp>
 #include <string>
@@ -8,6 +8,10 @@
 //  IL2CPP.Module::Unity::Input - Static utility class
 // ============================================================================
 
+namespace IL2CPP::Module {
+    [[nodiscard]] IL2CPP::il2cpp_exports const* GetExports() noexcept;
+}
+
 namespace IL2CPP::Module::Unity {
 
     class Input {
@@ -15,146 +19,132 @@ namespace IL2CPP::Module::Unity {
         Input() = delete;
 
         [[nodiscard]] static float GetAxis(std::string_view axisName) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->input.m_GetAxis) return 0.f;
+            static auto m = MethodHandler::resolve("UnityEngine.Input", "GetAxis", 1);
             auto* exports = GetExports();
             if (!exports || !exports->m_stringNew) return 0.f;
             void* str = reinterpret_cast<void*(IL2CPP_CALLTYPE)(const char*)>(exports->m_stringNew)(
                 std::string(axisName).c_str());
-            return reinterpret_cast<float(IL2CPP_CALLTYPE)(void*)>(fn->input.m_GetAxis)(str);
+            void* params[] = { str };
+            return MethodHandler::invoke<float>(m, nullptr, params);
         }
 
         [[nodiscard]] static float GetAxisRaw(std::string_view axisName) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->input.m_GetAxisRaw) return 0.f;
+            static auto m = MethodHandler::resolve("UnityEngine.Input", "GetAxisRaw", 1);
             auto* exports = GetExports();
             if (!exports || !exports->m_stringNew) return 0.f;
             void* str = reinterpret_cast<void*(IL2CPP_CALLTYPE)(const char*)>(exports->m_stringNew)(
                 std::string(axisName).c_str());
-            return reinterpret_cast<float(IL2CPP_CALLTYPE)(void*)>(fn->input.m_GetAxisRaw)(str);
+            void* params[] = { str };
+            return MethodHandler::invoke<float>(m, nullptr, params);
         }
 
         [[nodiscard]] static bool GetKey(KeyCode key) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->input.m_GetKey) return false;
-            return reinterpret_cast<bool(IL2CPP_CALLTYPE)(int)>(fn->input.m_GetKey)(static_cast<int>(key));
+            static auto m = MethodHandler::resolve("UnityEngine.Input", "GetKey", 1);
+            int k = static_cast<int>(key);
+            void* params[] = { &k };
+            return MethodHandler::invoke<bool>(m, nullptr, params);
         }
 
         [[nodiscard]] static bool GetKeyDown(KeyCode key) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->input.m_GetKeyDown) return false;
-            return reinterpret_cast<bool(IL2CPP_CALLTYPE)(int)>(fn->input.m_GetKeyDown)(static_cast<int>(key));
+            static auto m = MethodHandler::resolve("UnityEngine.Input", "GetKeyDown", 1);
+            int k = static_cast<int>(key);
+            void* params[] = { &k };
+            return MethodHandler::invoke<bool>(m, nullptr, params);
         }
 
         [[nodiscard]] static bool GetKeyUp(KeyCode key) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->input.m_GetKeyUp) return false;
-            return reinterpret_cast<bool(IL2CPP_CALLTYPE)(int)>(fn->input.m_GetKeyUp)(static_cast<int>(key));
+            static auto m = MethodHandler::resolve("UnityEngine.Input", "GetKeyUp", 1);
+            int k = static_cast<int>(key);
+            void* params[] = { &k };
+            return MethodHandler::invoke<bool>(m, nullptr, params);
         }
 
         [[nodiscard]] static bool GetMouseButton(int button) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->input.m_GetMouseButton) return false;
-            return reinterpret_cast<bool(IL2CPP_CALLTYPE)(int)>(fn->input.m_GetMouseButton)(button);
+            static auto m = MethodHandler::resolve("UnityEngine.Input", "GetMouseButton", 1);
+            void* params[] = { &button };
+            return MethodHandler::invoke<bool>(m, nullptr, params);
         }
 
         [[nodiscard]] static bool GetMouseButtonDown(int button) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->input.m_GetMouseButtonDown) return false;
-            return reinterpret_cast<bool(IL2CPP_CALLTYPE)(int)>(fn->input.m_GetMouseButtonDown)(button);
+            static auto m = MethodHandler::resolve("UnityEngine.Input", "GetMouseButtonDown", 1);
+            void* params[] = { &button };
+            return MethodHandler::invoke<bool>(m, nullptr, params);
         }
 
         [[nodiscard]] static bool GetMouseButtonUp(int button) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->input.m_GetMouseButtonUp) return false;
-            return reinterpret_cast<bool(IL2CPP_CALLTYPE)(int)>(fn->input.m_GetMouseButtonUp)(button);
+            static auto m = MethodHandler::resolve("UnityEngine.Input", "GetMouseButtonUp", 1);
+            void* params[] = { &button };
+            return MethodHandler::invoke<bool>(m, nullptr, params);
         }
 
         [[nodiscard]] static bool GetAnyKey() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->input.m_GetAnyKey) return false;
-            return reinterpret_cast<bool(IL2CPP_CALLTYPE)()>(fn->input.m_GetAnyKey)();
+            static auto m = MethodHandler::resolve("UnityEngine.Input", "get_anyKey", 0);
+            return MethodHandler::invoke<bool>(m, nullptr);
         }
 
         [[nodiscard]] static bool GetAnyKeyDown() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->input.m_GetAnyKeyDown) return false;
-            return reinterpret_cast<bool(IL2CPP_CALLTYPE)()>(fn->input.m_GetAnyKeyDown)();
+            static auto m = MethodHandler::resolve("UnityEngine.Input", "get_anyKeyDown", 0);
+            return MethodHandler::invoke<bool>(m, nullptr);
         }
 
         [[nodiscard]] static Vector3 GetMousePosition() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->input.m_GetMousePosition) return Vector3{};
-            Vector3 v;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(Vector3*)>(fn->input.m_GetMousePosition)(&v);
-            return v;
+            static auto m = MethodHandler::resolve("UnityEngine.Input", "get_mousePosition", 0);
+            return MethodHandler::invoke<Vector3>(m, nullptr);
         }
 
         [[nodiscard]] static Vector2 GetMouseScrollDelta() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->input.m_GetMouseScrollDelta) return Vector2{};
-            Vector2 v;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(Vector2*)>(fn->input.m_GetMouseScrollDelta)(&v);
-            return v;
+            static auto m = MethodHandler::resolve("UnityEngine.Input", "get_mouseScrollDelta", 0);
+            return MethodHandler::invoke<Vector2>(m, nullptr);
         }
 
         [[nodiscard]] static bool GetMousePresent() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->input.m_GetMousePresent) return false;
-            return reinterpret_cast<bool(IL2CPP_CALLTYPE)()>(fn->input.m_GetMousePresent)();
+            static auto m = MethodHandler::resolve("UnityEngine.Input", "get_mousePresent", 0);
+            return MethodHandler::invoke<bool>(m, nullptr);
         }
 
-        // ---- Button Input (by name) ----
         [[nodiscard]] static bool GetButton(std::string_view buttonName) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->input.m_GetButton) return false;
+            static auto m = MethodHandler::resolve("UnityEngine.Input", "GetButton", 1);
             auto* exports = GetExports();
             if (!exports || !exports->m_stringNew) return false;
             void* str = reinterpret_cast<void*(IL2CPP_CALLTYPE)(const char*)>(exports->m_stringNew)(
                 std::string(buttonName).c_str());
-            return reinterpret_cast<bool(IL2CPP_CALLTYPE)(void*)>(fn->input.m_GetButton)(str);
+            void* params[] = { str };
+            return MethodHandler::invoke<bool>(m, nullptr, params);
         }
 
         [[nodiscard]] static bool GetButtonDown(std::string_view buttonName) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->input.m_GetButtonDown) return false;
+            static auto m = MethodHandler::resolve("UnityEngine.Input", "GetButtonDown", 1);
             auto* exports = GetExports();
             if (!exports || !exports->m_stringNew) return false;
             void* str = reinterpret_cast<void*(IL2CPP_CALLTYPE)(const char*)>(exports->m_stringNew)(
                 std::string(buttonName).c_str());
-            return reinterpret_cast<bool(IL2CPP_CALLTYPE)(void*)>(fn->input.m_GetButtonDown)(str);
+            void* params[] = { str };
+            return MethodHandler::invoke<bool>(m, nullptr, params);
         }
 
         [[nodiscard]] static bool GetButtonUp(std::string_view buttonName) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->input.m_GetButtonUp) return false;
+            static auto m = MethodHandler::resolve("UnityEngine.Input", "GetButtonUp", 1);
             auto* exports = GetExports();
             if (!exports || !exports->m_stringNew) return false;
             void* str = reinterpret_cast<void*(IL2CPP_CALLTYPE)(const char*)>(exports->m_stringNew)(
                 std::string(buttonName).c_str());
-            return reinterpret_cast<bool(IL2CPP_CALLTYPE)(void*)>(fn->input.m_GetButtonUp)(str);
+            void* params[] = { str };
+            return MethodHandler::invoke<bool>(m, nullptr, params);
         }
 
-        // ---- Touch Input ----
         [[nodiscard]] static int GetTouchCount() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->input.m_GetTouchCount) return 0;
-            return reinterpret_cast<int(IL2CPP_CALLTYPE)()>(fn->input.m_GetTouchCount)();
+            static auto m = MethodHandler::resolve("UnityEngine.Input", "get_touchCount", 0);
+            return MethodHandler::invoke<int>(m, nullptr);
         }
 
         [[nodiscard]] static bool IsTouchSupported() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->input.m_GetTouchPresent) return false;
-            return reinterpret_cast<bool(IL2CPP_CALLTYPE)()>(fn->input.m_GetTouchPresent)();
+            static auto m = MethodHandler::resolve("UnityEngine.Input", "get_touchSupported", 0);
+            return MethodHandler::invoke<bool>(m, nullptr);
         }
 
-        // ---- Acceleration (mobile devices) ----
         [[nodiscard]] static Vector3 GetAcceleration() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->input.m_GetAcceleration) return Vector3{};
-            Vector3 v;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(Vector3*)>(fn->input.m_GetAcceleration)(&v);
-            return v;
+            static auto m = MethodHandler::resolve("UnityEngine.Input", "get_acceleration", 0);
+            return MethodHandler::invoke<Vector3>(m, nullptr);
         }
 
         // ---- Legacy snake_case aliases (deprecated) ----

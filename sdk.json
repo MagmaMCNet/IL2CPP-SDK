@@ -9,7 +9,7 @@
                      "Logging.Common",
                      "Logging.Module"
                  ],
-    "generated":  "2026-03-03T03:22:35Z",
-    "min_loader_version":  "5.5.1",
-    "version":  "1.2.0"
+    "generated":  "2026-03-07T01:09:48Z",
+    "min_loader_version":  "6.0.0",
+    "version":  "2.0.0"
 }

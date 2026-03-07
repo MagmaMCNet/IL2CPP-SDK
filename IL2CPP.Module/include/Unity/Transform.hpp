@@ -1,5 +1,6 @@
 #pragma once
 #include "Component.hpp"
+#include "../MethodHandler.hpp"
 #include <IL2CPP.Common/il2cpp_types.hpp>
 #include <IL2CPP.Common/il2cpp_shared.hpp>
 
@@ -15,205 +16,212 @@ namespace IL2CPP::Module::Unity {
 
         // ---- Position ----
         [[nodiscard]] Vector3 GetPosition() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->transform.m_GetPosition || !raw()) return Vector3{};
-            Vector3 v; reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, Vector3*)>(fn->transform.m_GetPosition)(raw(), &v); return v;
+            static auto m = MethodHandler::resolve("UnityEngine.Transform", "get_position", 0);
+            return MethodHandler::invoke<Vector3>(m, raw());
         }
         void SetPosition(const Vector3& pos) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->transform.m_SetPosition || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, const Vector3&)>(fn->transform.m_SetPosition)(raw(), pos);
+            static auto m = MethodHandler::resolve("UnityEngine.Transform", "set_position", 1);
+            Vector3 p = pos;
+            void* params[] = { &p };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         [[nodiscard]] Vector3 GetLocalPosition() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->transform.m_GetLocalPosition || !raw()) return Vector3{};
-            Vector3 v; reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, Vector3*)>(fn->transform.m_GetLocalPosition)(raw(), &v); return v;
+            static auto m = MethodHandler::resolve("UnityEngine.Transform", "get_localPosition", 0);
+            return MethodHandler::invoke<Vector3>(m, raw());
         }
         void SetLocalPosition(const Vector3& pos) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->transform.m_SetLocalPosition || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, const Vector3&)>(fn->transform.m_SetLocalPosition)(raw(), pos);
+            static auto m = MethodHandler::resolve("UnityEngine.Transform", "set_localPosition", 1);
+            Vector3 p = pos;
+            void* params[] = { &p };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         // ---- Rotation ----
         [[nodiscard]] Quaternion GetRotation() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->transform.m_GetRotation || !raw()) return Quaternion{};
-            Quaternion q; reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, Quaternion*)>(fn->transform.m_GetRotation)(raw(), &q); return q;
+            static auto m = MethodHandler::resolve("UnityEngine.Transform", "get_rotation", 0);
+            return MethodHandler::invoke<Quaternion>(m, raw());
         }
         void SetRotation(const Quaternion& rot) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->transform.m_SetRotation || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, const Quaternion&)>(fn->transform.m_SetRotation)(raw(), rot);
+            static auto m = MethodHandler::resolve("UnityEngine.Transform", "set_rotation", 1);
+            Quaternion r = rot;
+            void* params[] = { &r };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         [[nodiscard]] Quaternion GetLocalRotation() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->transform.m_GetLocalRotation || !raw()) return Quaternion{};
-            Quaternion q; reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, Quaternion*)>(fn->transform.m_GetLocalRotation)(raw(), &q); return q;
+            static auto m = MethodHandler::resolve("UnityEngine.Transform", "get_localRotation", 0);
+            return MethodHandler::invoke<Quaternion>(m, raw());
         }
         void SetLocalRotation(const Quaternion& rot) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->transform.m_SetLocalRotation || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, const Quaternion&)>(fn->transform.m_SetLocalRotation)(raw(), rot);
+            static auto m = MethodHandler::resolve("UnityEngine.Transform", "set_localRotation", 1);
+            Quaternion r = rot;
+            void* params[] = { &r };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         // ---- Scale ----
         [[nodiscard]] Vector3 GetLocalScale() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->transform.m_GetLocalScale || !raw()) return Vector3{};
-            Vector3 v; reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, Vector3*)>(fn->transform.m_GetLocalScale)(raw(), &v); return v;
+            static auto m = MethodHandler::resolve("UnityEngine.Transform", "get_localScale", 0);
+            return MethodHandler::invoke<Vector3>(m, raw());
         }
         void SetLocalScale(const Vector3& scale) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->transform.m_SetLocalScale || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, const Vector3&)>(fn->transform.m_SetLocalScale)(raw(), scale);
+            static auto m = MethodHandler::resolve("UnityEngine.Transform", "set_localScale", 1);
+            Vector3 s = scale;
+            void* params[] = { &s };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         [[nodiscard]] Vector3 GetLossyScale() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->transform.m_GetLossyScale || !raw()) return Vector3{};
-            Vector3 v; reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, Vector3*)>(fn->transform.m_GetLossyScale)(raw(), &v); return v;
+            static auto m = MethodHandler::resolve("UnityEngine.Transform", "get_lossyScale", 0);
+            return MethodHandler::invoke<Vector3>(m, raw());
         }
 
         // ---- Directions ----
         [[nodiscard]] Vector3 GetForward() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->transform.m_GetForward || !raw()) return Vector3{};
-            Vector3 v; reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, Vector3*)>(fn->transform.m_GetForward)(raw(), &v); return v;
+            static auto m = MethodHandler::resolve("UnityEngine.Transform", "get_forward", 0);
+            return MethodHandler::invoke<Vector3>(m, raw());
         }
         void SetForward(const Vector3& fwd) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->transform.m_SetForward || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, const Vector3&)>(fn->transform.m_SetForward)(raw(), fwd);
+            static auto m = MethodHandler::resolve("UnityEngine.Transform", "set_forward", 1);
+            Vector3 f = fwd;
+            void* params[] = { &f };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         [[nodiscard]] Vector3 GetRight() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->transform.m_GetRight || !raw()) return Vector3{};
-            Vector3 v; reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, Vector3*)>(fn->transform.m_GetRight)(raw(), &v); return v;
+            static auto m = MethodHandler::resolve("UnityEngine.Transform", "get_right", 0);
+            return MethodHandler::invoke<Vector3>(m, raw());
         }
         void SetRight(const Vector3& r) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->transform.m_SetRight || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, const Vector3&)>(fn->transform.m_SetRight)(raw(), r);
+            static auto m = MethodHandler::resolve("UnityEngine.Transform", "set_right", 1);
+            Vector3 rv = r;
+            void* params[] = { &rv };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         [[nodiscard]] Vector3 GetUp() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->transform.m_GetUp || !raw()) return Vector3{};
-            Vector3 v; reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, Vector3*)>(fn->transform.m_GetUp)(raw(), &v); return v;
+            static auto m = MethodHandler::resolve("UnityEngine.Transform", "get_up", 0);
+            return MethodHandler::invoke<Vector3>(m, raw());
         }
         void SetUp(const Vector3& u) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->transform.m_SetUp || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, const Vector3&)>(fn->transform.m_SetUp)(raw(), u);
+            static auto m = MethodHandler::resolve("UnityEngine.Transform", "set_up", 1);
+            Vector3 uv = u;
+            void* params[] = { &uv };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         // ---- Hierarchy ----
         [[nodiscard]] Transform GetParent() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->transform.m_GetParent || !raw()) return Transform{};
-            return Transform{ reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*)>(fn->transform.m_GetParent)(raw()) };
+            static auto m = MethodHandler::resolve("UnityEngine.Transform", "get_parent", 0);
+            return Transform{ MethodHandler::invoke<void*>(m, raw()) };
         }
         void SetParent(Transform parent, bool worldPositionStays = true) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->transform.m_SetParent || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, void*, bool)>(fn->transform.m_SetParent)(raw(), parent.raw(), worldPositionStays);
+            static auto m = MethodHandler::resolve("UnityEngine.Transform", "SetParent", 2);
+            void* p = parent.raw();
+            void* params[] = { p, &worldPositionStays };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         [[nodiscard]] Transform GetRoot() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->transform.m_GetRoot || !raw()) return Transform{};
-            return Transform{ reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*)>(fn->transform.m_GetRoot)(raw()) };
+            static auto m = MethodHandler::resolve("UnityEngine.Transform", "get_root", 0);
+            return Transform{ MethodHandler::invoke<void*>(m, raw()) };
         }
 
         [[nodiscard]] int GetChildCount() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->transform.m_GetChildCount || !raw()) return 0;
-            return reinterpret_cast<int(IL2CPP_CALLTYPE)(void*)>(fn->transform.m_GetChildCount)(raw());
+            static auto m = MethodHandler::resolve("UnityEngine.Transform", "get_childCount", 0);
+            return MethodHandler::invoke<int>(m, raw());
         }
 
         [[nodiscard]] Transform GetChild(int index) const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->transform.m_GetChild || !raw()) return Transform{};
-            return Transform{ reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*, int)>(fn->transform.m_GetChild)(raw(), index) };
+            static auto m = MethodHandler::resolve("UnityEngine.Transform", "GetChild", 1);
+            void* params[] = { &index };
+            return Transform{ MethodHandler::invoke<void*>(m, raw(), params) };
         }
 
         [[nodiscard]] int GetHierarchyCount() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->transform.m_GetHierarchyCount || !raw()) return 0;
-            return reinterpret_cast<int(IL2CPP_CALLTYPE)(void*)>(fn->transform.m_GetHierarchyCount)(raw());
+            static auto m = MethodHandler::resolve("UnityEngine.Transform", "get_hierarchyCount", 0);
+            return MethodHandler::invoke<int>(m, raw());
         }
 
         [[nodiscard]] bool IsChildOf(Transform parent) const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->transform.m_IsChildOf || !raw()) return false;
-            return reinterpret_cast<bool(IL2CPP_CALLTYPE)(void*, void*)>(fn->transform.m_IsChildOf)(raw(), parent.raw());
+            static auto m = MethodHandler::resolve("UnityEngine.Transform", "IsChildOf", 1);
+            void* p = parent.raw();
+            void* params[] = { p };
+            return MethodHandler::invoke<bool>(m, raw(), params);
         }
 
         void DetachChildren() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->transform.m_DetachChildren || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*)>(fn->transform.m_DetachChildren)(raw());
+            static auto m = MethodHandler::resolve("UnityEngine.Transform", "DetachChildren", 0);
+            MethodHandler::invoke(m, raw());
         }
 
         [[nodiscard]] Transform Find(std::string_view name) const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->transform.m_Find || !raw()) return Transform{};
+            static auto m = MethodHandler::resolve("UnityEngine.Transform", "Find", 1);
             auto* exports = GetExports();
             if (!exports || !exports->m_stringNew) return Transform{};
             void* il2cppStr = reinterpret_cast<void*(IL2CPP_CALLTYPE)(const char*)>(exports->m_stringNew)(
                 std::string(name).c_str());
-            return Transform{ reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*, void*)>(fn->transform.m_Find)(raw(), il2cppStr) };
+            void* params[] = { il2cppStr };
+            return Transform{ MethodHandler::invoke<void*>(m, raw(), params) };
         }
 
         // ---- Transform operations ----
         void SetPositionAndRotation(const Vector3& pos, const Quaternion& rot) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->transform.m_SetPositionAndRotation || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, const Vector3&, const Quaternion&)>(fn->transform.m_SetPositionAndRotation)(raw(), pos, rot);
+            static auto m = MethodHandler::resolve("UnityEngine.Transform", "SetPositionAndRotation", 2);
+            Vector3 p = pos;
+            Quaternion r = rot;
+            void* params[] = { &p, &r };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         void SetLocalPositionAndRotation(const Vector3& pos, const Quaternion& rot) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->transform.m_SetLocalPositionAndRotation || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, const Vector3&, const Quaternion&)>(fn->transform.m_SetLocalPositionAndRotation)(raw(), pos, rot);
+            static auto m = MethodHandler::resolve("UnityEngine.Transform", "SetLocalPositionAndRotation", 2);
+            Vector3 p = pos;
+            Quaternion r = rot;
+            void* params[] = { &p, &r };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         [[nodiscard]] Vector3 TransformDirection(const Vector3& dir) const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->transform.m_TransformDirection || !raw()) return Vector3{};
-            Vector3 v; reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, const Vector3&, Vector3*)>(fn->transform.m_TransformDirection)(raw(), dir, &v); return v;
+            static auto m = MethodHandler::resolve("UnityEngine.Transform", "TransformDirection", 1);
+            Vector3 d = dir;
+            void* params[] = { &d };
+            return MethodHandler::invoke<Vector3>(m, raw(), params);
         }
 
         [[nodiscard]] Vector3 InverseTransformDirection(const Vector3& dir) const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->transform.m_InverseTransformDirection || !raw()) return Vector3{};
-            Vector3 v; reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, const Vector3&, Vector3*)>(fn->transform.m_InverseTransformDirection)(raw(), dir, &v); return v;
+            static auto m = MethodHandler::resolve("UnityEngine.Transform", "InverseTransformDirection", 1);
+            Vector3 d = dir;
+            void* params[] = { &d };
+            return MethodHandler::invoke<Vector3>(m, raw(), params);
         }
 
         [[nodiscard]] Vector3 TransformPoint(const Vector3& point) const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->transform.m_TransformPoint || !raw()) return Vector3{};
-            Vector3 v; reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, const Vector3&, Vector3*)>(fn->transform.m_TransformPoint)(raw(), point, &v); return v;
+            static auto m = MethodHandler::resolve("UnityEngine.Transform", "TransformPoint", 1);
+            Vector3 p = point;
+            void* params[] = { &p };
+            return MethodHandler::invoke<Vector3>(m, raw(), params);
         }
 
         // ---- Rotation Methods ----
 
         /// Rotate around a point in world space.
         void RotateAround(const Vector3& point, const Vector3& axis, float angle) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->transform.m_RotateAround || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, const Vector3&, const Vector3&, float)>(fn->transform.m_RotateAround)(raw(), point, axis, angle);
+            static auto m = MethodHandler::resolve("UnityEngine.Transform", "RotateAround", 3);
+            Vector3 p = point;
+            Vector3 a = axis;
+            void* params[] = { &p, &a, &angle };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         /// Rotate around a point in local space.
         void RotateAroundLocal(const Vector3& point, const Vector3& axis, float angle) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->transform.m_RotateAroundLocal || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, const Vector3&, const Vector3&, float)>(fn->transform.m_RotateAroundLocal)(raw(), point, axis, angle);
+            static auto m = MethodHandler::resolve("UnityEngine.Transform", "RotateAroundLocal", 3);
+            Vector3 p = point;
+            Vector3 a = axis;
+            void* params[] = { &p, &a, &angle };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         // ---- Utility Methods (client-side implementation) ----
@@ -283,15 +291,13 @@ namespace IL2CPP::Module::Unity {
 
         // ---- Matrices ----
         [[nodiscard]] Matrix4x4 GetWorldToLocalMatrix() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->transform.m_GetWorldToLocalMatrix || !raw()) return Matrix4x4{};
-            Matrix4x4 m; reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, Matrix4x4*)>(fn->transform.m_GetWorldToLocalMatrix)(raw(), &m); return m;
+            static auto m = MethodHandler::resolve("UnityEngine.Transform", "get_worldToLocalMatrix", 0);
+            return MethodHandler::invoke<Matrix4x4>(m, raw());
         }
 
         [[nodiscard]] Matrix4x4 GetLocalToWorldMatrix() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->transform.m_GetLocalToWorldMatrix || !raw()) return Matrix4x4{};
-            Matrix4x4 m; reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, Matrix4x4*)>(fn->transform.m_GetLocalToWorldMatrix)(raw(), &m); return m;
+            static auto m = MethodHandler::resolve("UnityEngine.Transform", "get_localToWorldMatrix", 0);
+            return MethodHandler::invoke<Matrix4x4>(m, raw());
         }
 
         // ---- Legacy snake_case aliases (deprecated) ----
@@ -326,21 +332,18 @@ namespace IL2CPP::Module::Unity {
     // ---- Deferred implementations requiring Transform ----
 
     inline Transform Component::GetTransform() const {
-        auto* fn = GetUnityFunctions();
-        if (!fn || !fn->component.m_GetTransform || !raw()) return Transform{};
-        return Transform{ reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*)>(fn->component.m_GetTransform)(raw()) };
+        static auto m = MethodHandler::resolve("UnityEngine.Component", "get_transform", 0);
+        return Transform{ MethodHandler::invoke<void*>(m, raw()) };
     }
 
     inline GameObject Component::GetGameObject() const {
-        auto* fn = GetUnityFunctions();
-        if (!fn || !fn->component.m_GetGameObject || !raw()) return GameObject{};
-        return GameObject{ reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*)>(fn->component.m_GetGameObject)(raw()) };
+        static auto m = MethodHandler::resolve("UnityEngine.Component", "get_gameObject", 0);
+        return GameObject{ MethodHandler::invoke<void*>(m, raw()) };
     }
 
     inline Transform GameObject::GetTransform() const {
-        auto* fn = GetUnityFunctions();
-        if (!fn || !fn->gameObject.m_GetTransform || !raw()) return Transform{};
-        return Transform{ reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*)>(fn->gameObject.m_GetTransform)(raw()) };
+        static auto m = MethodHandler::resolve("UnityEngine.GameObject", "get_transform", 0);
+        return Transform{ MethodHandler::invoke<void*>(m, raw()) };
     }
 
     // ---- Legacy deferred implementations ----
@@ -351,9 +354,11 @@ namespace IL2CPP::Module::Unity {
     // ---- Object deferred implementations ----
 
     inline Object Object::InstantiateWithParent(Transform parent) const {
-        auto* fn = GetUnityFunctions();
-        if (!fn || !fn->object.m_Internal_CloneSingleWithParent || !raw()) return Object{};
-        return Object{ reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*, void*)>(fn->object.m_Internal_CloneSingleWithParent)(raw(), parent.raw()) };
+        static auto m = MethodHandler::resolve("UnityEngine.Object", "Internal_CloneSingleWithParent", 2);
+        void* self = raw();
+        void* p = parent.raw();
+        void* params[] = { self, p };
+        return Object{ MethodHandler::invoke<void*>(m, nullptr, params) };
     }
 
 } // namespace IL2CPP::Module::Unity

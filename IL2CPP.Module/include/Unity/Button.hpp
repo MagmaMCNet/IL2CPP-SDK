@@ -1,0 +1,18 @@
+#pragma once
+#include "Selectable.hpp"
+#include "../MethodHandler.hpp"
+
+namespace IL2CPP::Module::Unity {
+
+    class Button : public Selectable {
+    public:
+        using Selectable::Selectable;
+
+        // ---- onClick (get, raw pointer to UnityEvent) ----
+        [[nodiscard]] void* GetOnClickRaw() const {
+            static auto m = MethodHandler::resolve("UnityEngine.UI.Button", "get_onClick", 0);
+            return MethodHandler::invoke<void*>(m, raw());
+        }
+    };
+
+} // namespace IL2CPP::Module::Unity

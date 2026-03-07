@@ -158,7 +158,10 @@ namespace IL2CPP::Module {
 // ClassCache: high-level cache with deobfuscated Class handles
 #include "ClassCache.hpp"
 
-// Unity wrappers
+// MethodHandler: safe resolve + invoke through Core vtable
+#include "MethodHandler.hpp"
+
+// Unity wrappers — core hierarchy
 #include "Unity/Object.hpp"
 #include "Unity/Component.hpp"
 #include "Unity/GameObject.hpp"
@@ -170,6 +173,55 @@ namespace IL2CPP::Module {
 #include "Unity/Collider.hpp"
 #include "Unity/Time.hpp"
 #include "Unity/Input.hpp"
+#include "Unity/RectTransform.hpp"
+#include "Unity/Canvas.hpp"
+#include "Unity/CanvasGroup.hpp"
+
+// Unity wrappers — rendering
+#include "Unity/Renderer.hpp"
+#include "Unity/MeshRenderer.hpp"
+#include "Unity/SkinnedMeshRenderer.hpp"
+#include "Unity/Light.hpp"
+#include "Unity/ParticleSystem.hpp"
+
+// Unity wrappers — audio & animation
+#include "Unity/AudioSource.hpp"
+#include "Unity/Animator.hpp"
+
+// Unity wrappers — physics subtypes
+#include "Unity/BoxCollider.hpp"
+#include "Unity/SphereCollider.hpp"
+#include "Unity/MeshCollider.hpp"
+
+// Unity wrappers — UI hierarchy
+#include "Unity/UIBehaviour.hpp"
+#include "Unity/Graphic.hpp"
+#include "Unity/MaskableGraphic.hpp"
+#include "Unity/Image.hpp"
+#include "Unity/RawImage.hpp"
+#include "Unity/TMP_Text.hpp"
+#include "Unity/Selectable.hpp"
+#include "Unity/Button.hpp"
+#include "Unity/Toggle.hpp"
+#include "Unity/Slider.hpp"
+#include "Unity/InputField.hpp"
+#include "Unity/TMP_InputField.hpp"
+
+// Unity wrappers — UI layout
+#include "Unity/CanvasScaler.hpp"
+#include "Unity/ContentSizeFitter.hpp"
+#include "Unity/LayoutGroup.hpp"
+#include "Unity/HorizontalLayoutGroup.hpp"
+#include "Unity/VerticalLayoutGroup.hpp"
+#include "Unity/LayoutElement.hpp"
+#include "Unity/ScrollRect.hpp"
+#include "Unity/RectMask2D.hpp"
+
+// Unity wrappers — assets
+#include "Unity/Material.hpp"
+#include "Unity/Texture2D.hpp"
+#include "Unity/Sprite.hpp"
+#include "Unity/Resources.hpp"
 
 // .NET wrappers
 #include "System/String.hpp"

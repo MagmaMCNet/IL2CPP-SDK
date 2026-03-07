@@ -1,6 +1,5 @@
 #pragma once
-#include "Object.hpp"
-#include <IL2CPP.Common/il2cpp_shared.hpp>
+#include "../MethodHandler.hpp"
 
 // ============================================================================
 //  IL2CPP.Module::Unity::Time - Static utility class
@@ -13,136 +12,101 @@ namespace IL2CPP::Module::Unity {
         Time() = delete;
 
         [[nodiscard]] static float GetTime() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->time.m_GetTime) return 0.f;
-            return reinterpret_cast<float(IL2CPP_CALLTYPE)()>(fn->time.m_GetTime)();
+            static auto m = MethodHandler::resolve("UnityEngine.Time", "get_time", 0);
+            return MethodHandler::invoke<float>(m, nullptr);
         }
         [[nodiscard]] static double GetTimeAsDouble() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->time.m_GetTimeAsDouble) return 0.0;
-            return reinterpret_cast<double(IL2CPP_CALLTYPE)()>(fn->time.m_GetTimeAsDouble)();
+            static auto m = MethodHandler::resolve("UnityEngine.Time", "get_timeAsDouble", 0);
+            return MethodHandler::invoke<double>(m, nullptr);
         }
         [[nodiscard]] static float GetDeltaTime() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->time.m_GetDeltaTime) return 0.f;
-            return reinterpret_cast<float(IL2CPP_CALLTYPE)()>(fn->time.m_GetDeltaTime)();
+            static auto m = MethodHandler::resolve("UnityEngine.Time", "get_deltaTime", 0);
+            return MethodHandler::invoke<float>(m, nullptr);
         }
         [[nodiscard]] static float GetFixedDeltaTime() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->time.m_GetFixedDeltaTime) return 0.f;
-            return reinterpret_cast<float(IL2CPP_CALLTYPE)()>(fn->time.m_GetFixedDeltaTime)();
+            static auto m = MethodHandler::resolve("UnityEngine.Time", "get_fixedDeltaTime", 0);
+            return MethodHandler::invoke<float>(m, nullptr);
         }
         [[nodiscard]] static float GetUnscaledDeltaTime() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->time.m_GetUnscaledDeltaTime) return 0.f;
-            return reinterpret_cast<float(IL2CPP_CALLTYPE)()>(fn->time.m_GetUnscaledDeltaTime)();
+            static auto m = MethodHandler::resolve("UnityEngine.Time", "get_unscaledDeltaTime", 0);
+            return MethodHandler::invoke<float>(m, nullptr);
         }
         [[nodiscard]] static float GetUnscaledTime() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->time.m_GetUnscaledTime) return 0.f;
-            return reinterpret_cast<float(IL2CPP_CALLTYPE)()>(fn->time.m_GetUnscaledTime)();
+            static auto m = MethodHandler::resolve("UnityEngine.Time", "get_unscaledTime", 0);
+            return MethodHandler::invoke<float>(m, nullptr);
         }
         [[nodiscard]] static float GetFixedTime() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->time.m_GetFixedTime) return 0.f;
-            return reinterpret_cast<float(IL2CPP_CALLTYPE)()>(fn->time.m_GetFixedTime)();
+            static auto m = MethodHandler::resolve("UnityEngine.Time", "get_fixedTime", 0);
+            return MethodHandler::invoke<float>(m, nullptr);
         }
         [[nodiscard]] static float GetTimeScale() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->time.m_GetTimeScale) return 1.f;
-            return reinterpret_cast<float(IL2CPP_CALLTYPE)()>(fn->time.m_GetTimeScale)();
+            static auto m = MethodHandler::resolve("UnityEngine.Time", "get_timeScale", 0);
+            return MethodHandler::invoke<float>(m, nullptr);
         }
         static void SetTimeScale(float scale) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->time.m_SetTimeScale) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(float)>(fn->time.m_SetTimeScale)(scale);
+            static auto m = MethodHandler::resolve("UnityEngine.Time", "set_timeScale", 1);
+            void* params[] = { &scale };
+            MethodHandler::invoke(m, nullptr, params);
         }
         [[nodiscard]] static int GetFrameCount() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->time.m_GetFrameCount) return 0;
-            return reinterpret_cast<int(IL2CPP_CALLTYPE)()>(fn->time.m_GetFrameCount)();
+            static auto m = MethodHandler::resolve("UnityEngine.Time", "get_frameCount", 0);
+            return MethodHandler::invoke<int>(m, nullptr);
         }
         [[nodiscard]] static float GetRealtimeSinceStartup() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->time.m_GetRealtimeSinceStartup) return 0.f;
-            return reinterpret_cast<float(IL2CPP_CALLTYPE)()>(fn->time.m_GetRealtimeSinceStartup)();
+            static auto m = MethodHandler::resolve("UnityEngine.Time", "get_realtimeSinceStartup", 0);
+            return MethodHandler::invoke<float>(m, nullptr);
         }
         [[nodiscard]] static double GetRealtimeSinceStartupAsDouble() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->time.m_GetRealtimeSinceStartupAsDouble) return 0.0;
-            return reinterpret_cast<double(IL2CPP_CALLTYPE)()>(fn->time.m_GetRealtimeSinceStartupAsDouble)();
+            static auto m = MethodHandler::resolve("UnityEngine.Time", "get_realtimeSinceStartupAsDouble", 0);
+            return MethodHandler::invoke<double>(m, nullptr);
         }
         [[nodiscard]] static float GetSmoothDeltaTime() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->time.m_GetSmoothDeltaTime) return 0.f;
-            return reinterpret_cast<float(IL2CPP_CALLTYPE)()>(fn->time.m_GetSmoothDeltaTime)();
+            static auto m = MethodHandler::resolve("UnityEngine.Time", "get_smoothDeltaTime", 0);
+            return MethodHandler::invoke<float>(m, nullptr);
         }
         [[nodiscard]] static float GetMaximumDeltaTime() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->time.m_GetMaximumDeltaTime) return 0.f;
-            return reinterpret_cast<float(IL2CPP_CALLTYPE)()>(fn->time.m_GetMaximumDeltaTime)();
+            static auto m = MethodHandler::resolve("UnityEngine.Time", "get_maximumDeltaTime", 0);
+            return MethodHandler::invoke<float>(m, nullptr);
         }
-
-        // ---- Time Since Level Load ----
         [[nodiscard]] static float GetTimeSinceLevelLoad() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->time.m_GetTimeSinceLevelLoad) return 0.f;
-            return reinterpret_cast<float(IL2CPP_CALLTYPE)()>(fn->time.m_GetTimeSinceLevelLoad)();
+            static auto m = MethodHandler::resolve("UnityEngine.Time", "get_timeSinceLevelLoad", 0);
+            return MethodHandler::invoke<float>(m, nullptr);
         }
         [[nodiscard]] static double GetTimeSinceLevelLoadAsDouble() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->time.m_GetTimeSinceLevelLoadAsDouble) return 0.0;
-            return reinterpret_cast<double(IL2CPP_CALLTYPE)()>(fn->time.m_GetTimeSinceLevelLoadAsDouble)();
+            static auto m = MethodHandler::resolve("UnityEngine.Time", "get_timeSinceLevelLoadAsDouble", 0);
+            return MethodHandler::invoke<double>(m, nullptr);
         }
-
-        // ---- Fixed Time Variants ----
         [[nodiscard]] static double GetFixedTimeAsDouble() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->time.m_GetFixedTimeAsDouble) return 0.0;
-            return reinterpret_cast<double(IL2CPP_CALLTYPE)()>(fn->time.m_GetFixedTimeAsDouble)();
+            static auto m = MethodHandler::resolve("UnityEngine.Time", "get_fixedTimeAsDouble", 0);
+            return MethodHandler::invoke<double>(m, nullptr);
         }
-
-        // ---- Unscaled Time Variants ----
         [[nodiscard]] static double GetUnscaledTimeAsDouble() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->time.m_GetUnscaledTimeAsDouble) return 0.0;
-            return reinterpret_cast<double(IL2CPP_CALLTYPE)()>(fn->time.m_GetUnscaledTimeAsDouble)();
+            static auto m = MethodHandler::resolve("UnityEngine.Time", "get_unscaledTimeAsDouble", 0);
+            return MethodHandler::invoke<double>(m, nullptr);
         }
-
         [[nodiscard]] static float GetFixedUnscaledTime() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->time.m_GetFixedUnscaledTime) return 0.f;
-            return reinterpret_cast<float(IL2CPP_CALLTYPE)()>(fn->time.m_GetFixedUnscaledTime)();
+            static auto m = MethodHandler::resolve("UnityEngine.Time", "get_fixedUnscaledTime", 0);
+            return MethodHandler::invoke<float>(m, nullptr);
         }
         [[nodiscard]] static double GetFixedUnscaledTimeAsDouble() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->time.m_GetFixedUnscaledTimeAsDouble) return 0.0;
-            return reinterpret_cast<double(IL2CPP_CALLTYPE)()>(fn->time.m_GetFixedUnscaledTimeAsDouble)();
+            static auto m = MethodHandler::resolve("UnityEngine.Time", "get_fixedUnscaledTimeAsDouble", 0);
+            return MethodHandler::invoke<double>(m, nullptr);
         }
-
         [[nodiscard]] static float GetFixedUnscaledDeltaTime() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->time.m_GetFixedUnscaledDeltaTime) return 0.f;
-            return reinterpret_cast<float(IL2CPP_CALLTYPE)()>(fn->time.m_GetFixedUnscaledDeltaTime)();
+            static auto m = MethodHandler::resolve("UnityEngine.Time", "get_fixedUnscaledDeltaTime", 0);
+            return MethodHandler::invoke<float>(m, nullptr);
         }
-
-        // ---- Frame Counts ----
         [[nodiscard]] static int GetRenderedFrameCount() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->time.m_GetRenderedFrameCount) return 0;
-            return reinterpret_cast<int(IL2CPP_CALLTYPE)()>(fn->time.m_GetRenderedFrameCount)();
+            static auto m = MethodHandler::resolve("UnityEngine.Time", "get_renderedFrameCount", 0);
+            return MethodHandler::invoke<int>(m, nullptr);
         }
-
-        // ---- Capture ----
         [[nodiscard]] static float GetCaptureDeltaTime() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->time.m_GetCaptureDeltaTime) return 0.f;
-            return reinterpret_cast<float(IL2CPP_CALLTYPE)()>(fn->time.m_GetCaptureDeltaTime)();
+            static auto m = MethodHandler::resolve("UnityEngine.Time", "get_captureDeltaTime", 0);
+            return MethodHandler::invoke<float>(m, nullptr);
         }
         [[nodiscard]] static int GetCaptureFramerate() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->time.m_GetCaptureFramerate) return 0;
-            return reinterpret_cast<int(IL2CPP_CALLTYPE)()>(fn->time.m_GetCaptureFramerate)();
+            static auto m = MethodHandler::resolve("UnityEngine.Time", "get_captureFramerate", 0);
+            return MethodHandler::invoke<int>(m, nullptr);
         }
 
         // ---- Legacy snake_case aliases (deprecated) ----

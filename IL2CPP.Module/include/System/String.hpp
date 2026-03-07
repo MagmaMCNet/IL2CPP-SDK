@@ -71,4 +71,8 @@ namespace IL2CPP::Module::System {
         }
     };
 
+    [[nodiscard]] inline String operator""il(const char* str, std::size_t) {
+        return String::create(str);
+    }
+
 } // namespace IL2CPP::Module::System

@@ -1,7 +1,7 @@
 #pragma once
 #include "Object.hpp"
 #include "../Reflection.hpp"
-#include <IL2CPP.Common/il2cpp_shared.hpp>
+#include "../MethodHandler.hpp"
 #include <vector>
 
 // ============================================================================
@@ -26,9 +26,10 @@ namespace IL2CPP::Module::Unity {
 
         /// Get a component by System.Type.
         [[nodiscard]] Component GetComponent(Il2CppSystemType* systemType) const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->component.m_GetComponent || !raw() || !systemType) return Component{};
-            return Component{ reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*, void*)>(fn->component.m_GetComponent)(raw(), systemType) };
+            static auto m = MethodHandler::resolve("UnityEngine.Component", "GetComponent", 1);
+            if (!systemType) return Component{};
+            void* params[] = { systemType };
+            return Component{ MethodHandler::invoke<void*>(m, raw(), params) };
         }
 
         /// Get a component by Class.
@@ -41,20 +42,17 @@ namespace IL2CPP::Module::Unity {
 
         /// Get a component by name.
         [[nodiscard]] Component GetComponentByName(std::string_view name) const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->component.m_GetComponentByName || !raw()) return Component{};
-            auto* exports = GetExports();
-            if (!exports || !exports->m_stringNew) return Component{};
-            void* il2cppStr = reinterpret_cast<void*(IL2CPP_CALLTYPE)(const char*)>(exports->m_stringNew)(
-                std::string(name).c_str());
-            return Component{ reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*, void*)>(fn->component.m_GetComponentByName)(raw(), il2cppStr) };
+            Class klass = Class::find(name);
+            if (!klass) return Component{};
+            return GetComponent(klass);
         }
 
         /// Get a component in children by System.Type.
         [[nodiscard]] Component GetComponentInChildren(Il2CppSystemType* systemType, bool includeInactive = false) const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->component.m_GetComponentInChildren || !raw() || !systemType) return Component{};
-            return Component{ reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*, void*, bool)>(fn->component.m_GetComponentInChildren)(raw(), systemType, includeInactive) };
+            static auto m = MethodHandler::resolve("UnityEngine.Component", "GetComponentInChildren", 2);
+            if (!systemType) return Component{};
+            void* params[] = { systemType, &includeInactive };
+            return Component{ MethodHandler::invoke<void*>(m, raw(), params) };
         }
 
         /// Get a component in children by Class.
@@ -67,9 +65,10 @@ namespace IL2CPP::Module::Unity {
 
         /// Get a component in parent by System.Type.
         [[nodiscard]] Component GetComponentInParent(Il2CppSystemType* systemType, bool includeInactive = false) const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->component.m_GetComponentInParent || !raw() || !systemType) return Component{};
-            return Component{ reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*, void*, bool)>(fn->component.m_GetComponentInParent)(raw(), systemType, includeInactive) };
+            static auto m = MethodHandler::resolve("UnityEngine.Component", "GetComponentInParent", 2);
+            if (!systemType) return Component{};
+            void* params[] = { systemType, &includeInactive };
+            return Component{ MethodHandler::invoke<void*>(m, raw(), params) };
         }
 
         /// Get a component in parent by Class.
@@ -86,9 +85,10 @@ namespace IL2CPP::Module::Unity {
         /// @param systemType The System.Type object pointer (Il2CppSystemType*)
         /// @return A vector of Component containing all found components.
         [[nodiscard]] std::vector<Component> GetComponents(Il2CppSystemType* systemType) const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->component.m_GetComponents || !raw() || !systemType) return {};
-            void* array = reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*, void*)>(fn->component.m_GetComponents)(raw(), systemType);
+            static auto m = MethodHandler::resolve("UnityEngine.Component", "GetComponents", 1);
+            if (!systemType) return {};
+            void* params[] = { systemType };
+            void* array = MethodHandler::invoke<void*>(m, raw(), params);
             return Object::FromArray<Component>(array);
         }
 
@@ -110,10 +110,11 @@ namespace IL2CPP::Module::Unity {
         /// Get all components and return as std::vector<T>.
         template<typename T> requires std::is_base_of_v<ManagedObject, T>
         [[nodiscard]] std::vector<T> GetComponentsAs(Il2CppSystemType* systemType) const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->component.m_GetComponents || !raw() || !systemType) return {};
-            void* raw = reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*, void*)>(fn->component.m_GetComponents)(raw(), systemType);
-            return Object::FromArray<T>(raw);
+            static auto m = MethodHandler::resolve("UnityEngine.Component", "GetComponents", 1);
+            if (!systemType) return {};
+            void* params[] = { systemType };
+            void* array = MethodHandler::invoke<void*>(m, raw(), params);
+            return Object::FromArray<T>(array);
         }
 
         template<typename T> requires std::is_base_of_v<ManagedObject, T>
@@ -126,9 +127,10 @@ namespace IL2CPP::Module::Unity {
 
         /// Get all components of the specified type in children.
         [[nodiscard]] std::vector<Component> GetComponentsInChildren(Il2CppSystemType* systemType, bool includeInactive = false) const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->component.m_GetComponentsInChildren || !raw() || !systemType) return {};
-            void* array = reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*, void*, bool)>(fn->component.m_GetComponentsInChildren)(raw(), systemType, includeInactive);
+            static auto m = MethodHandler::resolve("UnityEngine.Component", "GetComponentsInChildren", 2);
+            if (!systemType) return {};
+            void* params[] = { systemType, &includeInactive };
+            void* array = MethodHandler::invoke<void*>(m, raw(), params);
             return Object::FromArray<Component>(array);
         }
 
@@ -143,17 +145,19 @@ namespace IL2CPP::Module::Unity {
         /// Get all components in children and return as std::vector<T>.
         template<typename T> requires std::is_base_of_v<ManagedObject, T>
         [[nodiscard]] std::vector<T> GetComponentsInChildrenAs(Il2CppSystemType* systemType, bool includeInactive = false) const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->component.m_GetComponentsInChildren || !raw() || !systemType) return {};
-            void* array = reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*, void*, bool)>(fn->component.m_GetComponentsInChildren)(raw(), systemType, includeInactive);
+            static auto m = MethodHandler::resolve("UnityEngine.Component", "GetComponentsInChildren", 2);
+            if (!systemType) return {};
+            void* params[] = { systemType, &includeInactive };
+            void* array = MethodHandler::invoke<void*>(m, raw(), params);
             return Object::FromArray<T>(array);
         }
 
         /// Get all components of the specified type in parent.
         [[nodiscard]] std::vector<Component> GetComponentsInParent(Il2CppSystemType* systemType, bool includeInactive = false) const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->component.m_GetComponentsInParent || !raw() || !systemType) return {};
-            void* array = reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*, void*, bool)>(fn->component.m_GetComponentsInParent)(raw(), systemType, includeInactive);
+            static auto m = MethodHandler::resolve("UnityEngine.Component", "GetComponentsInParent", 2);
+            if (!systemType) return {};
+            void* params[] = { systemType, &includeInactive };
+            void* array = MethodHandler::invoke<void*>(m, raw(), params);
             return Object::FromArray<Component>(array);
         }
 
@@ -168,9 +172,10 @@ namespace IL2CPP::Module::Unity {
         /// Get all components in parent and return as std::vector<T>.
         template<typename T> requires std::is_base_of_v<ManagedObject, T>
         [[nodiscard]] std::vector<T> GetComponentsInParentAs(Il2CppSystemType* systemType, bool includeInactive = false) const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->component.m_GetComponentsInParent || !raw() || !systemType) return {};
-            void* array = reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*, void*, bool)>(fn->component.m_GetComponentsInParent)(raw(), systemType, includeInactive);
+            static auto m = MethodHandler::resolve("UnityEngine.Component", "GetComponentsInParent", 2);
+            if (!systemType) return {};
+            void* params[] = { systemType, &includeInactive };
+            void* array = MethodHandler::invoke<void*>(m, raw(), params);
             return Object::FromArray<T>(array);
         }
 
@@ -181,12 +186,13 @@ namespace IL2CPP::Module::Unity {
         /// @param out Output parameter for the found component
         /// @return true if the component was found, false otherwise
         [[nodiscard]] bool TryGetComponent(Il2CppSystemType* systemType, Component& out) const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->component.m_TryGetComponent || !raw() || !systemType) return false;
-            void* result = nullptr;
-            bool success = reinterpret_cast<bool(IL2CPP_CALLTYPE)(void*, void*, void**)>(fn->component.m_TryGetComponent)(raw(), systemType, &result);
-            if (success && result) {
-                out = Component{ result };
+            static auto m = MethodHandler::resolve("UnityEngine.Component", "TryGetComponent", 2);
+            if (!systemType) return false;
+            void* outComp = nullptr;
+            void* params[] = { systemType, &outComp };
+            bool success = MethodHandler::invoke<bool>(m, raw(), params);
+            if (success && outComp) {
+                out = Component{ outComp };
                 return true;
             }
             return false;

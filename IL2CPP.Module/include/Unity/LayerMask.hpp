@@ -1,5 +1,5 @@
 #pragma once
-#include "Object.hpp"
+#include "../MethodHandler.hpp"
 #include <IL2CPP.Common/il2cpp_types.hpp>
 #include <IL2CPP.Common/il2cpp_shared.hpp>
 #include <string>
@@ -7,10 +7,14 @@
 
 // ============================================================================
 //  IL2CPP.Module::Unity::LayerMaskUtils - Static utility class for layer operations
-//  
+//
 //  Note: IL2CPP::LayerMask struct is defined in il2cpp_types.hpp
 //  This class provides static utilities for layer name/index conversion.
 // ============================================================================
+
+namespace IL2CPP::Module {
+    [[nodiscard]] IL2CPP::il2cpp_exports const* GetExports() noexcept;
+}
 
 namespace IL2CPP::Module::Unity {
 
@@ -19,14 +23,11 @@ namespace IL2CPP::Module::Unity {
         LayerMaskUtils() = delete;
 
         /// Convert a layer index to its name.
-        /// @param layer The layer index (0-31)
-        /// @return The layer name, or empty string if invalid
         [[nodiscard]] static std::string layer_to_name(int layer) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->layerMask.m_LayerToName) return "";
-            auto* str = reinterpret_cast<void*(IL2CPP_CALLTYPE)(int)>(fn->layerMask.m_LayerToName)(layer);
+            static auto m = MethodHandler::resolve("UnityEngine.LayerMask", "LayerToName", 1);
+            void* params[] = { &layer };
+            void* str = MethodHandler::invoke<void*>(m, nullptr, params);
             if (!str) return "";
-            // IL2CPP string: m_iLength at offset 0x10, m_wString at offset 0x14
             int len = *reinterpret_cast<int*>(static_cast<char*>(str) + 0x10);
             if (len <= 0) return "";
             wchar_t* wstr = reinterpret_cast<wchar_t*>(static_cast<char*>(str) + 0x14);
@@ -35,58 +36,41 @@ namespace IL2CPP::Module::Unity {
         }
 
         /// Convert a layer name to its index.
-        /// @param name The layer name
-        /// @return The layer index (0-31), or -1 if not found
         [[nodiscard]] static int name_to_layer(std::string_view name) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->layerMask.m_NameToLayer) return -1;
+            static auto m = MethodHandler::resolve("UnityEngine.LayerMask", "NameToLayer", 1);
             auto* exports = GetExports();
             if (!exports || !exports->m_stringNew) return -1;
             void* il2cppStr = reinterpret_cast<void*(IL2CPP_CALLTYPE)(const char*)>(exports->m_stringNew)(
                 std::string(name).c_str());
-            return reinterpret_cast<int(IL2CPP_CALLTYPE)(void*)>(fn->layerMask.m_NameToLayer)(il2cppStr);
+            void* params[] = { il2cppStr };
+            return MethodHandler::invoke<int>(m, nullptr, params);
         }
 
         // ---- Utility Methods ----
 
-        /// Create a layer mask from a single layer index.
         [[nodiscard]] static LayerMask from_layer(int layer) {
             return LayerMask(1 << layer);
         }
-
-        /// Create a layer mask from a layer name.
         [[nodiscard]] static LayerMask from_name(std::string_view name) {
             int layer = name_to_layer(name);
             if (layer < 0) return LayerMask(0);
             return LayerMask(1 << layer);
         }
-
-        /// Combine multiple layer masks.
         [[nodiscard]] static LayerMask combine(LayerMask a, LayerMask b) {
             return LayerMask(a.value() | b.value());
         }
-
-        /// Check if a layer mask contains a specific layer.
         [[nodiscard]] static bool contains_layer(LayerMask mask, int layer) {
             return (mask.value() & (1 << layer)) != 0;
         }
-
-        /// Create an inverted layer mask (all layers except the specified ones).
         [[nodiscard]] static LayerMask invert(LayerMask mask) {
             return LayerMask(~mask.value());
         }
-
-        /// Get a mask for all layers.
         [[nodiscard]] static LayerMask all() {
-            return LayerMask(-1); // All bits set
+            return LayerMask(-1);
         }
-
-        /// Get a mask for no layers.
         [[nodiscard]] static LayerMask none() {
             return LayerMask(0);
         }
-
-        /// Get the default layer mask (layer 0 only).
         [[nodiscard]] static LayerMask default_layer() {
             return LayerMask(1);
         }

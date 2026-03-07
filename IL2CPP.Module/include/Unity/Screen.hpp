@@ -1,7 +1,6 @@
 #pragma once
-#include "Object.hpp"
+#include "../MethodHandler.hpp"
 #include <IL2CPP.Common/il2cpp_types.hpp>
-#include <IL2CPP.Common/il2cpp_shared.hpp>
 
 // ============================================================================
 //  IL2CPP.Module::Unity::Screen - Static utility class for screen information
@@ -9,7 +8,6 @@
 
 namespace IL2CPP::Module::Unity {
 
-    // Forward declare full screen mode enum
     enum class FullScreenMode : int {
         ExclusiveFullScreen = 0,
         FullScreenWindow = 1,
@@ -27,75 +25,53 @@ namespace IL2CPP::Module::Unity {
     public:
         Screen() = delete;
 
-        // ---- Screen Dimensions ----
-
-        /// Get the current screen width in pixels.
         [[nodiscard]] static int GetWidth() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->screen.m_GetWidth) return 0;
-            return reinterpret_cast<int(IL2CPP_CALLTYPE)()>(fn->screen.m_GetWidth)();
+            static auto m = MethodHandler::resolve("UnityEngine.Screen", "get_width", 0);
+            return MethodHandler::invoke<int>(m, nullptr);
         }
 
-        /// Get the current screen height in pixels.
         [[nodiscard]] static int GetHeight() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->screen.m_GetHeight) return 0;
-            return reinterpret_cast<int(IL2CPP_CALLTYPE)()>(fn->screen.m_GetHeight)();
+            static auto m = MethodHandler::resolve("UnityEngine.Screen", "get_height", 0);
+            return MethodHandler::invoke<int>(m, nullptr);
         }
 
-        /// Get the screen DPI.
         [[nodiscard]] static float GetDpi() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->screen.m_GetDpi) return 96.f;
-            return reinterpret_cast<float(IL2CPP_CALLTYPE)()>(fn->screen.m_GetDpi)();
+            static auto m = MethodHandler::resolve("UnityEngine.Screen", "get_dpi", 0);
+            return MethodHandler::invoke<float>(m, nullptr);
         }
 
-        // ---- Full Screen ----
-
-        /// Check if the application is in full screen mode.
         [[nodiscard]] static bool GetFullScreen() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->screen.m_GetFullScreen) return false;
-            return reinterpret_cast<bool(IL2CPP_CALLTYPE)()>(fn->screen.m_GetFullScreen)();
+            static auto m = MethodHandler::resolve("UnityEngine.Screen", "get_fullScreen", 0);
+            return MethodHandler::invoke<bool>(m, nullptr);
         }
 
-        /// Set full screen mode.
         static void SetFullScreen(bool fullScreen) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->screen.m_SetFullScreen) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(bool)>(fn->screen.m_SetFullScreen)(fullScreen);
+            static auto m = MethodHandler::resolve("UnityEngine.Screen", "set_fullScreen", 1);
+            void* params[] = { &fullScreen };
+            MethodHandler::invoke(m, nullptr, params);
         }
 
-        /// Get the current full screen mode.
         [[nodiscard]] static FullScreenMode GetFullScreenMode() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->screen.m_GetFullScreenMode) return FullScreenMode::Windowed;
-            return static_cast<FullScreenMode>(reinterpret_cast<int(IL2CPP_CALLTYPE)()>(fn->screen.m_GetFullScreenMode)());
+            static auto m = MethodHandler::resolve("UnityEngine.Screen", "get_fullScreenMode", 0);
+            return static_cast<FullScreenMode>(MethodHandler::invoke<int>(m, nullptr));
         }
 
-        /// Set the full screen mode.
         static void SetFullScreenMode(FullScreenMode mode) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->screen.m_SetFullScreenMode) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(int)>(fn->screen.m_SetFullScreenMode)(static_cast<int>(mode));
+            static auto m = MethodHandler::resolve("UnityEngine.Screen", "set_fullScreenMode", 1);
+            int val = static_cast<int>(mode);
+            void* params[] = { &val };
+            MethodHandler::invoke(m, nullptr, params);
         }
 
-        // ---- Resolution ----
-
-        /// Get the current screen resolution.
         [[nodiscard]] static Resolution GetCurrentResolution() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->screen.m_GetCurrentResolution) return Resolution{ 0, 0, 0 };
-            Resolution r;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(Resolution*)>(fn->screen.m_GetCurrentResolution)(&r);
-            return r;
+            static auto m = MethodHandler::resolve("UnityEngine.Screen", "get_currentResolution", 0);
+            return MethodHandler::invoke<Resolution>(m, nullptr);
         }
 
-        /// Set the screen resolution.
         static void SetResolution(int width, int height, bool fullScreen, int refreshRate = 0) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->screen.m_SetResolution) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(int, int, bool, int)>(fn->screen.m_SetResolution)(width, height, fullScreen, refreshRate);
+            static auto m = MethodHandler::resolve("UnityEngine.Screen", "SetResolution", 4);
+            void* params[] = { &width, &height, &fullScreen, &refreshRate };
+            MethodHandler::invoke(m, nullptr, params);
         }
 
         // ---- Legacy snake_case aliases (deprecated) ----

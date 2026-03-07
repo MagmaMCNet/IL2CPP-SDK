@@ -1,0 +1,86 @@
+#pragma once
+#include "MaskableGraphic.hpp"
+#include "../MethodHandler.hpp"
+#include <IL2CPP.Common/il2cpp_types.hpp>
+
+namespace IL2CPP::Module::Unity {
+
+    class Image : public MaskableGraphic {
+    public:
+        using MaskableGraphic::MaskableGraphic;
+
+        // ---- sprite ----
+        [[nodiscard]] void* GetSprite() const {
+            static auto m = MethodHandler::resolve("UnityEngine.UI.Image", "get_sprite", 0);
+            return MethodHandler::invoke<void*>(m, raw());
+        }
+        void SetSprite(void* sprite) {
+            static auto m = MethodHandler::resolve("UnityEngine.UI.Image", "set_sprite", 1);
+            void* params[] = { sprite };
+            MethodHandler::invoke(m, raw(), params);
+        }
+
+        // ---- activeSprite ----
+        [[nodiscard]] void* GetActiveSprite() const {
+            static auto m = MethodHandler::resolve("UnityEngine.UI.Image", "get_activeSprite", 0);
+            return MethodHandler::invoke<void*>(m, raw());
+        }
+
+        // ---- overrideSprite ----
+        [[nodiscard]] void* GetOverrideSprite() const {
+            static auto m = MethodHandler::resolve("UnityEngine.UI.Image", "get_overrideSprite", 0);
+            return MethodHandler::invoke<void*>(m, raw());
+        }
+        void SetOverrideSprite(void* sprite) {
+            static auto m = MethodHandler::resolve("UnityEngine.UI.Image", "set_overrideSprite", 1);
+            void* params[] = { sprite };
+            MethodHandler::invoke(m, raw(), params);
+        }
+
+        // ---- fillAmount ----
+        [[nodiscard]] float GetFillAmount() const {
+            static auto m = MethodHandler::resolve("UnityEngine.UI.Image", "get_fillAmount", 0);
+            return MethodHandler::invoke<float>(m, raw());
+        }
+        void SetFillAmount(float value) {
+            static auto m = MethodHandler::resolve("UnityEngine.UI.Image", "set_fillAmount", 1);
+            void* params[] = { &value };
+            MethodHandler::invoke(m, raw(), params);
+        }
+
+        // ---- color ----
+        [[nodiscard]] Color GetColor() const {
+            static auto m = MethodHandler::resolve("UnityEngine.UI.Image", "get_color", 0);
+            return MethodHandler::invoke<Color>(m, raw());
+        }
+        void SetColor(const Color& value) {
+            static auto m = MethodHandler::resolve("UnityEngine.UI.Image", "set_color", 1);
+            Color c = value;
+            void* params[] = { &c };
+            MethodHandler::invoke(m, raw(), params);
+        }
+
+        // ---- type ----
+        [[nodiscard]] int GetType() const {
+            static auto m = MethodHandler::resolve("UnityEngine.UI.Image", "get_type", 0);
+            return MethodHandler::invoke<int>(m, raw());
+        }
+        void SetType(int type) {
+            static auto m = MethodHandler::resolve("UnityEngine.UI.Image", "set_type", 1);
+            void* params[] = { &type };
+            MethodHandler::invoke(m, raw(), params);
+        }
+
+        // ---- preserveAspect ----
+        [[nodiscard]] bool GetPreserveAspect() const {
+            static auto m = MethodHandler::resolve("UnityEngine.UI.Image", "get_preserveAspect", 0);
+            return MethodHandler::invoke<bool>(m, raw());
+        }
+        void SetPreserveAspect(bool value) {
+            static auto m = MethodHandler::resolve("UnityEngine.UI.Image", "set_preserveAspect", 1);
+            void* params[] = { &value };
+            MethodHandler::invoke(m, raw(), params);
+        }
+    };
+
+} // namespace IL2CPP::Module::Unity

@@ -1,7 +1,7 @@
 #pragma once
 #include "Behaviour.hpp"
+#include "../MethodHandler.hpp"
 #include <IL2CPP.Common/il2cpp_types.hpp>
-#include <IL2CPP.Common/il2cpp_shared.hpp>
 
 // ============================================================================
 //  IL2CPP.Module::Unity::Camera
@@ -14,191 +14,162 @@ namespace IL2CPP::Module::Unity {
         using Behaviour::Behaviour;
 
         [[nodiscard]] static Camera GetMain() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->camera.m_GetMain) return Camera{};
-            return Camera{ reinterpret_cast<void*(IL2CPP_CALLTYPE)()>(fn->camera.m_GetMain)() };
+            static auto m = MethodHandler::resolve("UnityEngine.Camera", "get_main", 0);
+            return Camera{ MethodHandler::invoke<void*>(m, nullptr) };
         }
 
         [[nodiscard]] static Camera GetCurrent() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->camera.m_GetCurrent) return Camera{};
-            return Camera{ reinterpret_cast<void*(IL2CPP_CALLTYPE)()>(fn->camera.m_GetCurrent)() };
+            static auto m = MethodHandler::resolve("UnityEngine.Camera", "get_current", 0);
+            return Camera{ MethodHandler::invoke<void*>(m, nullptr) };
         }
 
         [[nodiscard]] Vector3 WorldToScreenPoint(const Vector3& worldPos) const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->camera.m_WorldToScreenPoint || !raw()) return Vector3{};
-            Vector3 v;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, const Vector3, int, Vector3&)>(fn->camera.m_WorldToScreenPoint)(raw(), worldPos, 2, v);
-            return v;
+            static auto m = MethodHandler::resolve("UnityEngine.Camera", "WorldToScreenPoint", 1);
+            Vector3 v = worldPos;
+            void* params[] = { &v };
+            return MethodHandler::invoke<Vector3>(m, raw(), params);
         }
 
         [[nodiscard]] Matrix4x4 GetWorldToCameraMatrix() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->camera.m_GetWorldToCameraMatrix || !raw()) return Matrix4x4{};
-            Matrix4x4 m;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, Matrix4x4&)>(fn->camera.m_GetWorldToCameraMatrix)(raw(), m);
-            return m;
+            static auto m = MethodHandler::resolve("UnityEngine.Camera", "get_worldToCameraMatrix", 0);
+            return MethodHandler::invoke<Matrix4x4>(m, raw());
         }
 
         [[nodiscard]] Matrix4x4 GetProjectionMatrix() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->camera.m_GetProjectionMatrix || !raw()) return Matrix4x4{};
-            Matrix4x4 m;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, Matrix4x4&)>(fn->camera.m_GetProjectionMatrix)(raw(), m);
-            return m;
+            static auto m = MethodHandler::resolve("UnityEngine.Camera", "get_projectionMatrix", 0);
+            return MethodHandler::invoke<Matrix4x4>(m, raw());
         }
 
         // ---- Field of View ----
         [[nodiscard]] float GetFieldOfView() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->camera.m_GetFieldOfView || !raw()) return 60.f;
-            return reinterpret_cast<float(IL2CPP_CALLTYPE)(void*)>(fn->camera.m_GetFieldOfView)(raw());
+            static auto m = MethodHandler::resolve("UnityEngine.Camera", "get_fieldOfView", 0);
+            return MethodHandler::invoke<float>(m, raw());
         }
         void SetFieldOfView(float fov) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->camera.m_SetFieldOfView || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, float)>(fn->camera.m_SetFieldOfView)(raw(), fov);
+            static auto m = MethodHandler::resolve("UnityEngine.Camera", "set_fieldOfView", 1);
+            void* params[] = { &fov };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         // ---- Clip Planes ----
         [[nodiscard]] float GetNearClipPlane() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->camera.m_GetNearClipPlane || !raw()) return 0.3f;
-            return reinterpret_cast<float(IL2CPP_CALLTYPE)(void*)>(fn->camera.m_GetNearClipPlane)(raw());
+            static auto m = MethodHandler::resolve("UnityEngine.Camera", "get_nearClipPlane", 0);
+            return MethodHandler::invoke<float>(m, raw());
         }
         void SetNearClipPlane(float nearClip) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->camera.m_SetNearClipPlane || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, float)>(fn->camera.m_SetNearClipPlane)(raw(), nearClip);
+            static auto m = MethodHandler::resolve("UnityEngine.Camera", "set_nearClipPlane", 1);
+            void* params[] = { &nearClip };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         [[nodiscard]] float GetFarClipPlane() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->camera.m_GetFarClipPlane || !raw()) return 1000.f;
-            return reinterpret_cast<float(IL2CPP_CALLTYPE)(void*)>(fn->camera.m_GetFarClipPlane)(raw());
+            static auto m = MethodHandler::resolve("UnityEngine.Camera", "get_farClipPlane", 0);
+            return MethodHandler::invoke<float>(m, raw());
         }
         void SetFarClipPlane(float farClip) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->camera.m_SetFarClipPlane || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, float)>(fn->camera.m_SetFarClipPlane)(raw(), farClip);
+            static auto m = MethodHandler::resolve("UnityEngine.Camera", "set_farClipPlane", 1);
+            void* params[] = { &farClip };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         // ---- Orthographic ----
         [[nodiscard]] bool GetOrthographic() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->camera.m_GetOrthographic || !raw()) return false;
-            return reinterpret_cast<bool(IL2CPP_CALLTYPE)(void*)>(fn->camera.m_GetOrthographic)(raw());
+            static auto m = MethodHandler::resolve("UnityEngine.Camera", "get_orthographic", 0);
+            return MethodHandler::invoke<bool>(m, raw());
         }
         void SetOrthographic(bool ortho) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->camera.m_SetOrthographic || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, bool)>(fn->camera.m_SetOrthographic)(raw(), ortho);
+            static auto m = MethodHandler::resolve("UnityEngine.Camera", "set_orthographic", 1);
+            void* params[] = { &ortho };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         [[nodiscard]] float GetOrthographicSize() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->camera.m_GetOrthographicSize || !raw()) return 5.f;
-            return reinterpret_cast<float(IL2CPP_CALLTYPE)(void*)>(fn->camera.m_GetOrthographicSize)(raw());
+            static auto m = MethodHandler::resolve("UnityEngine.Camera", "get_orthographicSize", 0);
+            return MethodHandler::invoke<float>(m, raw());
         }
         void SetOrthographicSize(float size) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->camera.m_SetOrthographicSize || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, float)>(fn->camera.m_SetOrthographicSize)(raw(), size);
+            static auto m = MethodHandler::resolve("UnityEngine.Camera", "set_orthographicSize", 1);
+            void* params[] = { &size };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         // ---- Depth ----
         [[nodiscard]] float GetDepth() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->camera.m_GetDepth || !raw()) return 0.f;
-            return reinterpret_cast<float(IL2CPP_CALLTYPE)(void*)>(fn->camera.m_GetDepth)(raw());
+            static auto m = MethodHandler::resolve("UnityEngine.Camera", "get_depth", 0);
+            return MethodHandler::invoke<float>(m, raw());
         }
         void SetDepth(float depth) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->camera.m_SetDepth || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, float)>(fn->camera.m_SetDepth)(raw(), depth);
+            static auto m = MethodHandler::resolve("UnityEngine.Camera", "set_depth", 1);
+            void* params[] = { &depth };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         // ---- Culling Mask ----
         [[nodiscard]] int GetCullingMask() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->camera.m_GetCullingMask || !raw()) return -1;
-            return reinterpret_cast<int(IL2CPP_CALLTYPE)(void*)>(fn->camera.m_GetCullingMask)(raw());
+            static auto m = MethodHandler::resolve("UnityEngine.Camera", "get_cullingMask", 0);
+            return MethodHandler::invoke<int>(m, raw());
         }
         void SetCullingMask(int mask) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->camera.m_SetCullingMask || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, int)>(fn->camera.m_SetCullingMask)(raw(), mask);
+            static auto m = MethodHandler::resolve("UnityEngine.Camera", "set_cullingMask", 1);
+            void* params[] = { &mask };
+            MethodHandler::invoke(m, raw(), params);
         }
-        void SetCullingMask(LayerMask mask) {
-            SetCullingMask(mask.value());
-        }
+        void SetCullingMask(LayerMask mask) { SetCullingMask(mask.value()); }
 
         // ---- Viewport Rect ----
         [[nodiscard]] Rect GetPixelRect() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->camera.m_GetPixelRect || !raw()) return Rect{};
-            Rect r;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, Rect*)>(fn->camera.m_GetPixelRect)(raw(), &r);
-            return r;
+            static auto m = MethodHandler::resolve("UnityEngine.Camera", "get_pixelRect", 0);
+            return MethodHandler::invoke<Rect>(m, raw());
         }
 
         [[nodiscard]] Rect GetRect() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->camera.m_GetRect || !raw()) return Rect{};
-            Rect r;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, Rect*)>(fn->camera.m_GetRect)(raw(), &r);
-            return r;
+            static auto m = MethodHandler::resolve("UnityEngine.Camera", "get_rect", 0);
+            return MethodHandler::invoke<Rect>(m, raw());
         }
         void SetRect(const Rect& rect) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->camera.m_SetRect || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, const Rect&)>(fn->camera.m_SetRect)(raw(), rect);
+            static auto m = MethodHandler::resolve("UnityEngine.Camera", "set_rect", 1);
+            Rect r = rect;
+            void* params[] = { &r };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         // ---- Screen/Viewport Conversions ----
         [[nodiscard]] Vector3 ScreenToWorldPoint(const Vector3& screenPos) const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->camera.m_ScreenToWorldPoint || !raw()) return Vector3{};
-            Vector3 v;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, const Vector3&, Vector3*)>(fn->camera.m_ScreenToWorldPoint)(raw(), screenPos, &v);
-            return v;
+            static auto m = MethodHandler::resolve("UnityEngine.Camera", "ScreenToWorldPoint", 1);
+            Vector3 v = screenPos;
+            void* params[] = { &v };
+            return MethodHandler::invoke<Vector3>(m, raw(), params);
         }
 
         [[nodiscard]] Ray ScreenPointToRay(const Vector3& screenPos) const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->camera.m_ScreenPointToRay || !raw()) return Ray{};
-            Ray r;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, const Vector3&, Ray*)>(fn->camera.m_ScreenPointToRay)(raw(), screenPos, &r);
-            return r;
+            static auto m = MethodHandler::resolve("UnityEngine.Camera", "ScreenPointToRay", 1);
+            Vector3 v = screenPos;
+            void* params[] = { &v };
+            return MethodHandler::invoke<Ray>(m, raw(), params);
         }
 
         [[nodiscard]] Vector3 ViewportToWorldPoint(const Vector3& viewportPos) const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->camera.m_ViewportToWorldPoint || !raw()) return Vector3{};
-            Vector3 v;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, const Vector3&, Vector3*)>(fn->camera.m_ViewportToWorldPoint)(raw(), viewportPos, &v);
-            return v;
+            static auto m = MethodHandler::resolve("UnityEngine.Camera", "ViewportToWorldPoint", 1);
+            Vector3 v = viewportPos;
+            void* params[] = { &v };
+            return MethodHandler::invoke<Vector3>(m, raw(), params);
         }
 
         [[nodiscard]] Vector3 WorldToViewportPoint(const Vector3& worldPos) const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->camera.m_WorldToViewportPoint || !raw()) return Vector3{};
-            Vector3 v;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, const Vector3&, Vector3*)>(fn->camera.m_WorldToViewportPoint)(raw(), worldPos, &v);
-            return v;
+            static auto m = MethodHandler::resolve("UnityEngine.Camera", "WorldToViewportPoint", 1);
+            Vector3 v = worldPos;
+            void* params[] = { &v };
+            return MethodHandler::invoke<Vector3>(m, raw(), params);
         }
 
         // ---- Static: All Cameras ----
         [[nodiscard]] static int GetAllCamerasCount() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->camera.m_GetAllCamerasCount) return 0;
-            return reinterpret_cast<int(IL2CPP_CALLTYPE)()>(fn->camera.m_GetAllCamerasCount)();
+            static auto m = MethodHandler::resolve("UnityEngine.Camera", "get_allCamerasCount", 0);
+            return MethodHandler::invoke<int>(m, nullptr);
         }
 
         // ---- Utility Methods ----
 
-        /// Check if a world point is within the camera's view frustum (simplified check).
         [[nodiscard]] bool IsWorldPointVisible(const Vector3& worldPos, float screenWidth, float screenHeight) const {
             Vector3 screenPoint = WorldToScreenPoint(worldPos);
             return screenPoint.z > 0.f &&
@@ -206,24 +177,18 @@ namespace IL2CPP::Module::Unity {
                    screenPoint.y >= 0.f && screenPoint.y <= screenHeight;
         }
 
-        /// Get the view matrix (same as GetWorldToCameraMatrix).
-        [[nodiscard]] Matrix4x4 GetViewMatrix() const {
-            return GetWorldToCameraMatrix();
-        }
+        [[nodiscard]] Matrix4x4 GetViewMatrix() const { return GetWorldToCameraMatrix(); }
 
-        /// Get combined view-projection matrix.
         [[nodiscard]] Matrix4x4 GetViewProjectionMatrix() const {
             Matrix4x4 view = GetWorldToCameraMatrix();
             Matrix4x4 proj = GetProjectionMatrix();
             Matrix4x4 result;
-            for (int i = 0; i < 4; i++) {
+            for (int i = 0; i < 4; i++)
                 for (int j = 0; j < 4; j++) {
                     result[i][j] = 0.f;
-                    for (int k = 0; k < 4; k++) {
+                    for (int k = 0; k < 4; k++)
                         result[i][j] += proj[i][k] * view[k][j];
-                    }
                 }
-            }
             return result;
         }
 

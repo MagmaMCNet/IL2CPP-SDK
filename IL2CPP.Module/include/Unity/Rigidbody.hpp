@@ -1,7 +1,7 @@
 #pragma once
 #include "Component.hpp"
+#include "../MethodHandler.hpp"
 #include <IL2CPP.Common/il2cpp_types.hpp>
-#include <IL2CPP.Common/il2cpp_shared.hpp>
 
 // ============================================================================
 //  IL2CPP.Module::Unity::Rigidbody
@@ -15,265 +15,271 @@ namespace IL2CPP::Module::Unity {
 
         // ---- Velocity ----
         [[nodiscard]] Vector3 GetVelocity() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_GetVelocity || !raw()) return Vector3{};
-            Vector3 v; reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, Vector3*)>(fn->rigidbody.m_GetVelocity)(raw(), &v); return v;
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "get_velocity", 0);
+            return MethodHandler::invoke<Vector3>(m, raw());
         }
         void SetVelocity(const Vector3& vel) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_SetVelocity || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, const Vector3&)>(fn->rigidbody.m_SetVelocity)(raw(), vel);
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "set_velocity", 1);
+            Vector3 v = vel;
+            void* params[] = { &v };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         [[nodiscard]] Vector3 GetAngularVelocity() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_GetAngularVelocity || !raw()) return Vector3{};
-            Vector3 v; reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, Vector3*)>(fn->rigidbody.m_GetAngularVelocity)(raw(), &v); return v;
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "get_angularVelocity", 0);
+            return MethodHandler::invoke<Vector3>(m, raw());
         }
         void SetAngularVelocity(const Vector3& vel) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_SetAngularVelocity || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, const Vector3&)>(fn->rigidbody.m_SetAngularVelocity)(raw(), vel);
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "set_angularVelocity", 1);
+            Vector3 v = vel;
+            void* params[] = { &v };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         // ---- Mass / Drag ----
         [[nodiscard]] float GetMass() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_GetMass || !raw()) return 0.f;
-            return reinterpret_cast<float(IL2CPP_CALLTYPE)(void*)>(fn->rigidbody.m_GetMass)(raw());
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "get_mass", 0);
+            return MethodHandler::invoke<float>(m, raw());
         }
         void SetMass(float mass) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_SetMass || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, float)>(fn->rigidbody.m_SetMass)(raw(), mass);
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "set_mass", 1);
+            void* params[] = { &mass };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         [[nodiscard]] float GetDrag() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_GetDrag || !raw()) return 0.f;
-            return reinterpret_cast<float(IL2CPP_CALLTYPE)(void*)>(fn->rigidbody.m_GetDrag)(raw());
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "get_drag", 0);
+            return MethodHandler::invoke<float>(m, raw());
         }
         void SetDrag(float drag) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_SetDrag || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, float)>(fn->rigidbody.m_SetDrag)(raw(), drag);
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "set_drag", 1);
+            void* params[] = { &drag };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         [[nodiscard]] float GetAngularDrag() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_GetAngularDrag || !raw()) return 0.f;
-            return reinterpret_cast<float(IL2CPP_CALLTYPE)(void*)>(fn->rigidbody.m_GetAngularDrag)(raw());
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "get_angularDrag", 0);
+            return MethodHandler::invoke<float>(m, raw());
         }
         void SetAngularDrag(float angularDrag) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_SetAngularDrag || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, float)>(fn->rigidbody.m_SetAngularDrag)(raw(), angularDrag);
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "set_angularDrag", 1);
+            void* params[] = { &angularDrag };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         /// Set the density of the rigidbody (recalculates mass from colliders).
         void SetDensity(float density) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_SetDensity || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, float)>(fn->rigidbody.m_SetDensity)(raw(), density);
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "SetDensity", 1);
+            void* params[] = { &density };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         // ---- Gravity / Kinematic ----
         [[nodiscard]] bool GetUseGravity() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_GetUseGravity || !raw()) return false;
-            return reinterpret_cast<bool(IL2CPP_CALLTYPE)(void*)>(fn->rigidbody.m_GetUseGravity)(raw());
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "get_useGravity", 0);
+            return MethodHandler::invoke<bool>(m, raw());
         }
         void SetUseGravity(bool use) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_SetUseGravity || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, bool)>(fn->rigidbody.m_SetUseGravity)(raw(), use);
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "set_useGravity", 1);
+            void* params[] = { &use };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         [[nodiscard]] bool GetIsKinematic() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_GetIsKinematic || !raw()) return false;
-            return reinterpret_cast<bool(IL2CPP_CALLTYPE)(void*)>(fn->rigidbody.m_GetIsKinematic)(raw());
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "get_isKinematic", 0);
+            return MethodHandler::invoke<bool>(m, raw());
         }
         void SetIsKinematic(bool kinematic) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_SetIsKinematic || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, bool)>(fn->rigidbody.m_SetIsKinematic)(raw(), kinematic);
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "set_isKinematic", 1);
+            void* params[] = { &kinematic };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         // ---- Forces ----
         void AddForce(const Vector3& force, ForceMode mode = ForceMode::Force) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_AddForce || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, Vector3, int)>(fn->rigidbody.m_AddForce)(raw(), force, static_cast<int>(mode));
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "AddForce", 2);
+            Vector3 f = force;
+            int md = static_cast<int>(mode);
+            void* params[] = { &f, &md };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         void AddTorque(const Vector3& torque, ForceMode mode = ForceMode::Force) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_AddTorque || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, Vector3, int)>(fn->rigidbody.m_AddTorque)(raw(), torque, static_cast<int>(mode));
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "AddTorque", 2);
+            Vector3 t = torque;
+            int md = static_cast<int>(mode);
+            void* params[] = { &t, &md };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         void AddForceAtPosition(const Vector3& force, const Vector3& position, ForceMode mode = ForceMode::Force) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_AddForceAtPosition || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, Vector3, Vector3, int)>(fn->rigidbody.m_AddForceAtPosition)(raw(), force, position, static_cast<int>(mode));
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "AddForceAtPosition", 3);
+            Vector3 f = force;
+            Vector3 p = position;
+            int md = static_cast<int>(mode);
+            void* params[] = { &f, &p, &md };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         void AddExplosionForce(float explosionForce, const Vector3& explosionPosition, float explosionRadius, float upwardsModifier = 0.f, ForceMode mode = ForceMode::Force) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_AddExplosionForce || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, float, Vector3, float, float, int)>(fn->rigidbody.m_AddExplosionForce)(raw(), explosionForce, explosionPosition, explosionRadius, upwardsModifier, static_cast<int>(mode));
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "AddExplosionForce", 5);
+            Vector3 ep = explosionPosition;
+            int md = static_cast<int>(mode);
+            void* params[] = { &explosionForce, &ep, &explosionRadius, &upwardsModifier, &md };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         // ---- Position / Rotation ----
         void MovePosition(const Vector3& pos) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_MovePosition || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, const Vector3&)>(fn->rigidbody.m_MovePosition)(raw(), pos);
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "MovePosition", 1);
+            Vector3 p = pos;
+            void* params[] = { &p };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         void MoveRotation(const Quaternion& rot) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_MoveRotation || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, const Quaternion&)>(fn->rigidbody.m_MoveRotation)(raw(), rot);
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "MoveRotation", 1);
+            Quaternion r = rot;
+            void* params[] = { &r };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         void Move(const Vector3& pos, const Quaternion& rot) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_Move || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, const Vector3&, const Quaternion&)>(fn->rigidbody.m_Move)(raw(), pos, rot);
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "Move", 2);
+            Vector3 p = pos;
+            Quaternion r = rot;
+            void* params[] = { &p, &r };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         // ---- Sleep ----
         void Sleep() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_Sleep || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*)>(fn->rigidbody.m_Sleep)(raw());
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "Sleep", 0);
+            MethodHandler::invoke(m, raw());
         }
 
         void WakeUp() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_WakeUp || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*)>(fn->rigidbody.m_WakeUp)(raw());
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "WakeUp", 0);
+            MethodHandler::invoke(m, raw());
         }
 
         [[nodiscard]] bool IsSleeping() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_IsSleeping || !raw()) return false;
-            return reinterpret_cast<bool(IL2CPP_CALLTYPE)(void*)>(fn->rigidbody.m_IsSleeping)(raw());
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "IsSleeping", 0);
+            return MethodHandler::invoke<bool>(m, raw());
         }
 
         // ---- Freeze / Detect Collisions ----
         [[nodiscard]] bool GetFreezeRotation() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_GetFreezeRotation || !raw()) return false;
-            return reinterpret_cast<bool(IL2CPP_CALLTYPE)(void*)>(fn->rigidbody.m_GetFreezeRotation)(raw());
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "get_freezeRotation", 0);
+            return MethodHandler::invoke<bool>(m, raw());
         }
         void SetFreezeRotation(bool freeze) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_SetFreezeRotation || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, bool)>(fn->rigidbody.m_SetFreezeRotation)(raw(), freeze);
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "set_freezeRotation", 1);
+            void* params[] = { &freeze };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         [[nodiscard]] bool GetDetectCollisions() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_GetDetectCollisions || !raw()) return false;
-            return reinterpret_cast<bool(IL2CPP_CALLTYPE)(void*)>(fn->rigidbody.m_GetDetectCollisions)(raw());
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "get_detectCollisions", 0);
+            return MethodHandler::invoke<bool>(m, raw());
         }
         void SetDetectCollisions(bool detect) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_SetDetectCollisions || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, bool)>(fn->rigidbody.m_SetDetectCollisions)(raw(), detect);
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "set_detectCollisions", 1);
+            void* params[] = { &detect };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         // ---- Rigidbody Position / Rotation (physics interpolated) ----
         [[nodiscard]] Vector3 GetPosition() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_GetPosition || !raw()) return Vector3{};
-            Vector3 v; reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, Vector3*)>(fn->rigidbody.m_GetPosition)(raw(), &v); return v;
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "get_position", 0);
+            return MethodHandler::invoke<Vector3>(m, raw());
         }
         void SetPosition(const Vector3& pos) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_SetPosition || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, const Vector3&)>(fn->rigidbody.m_SetPosition)(raw(), pos);
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "set_position", 1);
+            Vector3 p = pos;
+            void* params[] = { &p };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         [[nodiscard]] Quaternion GetRotation() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_GetRotation || !raw()) return Quaternion{};
-            Quaternion q; reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, Quaternion*)>(fn->rigidbody.m_GetRotation)(raw(), &q); return q;
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "get_rotation", 0);
+            return MethodHandler::invoke<Quaternion>(m, raw());
         }
         void SetRotation(const Quaternion& rot) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_SetRotation || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, const Quaternion&)>(fn->rigidbody.m_SetRotation)(raw(), rot);
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "set_rotation", 1);
+            Quaternion r = rot;
+            void* params[] = { &r };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         // ---- Center of Mass ----
         [[nodiscard]] Vector3 GetCenterOfMass() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_GetCenterOfMass || !raw()) return Vector3{};
-            Vector3 v; reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, Vector3*)>(fn->rigidbody.m_GetCenterOfMass)(raw(), &v); return v;
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "get_centerOfMass", 0);
+            return MethodHandler::invoke<Vector3>(m, raw());
         }
         void SetCenterOfMass(const Vector3& com) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_SetCenterOfMass || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, const Vector3&)>(fn->rigidbody.m_SetCenterOfMass)(raw(), com);
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "set_centerOfMass", 1);
+            Vector3 c = com;
+            void* params[] = { &c };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         // ---- Interpolation / Collision Detection Mode ----
         [[nodiscard]] RigidbodyInterpolation GetInterpolation() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_GetInterpolation || !raw()) return RigidbodyInterpolation::None;
-            return static_cast<RigidbodyInterpolation>(reinterpret_cast<int(IL2CPP_CALLTYPE)(void*)>(fn->rigidbody.m_GetInterpolation)(raw()));
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "get_interpolation", 0);
+            return static_cast<RigidbodyInterpolation>(MethodHandler::invoke<int>(m, raw()));
         }
         void SetInterpolation(RigidbodyInterpolation interp) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_SetInterpolation || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, int)>(fn->rigidbody.m_SetInterpolation)(raw(), static_cast<int>(interp));
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "set_interpolation", 1);
+            int val = static_cast<int>(interp);
+            void* params[] = { &val };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         [[nodiscard]] CollisionDetectionMode GetCollisionDetectionMode() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_GetCollisionDetectionMode || !raw()) return CollisionDetectionMode::Discrete;
-            return static_cast<CollisionDetectionMode>(reinterpret_cast<int(IL2CPP_CALLTYPE)(void*)>(fn->rigidbody.m_GetCollisionDetectionMode)(raw()));
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "get_collisionDetectionMode", 0);
+            return static_cast<CollisionDetectionMode>(MethodHandler::invoke<int>(m, raw()));
         }
         void SetCollisionDetectionMode(CollisionDetectionMode mode) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_SetCollisionDetectionMode || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, int)>(fn->rigidbody.m_SetCollisionDetectionMode)(raw(), static_cast<int>(mode));
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "set_collisionDetectionMode", 1);
+            int val = static_cast<int>(mode);
+            void* params[] = { &val };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         // ---- Velocity Queries ----
         [[nodiscard]] Vector3 GetRelativePointVelocity(const Vector3& relativePoint) const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_GetRelativePointVelocity || !raw()) return Vector3{};
-            Vector3 v; reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, const Vector3&, Vector3*)>(fn->rigidbody.m_GetRelativePointVelocity)(raw(), relativePoint, &v); return v;
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "GetRelativePointVelocity", 1);
+            Vector3 rp = relativePoint;
+            void* params[] = { &rp };
+            return MethodHandler::invoke<Vector3>(m, raw(), params);
         }
 
         [[nodiscard]] Vector3 GetPointVelocity(const Vector3& worldPoint) const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_GetPointVelocity || !raw()) return Vector3{};
-            Vector3 v; reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, const Vector3&, Vector3*)>(fn->rigidbody.m_GetPointVelocity)(raw(), worldPoint, &v); return v;
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "GetPointVelocity", 1);
+            Vector3 wp = worldPoint;
+            void* params[] = { &wp };
+            return MethodHandler::invoke<Vector3>(m, raw(), params);
         }
 
         // ---- Bounds ----
         [[nodiscard]] Vector3 ClosestPointOnBounds(const Vector3& position) const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_ClosestPointOnBounds || !raw()) return Vector3{};
-            Vector3 v; reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, const Vector3&, Vector3*)>(fn->rigidbody.m_ClosestPointOnBounds)(raw(), position, &v); return v;
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "ClosestPointOnBounds", 1);
+            Vector3 p = position;
+            void* params[] = { &p };
+            return MethodHandler::invoke<Vector3>(m, raw(), params);
         }
 
         // ---- Constraints ----
         [[nodiscard]] RigidbodyConstraints GetConstraints() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_GetConstraints || !raw()) return RigidbodyConstraints::None;
-            return static_cast<RigidbodyConstraints>(reinterpret_cast<int(IL2CPP_CALLTYPE)(void*)>(fn->rigidbody.m_GetConstraints)(raw()));
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "get_constraints", 0);
+            return static_cast<RigidbodyConstraints>(MethodHandler::invoke<int>(m, raw()));
         }
         void SetConstraints(RigidbodyConstraints c) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->rigidbody.m_SetConstraints || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, int)>(fn->rigidbody.m_SetConstraints)(raw(), static_cast<int>(c));
+            static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "set_constraints", 1);
+            int val = static_cast<int>(c);
+            void* params[] = { &val };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         // ---- Legacy snake_case aliases (deprecated) ----
@@ -308,9 +314,8 @@ namespace IL2CPP::Module::Unity {
 
 namespace IL2CPP::Module::Unity {
     inline Rigidbody Collider::GetAttachedRigidbody() const {
-        auto* fn = GetUnityFunctions();
-        if (!fn || !fn->collider.m_GetAttachedRigidbody || !raw()) return Rigidbody{};
-        return Rigidbody{ reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*)>(fn->collider.m_GetAttachedRigidbody)(raw()) };
+        static auto m = MethodHandler::resolve("UnityEngine.Collider", "get_attachedRigidbody", 0);
+        return Rigidbody{ MethodHandler::invoke<void*>(m, raw()) };
     }
     inline Rigidbody Collider::get_attached_rigidbody() const { return GetAttachedRigidbody(); }
 } // deferred

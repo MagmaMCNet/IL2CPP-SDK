@@ -1,6 +1,6 @@
 #pragma once
 #include "Component.hpp"
-#include <IL2CPP.Common/il2cpp_shared.hpp>
+#include "../MethodHandler.hpp"
 
 // ============================================================================
 //  IL2CPP.Module::Unity::Collider
@@ -15,27 +15,25 @@ namespace IL2CPP::Module::Unity {
         using Component::Component;
 
         [[nodiscard]] bool GetEnabled() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->collider.m_GetEnabled || !raw()) return false;
-            return reinterpret_cast<bool(IL2CPP_CALLTYPE)(void*)>(fn->collider.m_GetEnabled)(raw());
+            static auto m = MethodHandler::resolve("UnityEngine.Collider", "get_enabled", 0);
+            return MethodHandler::invoke<bool>(m, raw());
         }
 
         void SetEnabled(bool value) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->collider.m_SetEnabled || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, bool)>(fn->collider.m_SetEnabled)(raw(), value);
+            static auto m = MethodHandler::resolve("UnityEngine.Collider", "set_enabled", 1);
+            void* params[] = { &value };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         [[nodiscard]] bool GetIsTrigger() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->collider.m_GetIsTrigger || !raw()) return false;
-            return reinterpret_cast<bool(IL2CPP_CALLTYPE)(void*)>(fn->collider.m_GetIsTrigger)(raw());
+            static auto m = MethodHandler::resolve("UnityEngine.Collider", "get_isTrigger", 0);
+            return MethodHandler::invoke<bool>(m, raw());
         }
 
         void SetIsTrigger(bool value) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->collider.m_SetIsTrigger || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, bool)>(fn->collider.m_SetIsTrigger)(raw(), value);
+            static auto m = MethodHandler::resolve("UnityEngine.Collider", "set_isTrigger", 1);
+            void* params[] = { &value };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         [[nodiscard]] Rigidbody GetAttachedRigidbody() const;

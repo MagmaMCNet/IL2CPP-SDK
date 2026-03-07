@@ -1,5 +1,5 @@
 #pragma once
-#include "Object.hpp"
+#include "../MethodHandler.hpp"
 #include <IL2CPP.Common/il2cpp_types.hpp>
 #include <IL2CPP.Common/il2cpp_shared.hpp>
 #include <string>
@@ -9,34 +9,42 @@
 //  IL2CPP.Module::Unity::Application - Static utility class for application info
 // ============================================================================
 
+namespace IL2CPP::Module {
+    [[nodiscard]] IL2CPP::il2cpp_exports const* GetExports() noexcept;
+}
+
 namespace IL2CPP::Module::Unity {
 
     enum class RuntimePlatform : int {
-        OSXEditor = 0,
-        OSXPlayer = 1,
-        WindowsPlayer = 2,
-        WindowsEditor = 7,
-        IPhonePlayer = 8,
-        Android = 11,
-        LinuxPlayer = 13,
-        LinuxEditor = 16,
-        WebGLPlayer = 17,
-        PS4 = 25,
-        XboxOne = 27,
-        Switch = 32
+        OSXEditor = 0, OSXPlayer = 1, WindowsPlayer = 2, WindowsEditor = 7,
+        IPhonePlayer = 8, Android = 11, LinuxPlayer = 13, LinuxEditor = 16,
+        WebGLPlayer = 17, PS4 = 25, XboxOne = 27, Switch = 32
     };
 
     class Application {
     public:
         Application() = delete;
 
-        // ---- Paths ----
+    private:
+        static std::string InvokeStringGetter(const char* methodName) {
+            static std::unordered_map<std::string, Method> cache;
+            auto it = cache.find(methodName);
+            if (it == cache.end()) {
+                it = cache.emplace(methodName, MethodHandler::resolve("UnityEngine.Application", methodName, 0)).first;
+            }
+            void* str = MethodHandler::invoke<void*>(it->second, nullptr);
+            if (!str) return "";
+            int len = *reinterpret_cast<int*>(static_cast<char*>(str) + 0x10);
+            if (len <= 0) return "";
+            wchar_t* wstr = reinterpret_cast<wchar_t*>(static_cast<char*>(str) + 0x14);
+            std::wstring ws(wstr, len);
+            return std::string(ws.begin(), ws.end());
+        }
 
-        /// Get the data path (read-only).
+    public:
         [[nodiscard]] static std::string GetDataPath() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->application.m_GetDataPath) return "";
-            auto* str = reinterpret_cast<void*(IL2CPP_CALLTYPE)()>(fn->application.m_GetDataPath)();
+            static auto m = MethodHandler::resolve("UnityEngine.Application", "get_dataPath", 0);
+            void* str = MethodHandler::invoke<void*>(m, nullptr);
             if (!str) return "";
             int len = *reinterpret_cast<int*>(static_cast<char*>(str) + 0x10);
             if (len <= 0) return "";
@@ -45,11 +53,9 @@ namespace IL2CPP::Module::Unity {
             return std::string(ws.begin(), ws.end());
         }
 
-        /// Get the persistent data path (read-write).
         [[nodiscard]] static std::string GetPersistentDataPath() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->application.m_GetPersistentDataPath) return "";
-            auto* str = reinterpret_cast<void*(IL2CPP_CALLTYPE)()>(fn->application.m_GetPersistentDataPath)();
+            static auto m = MethodHandler::resolve("UnityEngine.Application", "get_persistentDataPath", 0);
+            void* str = MethodHandler::invoke<void*>(m, nullptr);
             if (!str) return "";
             int len = *reinterpret_cast<int*>(static_cast<char*>(str) + 0x10);
             if (len <= 0) return "";
@@ -58,11 +64,9 @@ namespace IL2CPP::Module::Unity {
             return std::string(ws.begin(), ws.end());
         }
 
-        /// Get the streaming assets path.
         [[nodiscard]] static std::string GetStreamingAssetsPath() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->application.m_GetStreamingAssetsPath) return "";
-            auto* str = reinterpret_cast<void*(IL2CPP_CALLTYPE)()>(fn->application.m_GetStreamingAssetsPath)();
+            static auto m = MethodHandler::resolve("UnityEngine.Application", "get_streamingAssetsPath", 0);
+            void* str = MethodHandler::invoke<void*>(m, nullptr);
             if (!str) return "";
             int len = *reinterpret_cast<int*>(static_cast<char*>(str) + 0x10);
             if (len <= 0) return "";
@@ -71,36 +75,24 @@ namespace IL2CPP::Module::Unity {
             return std::string(ws.begin(), ws.end());
         }
 
-        // ---- State ----
-
-        /// Check if the application is playing.
         [[nodiscard]] static bool GetIsPlaying() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->application.m_GetIsPlaying) return true;
-            return reinterpret_cast<bool(IL2CPP_CALLTYPE)()>(fn->application.m_GetIsPlaying)();
+            static auto m = MethodHandler::resolve("UnityEngine.Application", "get_isPlaying", 0);
+            return MethodHandler::invoke<bool>(m, nullptr);
         }
 
-        /// Check if running in the Unity editor.
         [[nodiscard]] static bool GetIsEditor() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->application.m_GetIsEditor) return false;
-            return reinterpret_cast<bool(IL2CPP_CALLTYPE)()>(fn->application.m_GetIsEditor)();
+            static auto m = MethodHandler::resolve("UnityEngine.Application", "get_isEditor", 0);
+            return MethodHandler::invoke<bool>(m, nullptr);
         }
 
-        /// Get the runtime platform.
         [[nodiscard]] static RuntimePlatform GetPlatform() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->application.m_GetPlatform) return RuntimePlatform::WindowsPlayer;
-            return static_cast<RuntimePlatform>(reinterpret_cast<int(IL2CPP_CALLTYPE)()>(fn->application.m_GetPlatform)());
+            static auto m = MethodHandler::resolve("UnityEngine.Application", "get_platform", 0);
+            return static_cast<RuntimePlatform>(MethodHandler::invoke<int>(m, nullptr));
         }
 
-        // ---- Version Info ----
-
-        /// Get the application version string.
         [[nodiscard]] static std::string GetVersion() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->application.m_GetVersion) return "";
-            auto* str = reinterpret_cast<void*(IL2CPP_CALLTYPE)()>(fn->application.m_GetVersion)();
+            static auto m = MethodHandler::resolve("UnityEngine.Application", "get_version", 0);
+            void* str = MethodHandler::invoke<void*>(m, nullptr);
             if (!str) return "";
             int len = *reinterpret_cast<int*>(static_cast<char*>(str) + 0x10);
             if (len <= 0) return "";
@@ -109,11 +101,9 @@ namespace IL2CPP::Module::Unity {
             return std::string(ws.begin(), ws.end());
         }
 
-        /// Get the product name.
         [[nodiscard]] static std::string GetProductName() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->application.m_GetProductName) return "";
-            auto* str = reinterpret_cast<void*(IL2CPP_CALLTYPE)()>(fn->application.m_GetProductName)();
+            static auto m = MethodHandler::resolve("UnityEngine.Application", "get_productName", 0);
+            void* str = MethodHandler::invoke<void*>(m, nullptr);
             if (!str) return "";
             int len = *reinterpret_cast<int*>(static_cast<char*>(str) + 0x10);
             if (len <= 0) return "";
@@ -122,11 +112,9 @@ namespace IL2CPP::Module::Unity {
             return std::string(ws.begin(), ws.end());
         }
 
-        /// Get the company name.
         [[nodiscard]] static std::string GetCompanyName() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->application.m_GetCompanyName) return "";
-            auto* str = reinterpret_cast<void*(IL2CPP_CALLTYPE)()>(fn->application.m_GetCompanyName)();
+            static auto m = MethodHandler::resolve("UnityEngine.Application", "get_companyName", 0);
+            void* str = MethodHandler::invoke<void*>(m, nullptr);
             if (!str) return "";
             int len = *reinterpret_cast<int*>(static_cast<char*>(str) + 0x10);
             if (len <= 0) return "";
@@ -135,47 +123,36 @@ namespace IL2CPP::Module::Unity {
             return std::string(ws.begin(), ws.end());
         }
 
-        // ---- Control ----
-
-        /// Quit the application.
         static void Quit() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->application.m_Quit) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)()>(fn->application.m_Quit)();
+            static auto m = MethodHandler::resolve("UnityEngine.Application", "Quit", 0);
+            MethodHandler::invoke(m, nullptr);
         }
 
-        /// Quit the application with an exit code.
         static void Quit(int exitCode) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->application.m_QuitWithExitCode) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(int)>(fn->application.m_QuitWithExitCode)(exitCode);
+            static auto m = MethodHandler::resolve("UnityEngine.Application", "Quit", 1);
+            void* params[] = { &exitCode };
+            MethodHandler::invoke(m, nullptr, params);
         }
 
-        /// Open a URL in the default browser.
         static void OpenURL(std::string_view url) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->application.m_OpenURL) return;
+            static auto m = MethodHandler::resolve("UnityEngine.Application", "OpenURL", 1);
             auto* exports = GetExports();
             if (!exports || !exports->m_stringNew) return;
             void* il2cppStr = reinterpret_cast<void*(IL2CPP_CALLTYPE)(const char*)>(exports->m_stringNew)(
                 std::string(url).c_str());
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*)>(fn->application.m_OpenURL)(il2cppStr);
+            void* params[] = { il2cppStr };
+            MethodHandler::invoke(m, nullptr, params);
         }
 
-        // ---- Frame Rate ----
-
-        /// Get the target frame rate (-1 = vsync, 0 = uncapped).
         [[nodiscard]] static int GetTargetFrameRate() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->application.m_GetTargetFrameRate) return -1;
-            return reinterpret_cast<int(IL2CPP_CALLTYPE)()>(fn->application.m_GetTargetFrameRate)();
+            static auto m = MethodHandler::resolve("UnityEngine.Application", "get_targetFrameRate", 0);
+            return MethodHandler::invoke<int>(m, nullptr);
         }
 
-        /// Set the target frame rate.
         static void SetTargetFrameRate(int frameRate) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->application.m_SetTargetFrameRate) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(int)>(fn->application.m_SetTargetFrameRate)(frameRate);
+            static auto m = MethodHandler::resolve("UnityEngine.Application", "set_targetFrameRate", 1);
+            void* params[] = { &frameRate };
+            MethodHandler::invoke(m, nullptr, params);
         }
 
         // ---- Legacy snake_case aliases (deprecated) ----

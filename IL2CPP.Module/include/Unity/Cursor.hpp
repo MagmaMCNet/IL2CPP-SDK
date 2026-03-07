@@ -1,6 +1,5 @@
 #pragma once
-#include "Object.hpp"
-#include <IL2CPP.Common/il2cpp_shared.hpp>
+#include "../MethodHandler.hpp"
 
 // ============================================================================
 //  IL2CPP.Module::Unity::Cursor - Static utility class for cursor control
@@ -20,62 +19,37 @@ namespace IL2CPP::Module::Unity {
 
         // ---- Visibility ----
 
-        /// Get cursor visibility.
         [[nodiscard]] static bool GetVisible() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->cursor.m_GetVisible) return true;
-            return reinterpret_cast<bool(IL2CPP_CALLTYPE)()>(fn->cursor.m_GetVisible)();
+            static auto m = MethodHandler::resolve("UnityEngine.Cursor", "get_visible", 0);
+            return MethodHandler::invoke<bool>(m, nullptr);
         }
 
-        /// Set cursor visibility.
         static void SetVisible(bool visible) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->cursor.m_SetVisible) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(bool)>(fn->cursor.m_SetVisible)(visible);
+            static auto m = MethodHandler::resolve("UnityEngine.Cursor", "set_visible", 1);
+            void* params[] = { &visible };
+            MethodHandler::invoke(m, nullptr, params);
         }
 
         // ---- Lock State ----
 
-        /// Get the cursor lock state.
         [[nodiscard]] static CursorLockMode GetLockState() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->cursor.m_GetLockState) return CursorLockMode::None;
-            return static_cast<CursorLockMode>(reinterpret_cast<int(IL2CPP_CALLTYPE)()>(fn->cursor.m_GetLockState)());
+            static auto m = MethodHandler::resolve("UnityEngine.Cursor", "get_lockState", 0);
+            return static_cast<CursorLockMode>(MethodHandler::invoke<int>(m, nullptr));
         }
 
-        /// Set the cursor lock state.
         static void SetLockState(CursorLockMode lockMode) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->cursor.m_SetLockState) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(int)>(fn->cursor.m_SetLockState)(static_cast<int>(lockMode));
+            static auto m = MethodHandler::resolve("UnityEngine.Cursor", "set_lockState", 1);
+            int val = static_cast<int>(lockMode);
+            void* params[] = { &val };
+            MethodHandler::invoke(m, nullptr, params);
         }
 
         // ---- Utility ----
-
-        /// Lock the cursor to the center of the screen.
-        static void Lock() {
-            SetLockState(CursorLockMode::Locked);
-        }
-
-        /// Unlock the cursor.
-        static void Unlock() {
-            SetLockState(CursorLockMode::None);
-        }
-
-        /// Confine the cursor to the game window.
-        static void Confine() {
-            SetLockState(CursorLockMode::Confined);
-        }
-
-        /// Show the cursor.
-        static void Show() {
-            SetVisible(true);
-        }
-
-        /// Hide the cursor.
-        static void Hide() {
-            SetVisible(false);
-        }
+        static void Lock() { SetLockState(CursorLockMode::Locked); }
+        static void Unlock() { SetLockState(CursorLockMode::None); }
+        static void Confine() { SetLockState(CursorLockMode::Confined); }
+        static void Show() { SetVisible(true); }
+        static void Hide() { SetVisible(false); }
 
         // ---- Legacy snake_case aliases (deprecated) ----
         [[deprecated("Use GetVisible()")]] [[nodiscard]] static bool get_visible() { return GetVisible(); }

@@ -189,10 +189,14 @@ namespace IL2CPP {
         void*       m_helperCallbackRegister;       // void(void* callback, UnityEvent event)
         void*       m_helperCallbackInitialize;     // void()
         void*       m_helperCallbackUninitialize;   // void()
+
+        // ===== Method Handler Helpers =====
+        void*       m_helperMethodResolve;          // void*(const char* className, const char* methodName, int argc) -> il2cppMethodInfo*
+        void*       m_helperMethodInvoke;           // void*(void* methodInfo, void* obj, void** params) -> void* result
     };
 
     // ---- Version & shared memory ----
-    constexpr uint32_t      exports_version     = 7;  // Added il2cpp_value_box
+    constexpr uint32_t      exports_version     = 8;  // Added MethodHandler (resolve/invoke)
     constexpr wchar_t const* exports_shared_prefix = L"Local\\UNIx_PID_";
     constexpr wchar_t const* exports_shared_suffix = L"_IL2CPPCore";
 

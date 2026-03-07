@@ -228,6 +228,64 @@ namespace IL2CPP {
         Mouse0 = 323, Mouse1, Mouse2, Mouse3, Mouse4, Mouse5, Mouse6,
     };
 
+    // ========================================================================
+    //  Unity UI / TextMeshPro Enums
+    // ========================================================================
+
+    enum class RenderMode : int {
+        WorldSpace = 0,
+        ScreenSpaceOverlay = 1,
+        ScreenSpaceCamera = 2
+    };
+
+    enum class ImageType : int {
+        Simple = 0,
+        Sliced = 1,
+        Tiled = 2,
+        Filled = 3
+    };
+
+    enum class TextAlignmentOptions : int {
+        TopLeft = 0x101,
+        Top = 0x102,
+        TopRight = 0x104,
+        TopJustified = 0x108,
+        Left = 0x201,
+        Center = 0x202,
+        Right = 0x204,
+        Justified = 0x208,
+        BottomLeft = 0x401,
+        Bottom = 0x402,
+        BottomRight = 0x404,
+        BottomJustified = 0x408,
+        BaselineLeft = 0x801,
+        Baseline = 0x802,
+        BaselineRight = 0x804,
+        BaselineJustified = 0x808,
+        MidlineLeft = 0x1001,
+        Midline = 0x1002,
+        MidlineRight = 0x1004,
+        MidlineJustified = 0x1008,
+        CaplineLeft = 0x2001,
+        Capline = 0x2002,
+        CaplineRight = 0x2004,
+        CaplineJustified = 0x2008
+    };
+
+    enum class FontStyles : int {
+        Normal = 0x0,
+        Bold = 0x1,
+        Italic = 0x2,
+        Underline = 0x4,
+        LowerCase = 0x8,
+        UpperCase = 0x10,
+        SmallCaps = 0x20,
+        Strikethrough = 0x40,
+        Superscript = 0x80,
+        Subscript = 0x100,
+        Highlight = 0x200
+    };
+
     struct Touch {
         int fingerId; Vector2 position, rawPosition, deltaPosition;
         float deltaTime; int tapCount; TouchPhase phase; TouchType type;

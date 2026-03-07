@@ -1,5 +1,6 @@
 #pragma once
 #include "Behaviour.hpp"
+#include "../MethodHandler.hpp"
 #include <IL2CPP.Common/il2cpp_shared.hpp>
 
 // ============================================================================
@@ -13,36 +14,34 @@ namespace IL2CPP::Module::Unity {
         using Behaviour::Behaviour;
 
         void Invoke(std::string_view methodName, float time) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->monoBehaviour.m_Invoke || !raw()) return;
+            static auto m = MethodHandler::resolve("UnityEngine.MonoBehaviour", "Invoke", 2);
             auto* exports = GetExports();
             if (!exports || !exports->m_stringNew) return;
             void* str = reinterpret_cast<void*(IL2CPP_CALLTYPE)(const char*)>(exports->m_stringNew)(
                 std::string(methodName).c_str());
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, void*, float)>(fn->monoBehaviour.m_Invoke)(raw(), str, time);
+            void* params[] = { str, &time };
+            MethodHandler::invoke(m, raw(), params);
         }
 
         void CancelInvoke() {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->monoBehaviour.m_CancelInvoke || !raw()) return;
-            reinterpret_cast<void(IL2CPP_CALLTYPE)(void*)>(fn->monoBehaviour.m_CancelInvoke)(raw());
+            static auto m = MethodHandler::resolve("UnityEngine.MonoBehaviour", "CancelInvoke", 0);
+            MethodHandler::invoke(m, raw());
         }
 
         [[nodiscard]] bool IsInvoking() const {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->monoBehaviour.m_IsInvoking || !raw()) return false;
-            return reinterpret_cast<bool(IL2CPP_CALLTYPE)(void*)>(fn->monoBehaviour.m_IsInvoking)(raw());
+            static auto m = MethodHandler::resolve("UnityEngine.MonoBehaviour", "IsInvoking", 0);
+            return MethodHandler::invoke<bool>(m, raw());
         }
 
         /// Start a coroutine by method name.
         [[nodiscard]] ManagedObject StartCoroutine(std::string_view method) {
-            auto* fn = GetUnityFunctions();
-            if (!fn || !fn->monoBehaviour.m_StartCoroutine || !raw()) return ManagedObject{};
+            static auto m = MethodHandler::resolve("UnityEngine.MonoBehaviour", "StartCoroutine", 1);
             auto* exports = GetExports();
             if (!exports || !exports->m_stringNew) return ManagedObject{};
             void* str = reinterpret_cast<void*(IL2CPP_CALLTYPE)(const char*)>(exports->m_stringNew)(
                 std::string(method).c_str());
-            return ManagedObject{ reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*, void*)>(fn->monoBehaviour.m_StartCoroutine)(raw(), str) };
+            void* params[] = { str };
+            return ManagedObject{ MethodHandler::invoke<void*>(m, raw(), params) };
         }
 
         // ---- Legacy snake_case aliases (deprecated) ----
