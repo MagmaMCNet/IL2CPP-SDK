@@ -25,6 +25,9 @@ namespace IL2CPP::VRChat {
         [[nodiscard]] static double GetServerTimeInSeconds();
         [[nodiscard]] static int GetServerTimeInMilliseconds();
 
+        // Room
+        static bool GoToRoom(const std::string& roomID);
+
         // Ownership
         [[nodiscard]] static bool IsOwner(VRCPlayerApi player, IL2CPP::Module::Unity::GameObject obj);
         [[nodiscard]] static bool IsOwner(IL2CPP::Module::Unity::GameObject obj);

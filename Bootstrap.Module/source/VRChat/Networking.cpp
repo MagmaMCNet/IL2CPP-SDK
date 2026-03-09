@@ -85,6 +85,18 @@ namespace IL2CPP::VRChat {
         return result ? *reinterpret_cast<int*>(IL2CPP::Unbox(result)) : 0;
     }
 
+    bool Networking::GoToRoom(const std::string& roomID) {
+        auto k = klass();
+        if (!k) return false;
+        auto m = k.get_method("GoToRoom", 1);
+        if (!m) return false;
+        void* str = IL2CPP::StringNew(roomID.c_str());
+        if (!str) return false;
+        void* params[1] = { str };
+        void* result = m.invoke(nullptr, params);
+        return result ? *reinterpret_cast<bool*>(IL2CPP::Unbox(result)) : false;
+    }
+
     bool Networking::IsOwner(VRCPlayerApi player, IL2CPP::Module::Unity::GameObject obj) {
         auto k = klass();
         if (!k) return false;

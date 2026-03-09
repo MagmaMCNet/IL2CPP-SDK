@@ -39,6 +39,12 @@ namespace IL2CPP::Module::Unity {
             static auto m = MethodHandler::resolve("UnityEngine.Camera", "get_projectionMatrix", 0);
             return MethodHandler::invoke<Matrix4x4>(m, raw());
         }
+        void SetProjectionMatrix(const Matrix4x4& matrix) {
+            static auto m = MethodHandler::resolve("UnityEngine.Camera", "set_projectionMatrix", 1);
+            Matrix4x4 mat = matrix;
+            void* params[] = { &mat };
+            MethodHandler::invoke(m, raw(), params);
+        }
 
         // ---- Field of View ----
         [[nodiscard]] float GetFieldOfView() const {
@@ -166,6 +172,12 @@ namespace IL2CPP::Module::Unity {
         [[nodiscard]] static int GetAllCamerasCount() {
             static auto m = MethodHandler::resolve("UnityEngine.Camera", "get_allCamerasCount", 0);
             return MethodHandler::invoke<int>(m, nullptr);
+        }
+
+        // ---- Projection ----
+        void ResetProjectionMatrix() {
+            static auto m = MethodHandler::resolve("UnityEngine.Camera", "ResetProjectionMatrix", 0);
+            MethodHandler::invoke(m, raw());
         }
 
         // ---- Utility Methods ----
