@@ -1,15 +1,18 @@
 #include <include/VRChat/APIUser.hpp>
 #include <include/VRChat/ApiBadge.hpp>
+#include <IL2CPP.Module/include/MethodHandler.hpp>
 #include <IL2CPP.Module/include/System/String.hpp>
 #include <IL2CPP.Module/include/System/List.hpp>
 
 namespace IL2CPP::VRChat {
 
+    using IL2CPP::Module::MethodHandler;
+
     namespace {
-        std::vector<std::string> collect_string_list(IL2CPP::Module::ManagedObject const& obj, std::string_view methodName) {
+        std::vector<std::string> collect_string_list(IL2CPP::Module::ManagedObject obj, const IL2CPP::Module::Method& method) {
             std::vector<std::string> result;
             if (!obj.valid()) return result;
-            auto* listPtr = obj.call_method<void*>(methodName);
+            auto* listPtr = MethodHandler::invoke<void*>(method, obj.raw());
             if (!listPtr) return result;
             IL2CPP::Module::System::List<void*> list(listPtr);
             int cnt = list.count();
@@ -24,99 +27,139 @@ namespace IL2CPP::VRChat {
     }
 
     std::string APIUser::GetDisplayName() {
-        return call_string_method("get_displayName");
+        static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_displayName", 0);
+        void* str = MethodHandler::invoke<void*>(m, raw());
+        return str ? IL2CPP::Module::System::String(str).to_string() : "";
     }
 
     std::string APIUser::GetUsername() {
-        return call_string_method("get_username");
+        static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_username", 0);
+        void* str = MethodHandler::invoke<void*>(m, raw());
+        return str ? IL2CPP::Module::System::String(str).to_string() : "";
     }
 
     std::string APIUser::GetPronouns() {
-        return call_string_method("get_pronouns");
+        static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_pronouns", 0);
+        void* str = MethodHandler::invoke<void*>(m, raw());
+        return str ? IL2CPP::Module::System::String(str).to_string() : "";
     }
 
     std::string APIUser::GetBio() {
-        return call_string_method("get_bio");
+        static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_bio", 0);
+        void* str = MethodHandler::invoke<void*>(m, raw());
+        return str ? IL2CPP::Module::System::String(str).to_string() : "";
     }
 
     std::vector<std::string> APIUser::GetBioLinks() {
-        return collect_string_list(*this, "get_bioLinks");
+        static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_bioLinks", 0);
+        return collect_string_list(*this, m);
     }
 
     std::string APIUser::GetStatus() {
-        return call_string_method("get_status");
+        static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_status", 0);
+        void* str = MethodHandler::invoke<void*>(m, raw());
+        return str ? IL2CPP::Module::System::String(str).to_string() : "";
     }
 
     std::string APIUser::GetStatusDescription() {
-        return call_string_method("get_statusDescription");
+        static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_statusDescription", 0);
+        void* str = MethodHandler::invoke<void*>(m, raw());
+        return str ? IL2CPP::Module::System::String(str).to_string() : "";
     }
 
     std::vector<std::string> APIUser::GetTags() {
-        return collect_string_list(*this, "get_tags");
+        static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_tags", 0);
+        return collect_string_list(*this, m);
     }
 
     std::string APIUser::GetNote() {
-        return call_string_method("get_note");
+        static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_note", 0);
+        void* str = MethodHandler::invoke<void*>(m, raw());
+        return str ? IL2CPP::Module::System::String(str).to_string() : "";
     }
 
     std::string APIUser::GetUserLanguageCode() {
-        return call_string_method("get_userLanguageCode");
+        static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_userLanguageCode", 0);
+        void* str = MethodHandler::invoke<void*>(m, raw());
+        return str ? IL2CPP::Module::System::String(str).to_string() : "";
     }
 
     std::string APIUser::GetAvatarId() {
-        return call_string_method("get_avatarId");
+        static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_avatarId", 0);
+        void* str = MethodHandler::invoke<void*>(m, raw());
+        return str ? IL2CPP::Module::System::String(str).to_string() : "";
     }
 
     std::string APIUser::GetFallbackId() {
-        return call_string_method("get_fallbackId");
+        static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_fallbackId", 0);
+        void* str = MethodHandler::invoke<void*>(m, raw());
+        return str ? IL2CPP::Module::System::String(str).to_string() : "";
     }
 
     std::string APIUser::GetCurrentAvatarImageUrl() {
-        return call_string_method("get_currentAvatarImageUrl");
+        static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_currentAvatarImageUrl", 0);
+        void* str = MethodHandler::invoke<void*>(m, raw());
+        return str ? IL2CPP::Module::System::String(str).to_string() : "";
     }
 
     std::string APIUser::GetCurrentAvatarThumbnailImageUrl() {
-        return call_string_method("get_currentAvatarThumbnailImageUrl");
+        static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_currentAvatarThumbnailImageUrl", 0);
+        void* str = MethodHandler::invoke<void*>(m, raw());
+        return str ? IL2CPP::Module::System::String(str).to_string() : "";
     }
 
     std::vector<std::string> APIUser::GetCurrentAvatarTags() {
-        return collect_string_list(*this, "get_currentAvatarTags");
+        static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_currentAvatarTags", 0);
+        return collect_string_list(*this, m);
     }
 
     bool APIUser::GetAllowAvatarCopying() {
         if (!valid()) return false;
-        return call_method<bool>("get_allowAvatarCopying");
+        static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_allowAvatarCopying", 0);
+        return MethodHandler::invoke<bool>(m, raw());
     }
 
     std::string APIUser::GetUserIcon() {
-        return call_string_method("get_userIcon");
+        static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_userIcon", 0);
+        void* str = MethodHandler::invoke<void*>(m, raw());
+        return str ? IL2CPP::Module::System::String(str).to_string() : "";
     }
 
     std::string APIUser::GetProfilePicOverride() {
-        return call_string_method("get_profilePicOverride");
+        static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_profilePicOverride", 0);
+        void* str = MethodHandler::invoke<void*>(m, raw());
+        return str ? IL2CPP::Module::System::String(str).to_string() : "";
     }
 
     std::string APIUser::GetIconUrl() {
-        return call_string_method("get_iconUrl");
+        static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_iconUrl", 0);
+        void* str = MethodHandler::invoke<void*>(m, raw());
+        return str ? IL2CPP::Module::System::String(str).to_string() : "";
     }
 
     std::string APIUser::GetThumbnailUrl() {
-        return call_string_method("get_thumbnailUrl");
+        static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_thumbnailUrl", 0);
+        void* str = MethodHandler::invoke<void*>(m, raw());
+        return str ? IL2CPP::Module::System::String(str).to_string() : "";
     }
 
     bool APIUser::GetIsFriend() {
         if (!valid()) return false;
-        return call_method<bool>("get_isFriend");
+        static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_isFriend", 0);
+        return MethodHandler::invoke<bool>(m, raw());
     }
 
     std::string APIUser::GetLocation() {
-        return call_string_method("get_location");
+        static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_location", 0);
+        void* str = MethodHandler::invoke<void*>(m, raw());
+        return str ? IL2CPP::Module::System::String(str).to_string() : "";
     }
 
     std::vector<ApiBadge> APIUser::GetBadges() {
         std::vector<ApiBadge> result;
         if (!valid()) return result;
-        auto* listPtr = call_method<void*>("get_badges");
+        static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_badges", 0);
+        auto* listPtr = MethodHandler::invoke<void*>(m, raw());
         if (!listPtr) return result;
         IL2CPP::Module::System::List<void*> list(listPtr);
         int cnt = list.count();
@@ -131,25 +174,32 @@ namespace IL2CPP::VRChat {
 
     bool APIUser::GetAgeVerified() {
         if (!valid()) return false;
-        return call_method<bool>("get_ageVerified");
+        static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_ageVerified", 0);
+        return MethodHandler::invoke<bool>(m, raw());
     }
 
     bool APIUser::GetIsAdult() {
         if (!valid()) return false;
-        return call_method<bool>("get_isAdult");
+        static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_isAdult", 0);
+        return MethodHandler::invoke<bool>(m, raw());
     }
 
     bool APIUser::GetIsOnMobile() {
         if (!valid()) return false;
-        return call_method<bool>("get_IsOnMobile");
+        static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_IsOnMobile", 0);
+        return MethodHandler::invoke<bool>(m, raw());
     }
 
     std::string APIUser::GetLast_platform() {
-        return call_string_method("get_last_platform");
+        static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_last_platform", 0);
+        void* str = MethodHandler::invoke<void*>(m, raw());
+        return str ? IL2CPP::Module::System::String(str).to_string() : "";
     }
 
     std::string APIUser::GetPlatform() {
-        return call_string_method("get_platform");
+        static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_platform", 0);
+        void* str = MethodHandler::invoke<void*>(m, raw());
+        return str ? IL2CPP::Module::System::String(str).to_string() : "";
     }
 
     PlayerRank APIUser::GetPlayerRank() {

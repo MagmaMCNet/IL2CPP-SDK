@@ -1,6 +1,10 @@
 #include <include/VRChat/Networking.hpp>
+#include <IL2CPP.Module/include/MethodHandler.hpp>
+#include <IL2CPP.Module/include/System/String.hpp>
 
 namespace IL2CPP::VRChat {
+
+    using IL2CPP::Module::MethodHandler;
 
     IL2CPP::Module::Class Networking::klass() {
         static auto c = IL2CPP::Module::Class::find("VRC.SDKBase.Networking");
@@ -68,72 +72,144 @@ namespace IL2CPP::VRChat {
     }
 
     double Networking::GetServerTimeInSeconds() {
-        auto k = klass();
-        if (!k) return 0.0;
-        auto m = k.get_method("GetServerTimeInSeconds", 0);
-        if (!m) return 0.0;
-        void* result = m.invoke(nullptr, nullptr);
-        return result ? *reinterpret_cast<double*>(IL2CPP::Unbox(result)) : 0.0;
+        static auto m = MethodHandler::resolve("VRC.SDKBase.Networking", "GetServerTimeInSeconds", 0);
+        return MethodHandler::invoke<double>(m, nullptr);
     }
 
     int Networking::GetServerTimeInMilliseconds() {
-        auto k = klass();
-        if (!k) return 0;
-        auto m = k.get_method("GetServerTimeInMilliseconds", 0);
-        if (!m) return 0;
-        void* result = m.invoke(nullptr, nullptr);
-        return result ? *reinterpret_cast<int*>(IL2CPP::Unbox(result)) : 0;
+        static auto m = MethodHandler::resolve("VRC.SDKBase.Networking", "GetServerTimeInMilliseconds", 0);
+        return MethodHandler::invoke<int>(m, nullptr);
     }
 
     bool Networking::GoToRoom(const std::string& roomID) {
-        auto k = klass();
-        if (!k) return false;
-        auto m = k.get_method("GoToRoom", 1);
-        if (!m) return false;
-        void* str = IL2CPP::StringNew(roomID.c_str());
+        static auto m = MethodHandler::resolve("VRC.SDKBase.Networking", "GoToRoom", 1);
+        auto str = Module::System::String::create(roomID.c_str());
         if (!str) return false;
-        void* params[1] = { str };
-        void* result = m.invoke(nullptr, params);
-        return result ? *reinterpret_cast<bool*>(IL2CPP::Unbox(result)) : false;
+        void* params[1] = { str.raw() };
+        return MethodHandler::invoke<bool>(m, nullptr, params);
     }
 
     bool Networking::IsOwner(VRCPlayerApi player, IL2CPP::Module::Unity::GameObject obj) {
-        auto k = klass();
-        if (!k) return false;
-        auto m = k.get_method("IsOwner", 2);
-        if (!m) return false;
+        static auto m = MethodHandler::resolve("VRC.SDKBase.Networking", "IsOwner", 2);
         void* params[2] = { player.raw(), obj.raw() };
-        void* result = m.invoke(nullptr, params);
-        return result ? *reinterpret_cast<bool*>(IL2CPP::Unbox(result)) : false;
+        return MethodHandler::invoke<bool>(m, nullptr, params);
     }
 
     bool Networking::IsOwner(IL2CPP::Module::Unity::GameObject obj) {
-        auto k = klass();
-        if (!k) return false;
-        auto m = k.get_method("IsOwner", 1);
-        if (!m) return false;
+        static auto m = MethodHandler::resolve("VRC.SDKBase.Networking", "IsOwner", 1);
         void* params[1] = { obj.raw() };
-        void* result = m.invoke(nullptr, params);
-        return result ? *reinterpret_cast<bool*>(IL2CPP::Unbox(result)) : false;
+        return MethodHandler::invoke<bool>(m, nullptr, params);
     }
 
     VRCPlayerApi Networking::GetOwner(IL2CPP::Module::Unity::GameObject obj) {
-        auto k = klass();
-        if (!k) return {};
-        auto m = k.get_method("GetOwner", 1);
-        if (!m) return {};
+        static auto m = MethodHandler::resolve("VRC.SDKBase.Networking", "GetOwner", 1);
         void* params[1] = { obj.raw() };
-        void* result = m.invoke(nullptr, params);
+        void* result = MethodHandler::invoke<void*>(m, nullptr, params);
         return result ? VRCPlayerApi(result) : VRCPlayerApi();
     }
 
     void Networking::SetOwner(VRCPlayerApi player, IL2CPP::Module::Unity::GameObject obj) {
-        auto k = klass();
-        if (!k) return;
-        auto m = k.get_method("SetOwner", 2);
-        if (!m) return;
+        static auto m = MethodHandler::resolve("VRC.SDKBase.Networking", "SetOwner", 2);
         void* params[2] = { player.raw(), obj.raw() };
-        m.invoke(nullptr, params);
+        MethodHandler::invoke<void>(m, nullptr, params);
+    }
+
+    VRCPlayerApi Networking::GetInstanceOwnerPlayer() {
+        static auto m = MethodHandler::resolve("VRC.SDKBase.Networking", "get_InstanceOwner", 0);
+        void* result = MethodHandler::invoke<void*>(m, nullptr);
+        return result ? VRCPlayerApi(result) : VRCPlayerApi();
+    }
+
+    int64_t Networking::GetNetworkDateTime() {
+        static auto m = MethodHandler::resolve("VRC.SDKBase.Networking", "GetNetworkDateTime", 0);
+        return MethodHandler::invoke<int64_t>(m, nullptr);
+    }
+
+    void Networking::RPC(RpcDestination targetClients, IL2CPP::Module::Unity::GameObject targetObject,
+                         std::string_view methodName, void* parameters) {
+        static auto m = MethodHandler::resolve("VRC.SDKBase.Networking", "RPC", 4);
+        auto str = IL2CPP::Module::System::String::create(methodName);
+        int dest = static_cast<int>(targetClients);
+        void* params[4] = { &dest, targetObject.raw(), str.raw(), parameters };
+        MethodHandler::invoke<void>(m, nullptr, params);
+    }
+
+    void Networking::RPC(VRCPlayerApi targetPlayer, IL2CPP::Module::Unity::GameObject targetObject,
+                         std::string_view methodName, void* parameters) {
+        static auto m = MethodHandler::resolve("VRC.SDKBase.Networking", "RPC", 4);
+        auto str = IL2CPP::Module::System::String::create(methodName);
+        void* params[4] = { targetPlayer.raw(), targetObject.raw(), str.raw(), parameters };
+        MethodHandler::invoke<void>(m, nullptr, params);
+    }
+
+    IL2CPP::Module::ManagedObject Networking::GetEventDispatcher() {
+        static auto m = MethodHandler::resolve("VRC.SDKBase.Networking", "GetEventDispatcher", 0);
+        void* result = MethodHandler::invoke<void*>(m, nullptr);
+        return IL2CPP::Module::ManagedObject(result);
+    }
+
+    double Networking::CalculateServerDeltaTime(double timeInSeconds, double previousTimeInSeconds) {
+        static auto m = MethodHandler::resolve("VRC.SDKBase.Networking", "CalculateServerDeltaTime", 2);
+        void* params[2] = { &timeInSeconds, &previousTimeInSeconds };
+        return MethodHandler::invoke<double>(m, nullptr, params);
+    }
+
+    bool Networking::IsObjectReady(IL2CPP::Module::Unity::GameObject obj) {
+        static auto m = MethodHandler::resolve("VRC.SDKBase.Networking", "IsObjectReady", 1);
+        void* params[1] = { obj.raw() };
+        return MethodHandler::invoke<bool>(m, nullptr, params);
+    }
+
+    std::string Networking::GetUniqueName(IL2CPP::Module::Unity::GameObject obj) {
+        static auto m = MethodHandler::resolve("VRC.SDKBase.Networking", "GetUniqueName", 1);
+        void* params[1] = { obj.raw() };
+        void* str = MethodHandler::invoke<void*>(m, nullptr, params);
+        return str ? IL2CPP::Module::System::String(str).to_string() : "";
+    }
+
+    float Networking::SimulationTime(IL2CPP::Module::Unity::GameObject target) {
+        static auto m = MethodHandler::resolve("VRC.SDKBase.Networking", "SimulationTime", 1);
+        void* params[1] = { target.raw() };
+        return MethodHandler::invoke<float>(m, nullptr, params);
+    }
+
+    float Networking::SimulationTime(VRCPlayerApi target) {
+        static auto m = MethodHandler::resolve("VRC.SDKBase.Networking", "SimulationTime", 1);
+        void* params[1] = { target.raw() };
+        return MethodHandler::invoke<float>(m, nullptr, params);
+    }
+
+    void Networking::Destroy(IL2CPP::Module::Unity::GameObject obj) {
+        static auto m = MethodHandler::resolve("VRC.SDKBase.Networking", "Destroy", 1);
+        void* params[1] = { obj.raw() };
+        MethodHandler::invoke<void>(m, nullptr, params);
+    }
+
+    void Networking::RequestStorageUsageUpdate() {
+        static auto m = MethodHandler::resolve("VRC.SDKBase.Networking", "RequestStorageUsageUpdate", 0);
+        MethodHandler::invoke<void>(m, nullptr);
+    }
+
+    int Networking::GetPlayerDataStorageLimit() {
+        static auto m = MethodHandler::resolve("VRC.SDKBase.Networking", "GetPlayerDataStorageLimit", 0);
+        return MethodHandler::invoke<int>(m, nullptr);
+    }
+
+    int Networking::GetPlayerObjectStorageLimit() {
+        static auto m = MethodHandler::resolve("VRC.SDKBase.Networking", "GetPlayerObjectStorageLimit", 0);
+        return MethodHandler::invoke<int>(m, nullptr);
+    }
+
+    int Networking::GetPlayerDataStorageUsage(VRCPlayerApi target) {
+        static auto m = MethodHandler::resolve("VRC.SDKBase.Networking", "GetPlayerDataStorageUsage", 1);
+        void* params[1] = { target.raw() };
+        return MethodHandler::invoke<int>(m, nullptr, params);
+    }
+
+    int Networking::GetPlayerObjectStorageUsage(VRCPlayerApi target) {
+        static auto m = MethodHandler::resolve("VRC.SDKBase.Networking", "GetPlayerObjectStorageUsage", 1);
+        void* params[1] = { target.raw() };
+        return MethodHandler::invoke<int>(m, nullptr, params);
     }
 
 } // namespace IL2CPP::VRChat

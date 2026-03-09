@@ -1,48 +1,57 @@
 #include <include/VRChat/LocalizableString.hpp>
+#include <IL2CPP.Module/include/MethodHandler.hpp>
 #include <IL2CPP.Module/include/System/String.hpp>
 
 namespace IL2CPP::VRChat {
 
+    using IL2CPP::Module::MethodHandler;
+
     // ---- Properties ----
 
     std::string LocalizableString::GetKey() {
-        return call_string_method("get_Key");
+        static auto m = MethodHandler::resolve("VRC.Localization.LocalizableString", "get_Key", 0);
+        void* str = MethodHandler::invoke<void*>(m, raw());
+        return str ? IL2CPP::Module::System::String(str).to_string() : "";
     }
 
     std::string LocalizableString::GetFallbackText() {
-        return call_string_method("get_FallbackText");
+        static auto m = MethodHandler::resolve("VRC.Localization.LocalizableString", "get_FallbackText", 0);
+        void* str = MethodHandler::invoke<void*>(m, raw());
+        return str ? IL2CPP::Module::System::String(str).to_string() : "";
     }
 
     bool LocalizableString::HasKey() {
         if (!valid()) return false;
-        return call_method<bool>("get_HasKey");
+        static auto m = MethodHandler::resolve("VRC.Localization.LocalizableString", "get_HasKey", 0);
+        return MethodHandler::invoke<bool>(m, raw());
     }
 
     bool LocalizableString::IsLocalized() {
         if (!valid()) return false;
-        return call_method<bool>("get_IsLocalized");
+        static auto m = MethodHandler::resolve("VRC.Localization.LocalizableString", "get_IsLocalized", 0);
+        return MethodHandler::invoke<bool>(m, raw());
     }
 
     bool LocalizableString::IsEmpty() {
         if (!valid()) return true;
-        return call_method<bool>("get_IsEmpty");
+        static auto m = MethodHandler::resolve("VRC.Localization.LocalizableString", "get_IsEmpty", 0);
+        return MethodHandler::invoke<bool>(m, raw());
     }
 
     // ---- Methods ----
 
     std::string LocalizableString::ToString() {
-        return call_string_method("ToString");
+        static auto m = MethodHandler::resolve("VRC.Localization.LocalizableString", "ToString", 0);
+        void* str = MethodHandler::invoke<void*>(m, raw());
+        return str ? IL2CPP::Module::System::String(str).to_string() : "";
     }
 
     std::string LocalizableString::GetTranslation(bool& success) {
         if (!valid()) { success = false; return {}; }
-        auto klass = get_class();
-        if (!klass) { success = false; return {}; }
-        auto m = klass.get_method("GetTranslation", 1);
-        if (!m) { success = false; return {}; }
+        static auto m = MethodHandler::resolve("VRC.Localization.LocalizableString", "GetTranslation", 1);
         bool outSuccess = false;
         void* params[1] = { &outSuccess };
-        void* result = m.invoke(raw(), params);
+        void* result = MethodHandler::invoke<void*>(m, raw(), params);
         success = outSuccess;
         if (!result) return {};
         return IL2CPP::Module::System::String(result).to_string();
@@ -51,54 +60,35 @@ namespace IL2CPP::VRChat {
     // ---- Static ----
 
     LocalizableString LocalizableString::Empty() {
-        static auto klass = IL2CPP::Module::Class::find("VRC.Localization.LocalizableString");
-        if (!klass) return LocalizableString{};
-        auto m = klass.get_method("get_Empty", 0);
-        if (!m) return LocalizableString{};
-        void* result = m.invoke(nullptr, nullptr);
+        static auto m = MethodHandler::resolve("VRC.Localization.LocalizableString", "get_Empty", 0);
+        void* result = MethodHandler::invoke<void*>(m, nullptr);
         return LocalizableString{ result };
     }
 
     // ---- Construction helpers (LocalizableStringExtensions) ----
 
-    namespace {
-        IL2CPP::Module::Class extensions_class() {
-            static auto c = IL2CPP::Module::Class::find("VRC.Localization.LocalizableStringExtensions");
-            return c;
-        }
-    }
-
     LocalizableString LocalizableString::Localize(std::string_view text) {
-        auto k = extensions_class();
-        if (!k) return LocalizableString{};
-        auto m = k.get_method("Localize", 1);
-        if (!m) return LocalizableString{};
+        static auto m = MethodHandler::resolve("VRC.Localization.LocalizableStringExtensions", "Localize", 1);
         auto str = IL2CPP::Module::System::String::create(text);
         void* params[1] = { str.raw() };
-        void* result = m.invoke(nullptr, params);
+        void* result = MethodHandler::invoke<void*>(m, nullptr, params);
         return LocalizableString{ result };
     }
 
     LocalizableString LocalizableString::LocalizeWithFallback(std::string_view key, std::string_view fallback) {
-        auto k = extensions_class();
-        if (!k) return LocalizableString{};
-        auto m = k.get_method("Localize", 2);
-        if (!m) return LocalizableString{};
+        static auto m = MethodHandler::resolve("VRC.Localization.LocalizableStringExtensions", "Localize", 2);
         auto keyStr = IL2CPP::Module::System::String::create(key);
         auto fallbackStr = IL2CPP::Module::System::String::create(fallback);
         void* params[2] = { keyStr.raw(), fallbackStr.raw() };
-        void* result = m.invoke(nullptr, params);
+        void* result = MethodHandler::invoke<void*>(m, nullptr, params);
         return LocalizableString{ result };
     }
 
     LocalizableString LocalizableString::NoTranslation(std::string_view text) {
-        auto k = extensions_class();
-        if (!k) return LocalizableString{};
-        auto m = k.get_method("NoTranslation", 1);
-        if (!m) return LocalizableString{};
+        static auto m = MethodHandler::resolve("VRC.Localization.LocalizableStringExtensions", "NoTranslation", 1);
         auto str = IL2CPP::Module::System::String::create(text);
         void* params[1] = { str.raw() };
-        void* result = m.invoke(nullptr, params);
+        void* result = MethodHandler::invoke<void*>(m, nullptr, params);
         return LocalizableString{ result };
     }
 

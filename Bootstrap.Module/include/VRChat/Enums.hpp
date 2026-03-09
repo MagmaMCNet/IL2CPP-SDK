@@ -71,4 +71,30 @@ namespace IL2CPP::VRChat {
         Manual
     };
 
+    enum class RpcDestination : int {
+        All = 0,
+        Others = 1,
+        Owner = 2,
+        Master = 3,
+        AllBuffered = 4,
+        OthersBuffered = 5,
+        Local = 6,
+        AllBufferOne = 7,
+        OthersBufferOne = 8,
+        TargetPlayer = 9
+    };
+
+    enum class VrcBroadcastType : int {
+        Always = 0,
+        Master = 1,
+        Local = 2,
+        Owner = 3,
+        AlwaysUnbuffered = 4,
+        MasterUnbuffered = 5,
+        OwnerUnbuffered = 6,
+        AlwaysBufferOne = 7,
+        MasterBufferOne = 8,
+        OwnerBufferOne = 9
+    };
+
 } // namespace IL2CPP::VRChat
