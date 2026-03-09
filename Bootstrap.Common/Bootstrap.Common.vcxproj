@@ -85,6 +85,7 @@
   <ItemGroup>
     <ClCompile Include="source\bootstrap_common.cpp" />
     <ClInclude Include="include\bootstrap_shared.hpp" />
+    <ClInclude Include="include\sdk_version.hpp" />
     <ClInclude Include="include\vrc_types.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

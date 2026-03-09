@@ -148,6 +148,7 @@
     <ClCompile Include="source\VRChat\VRC_Interactable.cpp" />
     <ClCompile Include="source\VRChat\UdonBehaviour.cpp" />
     <ClCompile Include="source\VRChat\VRChatEvents.cpp" />
+    <ClCompile Include="source\VRChat\LocalizableString.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\bootstrap_module.hpp" />
@@ -167,6 +168,7 @@
     <ClInclude Include="include\VRChat\VRC_Interactable.hpp" />
     <ClInclude Include="include\VRChat\UdonBehaviour.hpp" />
     <ClInclude Include="include\VRChat\VRChatEvents.hpp" />
+    <ClInclude Include="include\VRChat\LocalizableString.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Bootstrap.Common\Bootstrap.Common.vcxproj">

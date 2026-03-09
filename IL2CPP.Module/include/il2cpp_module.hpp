@@ -181,12 +181,19 @@ namespace IL2CPP::Module {
 #include "Unity/Renderer.hpp"
 #include "Unity/MeshRenderer.hpp"
 #include "Unity/SkinnedMeshRenderer.hpp"
+#include "Unity/LineRenderer.hpp"
+#include "Unity/TrailRenderer.hpp"
 #include "Unity/Light.hpp"
 #include "Unity/ParticleSystem.hpp"
+#include "Unity/Mesh.hpp"
 
 // Unity wrappers — audio & animation
 #include "Unity/AudioSource.hpp"
+#include "Unity/AudioClip.hpp"
 #include "Unity/Animator.hpp"
+#include "Unity/AnimationClip.hpp"
+#include "Unity/RuntimeAnimatorController.hpp"
+#include "Unity/AnimatorOverrideController.hpp"
 
 // Unity wrappers — physics subtypes
 #include "Unity/BoxCollider.hpp"
@@ -222,9 +229,24 @@ namespace IL2CPP::Module {
 #include "Unity/Texture2D.hpp"
 #include "Unity/Sprite.hpp"
 #include "Unity/Resources.hpp"
+#include "Unity/AssetBundle.hpp"
+#include "Unity/AssetBundleCreateRequest.hpp"
+
+// Unity wrappers — networking & IO
+#include "Unity/UnityWebRequest.hpp"
+#include "Unity/PlayerPrefs.hpp"
+
+// Unity wrappers — scene management
+#include "Unity/SceneManager.hpp"
 
 // .NET wrappers
 #include "System/String.hpp"
 #include "System/Array.hpp"
 #include "System/List.hpp"
 #include "System/Dictionary.hpp"
+#include "System/HashSet.hpp"
+#include "System/Queue.hpp"
+#include "System/Stack.hpp"
+#include "System/Delegate.hpp"
+#include "System/IO.hpp"
+#include "System/Encoding.hpp"

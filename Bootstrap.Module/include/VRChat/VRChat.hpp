@@ -24,3 +24,4 @@
 #include "VRC_Interactable.hpp"
 #include "UdonBehaviour.hpp"
 #include "VRChatEvents.hpp"
+#include "LocalizableString.hpp"

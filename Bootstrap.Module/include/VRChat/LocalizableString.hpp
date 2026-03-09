@@ -1,0 +1,39 @@
+#pragma once
+
+// ============================================================================
+//  LocalizableString - VRC.Localization.LocalizableString wrapper
+//
+//  Value-type struct used for localized UI text. Wraps the boxed IL2CPP
+//  representation as a ManagedObject.
+// ============================================================================
+
+#include <IL2CPP.Module/include/il2cpp_module.hpp>
+#include <string>
+
+namespace IL2CPP::VRChat {
+
+    class LocalizableString : public IL2CPP::Module::ManagedObject {
+    public:
+        using ManagedObject::ManagedObject;
+
+        // Properties
+        [[nodiscard]] std::string GetKey();
+        [[nodiscard]] std::string GetFallbackText();
+        [[nodiscard]] bool HasKey();
+        [[nodiscard]] bool IsLocalized();
+        [[nodiscard]] bool IsEmpty();
+
+        // Methods
+        [[nodiscard]] std::string ToString();
+        [[nodiscard]] std::string GetTranslation(bool& success);
+
+        // Static
+        static LocalizableString Empty();
+
+        // Construction helpers (via LocalizableStringExtensions)
+        static LocalizableString Localize(std::string_view text);
+        static LocalizableString LocalizeWithFallback(std::string_view key, std::string_view fallback);
+        static LocalizableString NoTranslation(std::string_view text);
+    };
+
+} // namespace IL2CPP::VRChat
