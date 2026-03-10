@@ -207,6 +207,7 @@ namespace IL2CPP::Module {
 #include "Unity/Image.hpp"
 #include "Unity/RawImage.hpp"
 #include "Unity/TMP_Text.hpp"
+#include "Unity/TextMeshProUGUI.hpp"
 #include "Unity/Selectable.hpp"
 #include "Unity/Button.hpp"
 #include "Unity/Toggle.hpp"

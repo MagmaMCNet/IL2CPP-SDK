@@ -514,7 +514,7 @@ namespace Bootstrap::Module {
     }
 
     uint32_t QuickMenu::add_settings_toggle(uint32_t module_id, uint32_t foldout_id, std::string_view text,
-                                             bool default_state, Bootstrap::fn_menu_toggle_callback callback,
+                                             bool default_state, fn_menu_toggle_callback callback,
                                              std::string_view config_key, bool show_sub_element_indicator) {
         if (!valid() || !callback) return Bootstrap::invalid_id;
         return g_conn.vtable->qm_add_settings_toggle(module_id, foldout_id,
@@ -526,7 +526,7 @@ namespace Bootstrap::Module {
 
     uint32_t QuickMenu::add_enum_selector(uint32_t module_id, uint32_t foldout_id, std::string_view label,
                                            const char* const* options, uint32_t option_count,
-                                           int32_t default_index, Bootstrap::fn_menu_enum_callback callback,
+                                           int32_t default_index, fn_menu_enum_callback callback,
                                            std::string_view config_key, bool show_sub_element_indicator) {
         if (!valid() || !callback) return Bootstrap::invalid_id;
         return g_conn.vtable->qm_add_enum_selector(module_id, foldout_id,
@@ -548,7 +548,7 @@ namespace Bootstrap::Module {
 
     uint32_t QuickMenu::add_slider(uint32_t module_id, uint32_t foldout_id, std::string_view label,
                                     float min_val, float max_val, float default_val,
-                                    Bootstrap::fn_menu_slider_callback callback,
+                                    fn_menu_slider_callback callback,
                                     std::string_view config_key, std::string_view format_str,
                                     bool show_sub_element_indicator) {
         if (!valid() || !callback) return Bootstrap::invalid_id;
@@ -593,7 +593,7 @@ namespace Bootstrap::Module {
     }
 
     uint32_t PlayerEvents::register_event(uint32_t module_id, Bootstrap::PlayerEvent event,
-                                           Bootstrap::fn_player_simple_callback callback) {
+                                           fn_player_simple_callback callback) {
         if (!is_connected() || !callback) return Bootstrap::invalid_id;
         return g_conn.vtable->register_player_event(module_id, event, callback);
     }
@@ -665,5 +665,169 @@ namespace Bootstrap::Module {
         if (!is_connected()) return;
         g_conn.vtable->tween_cancel_all(module_id);
     }
+
+    uint32_t TweenService::tween_float(uint32_t module_id, float from, float to,
+                                        float duration_ms, int32_t ease_type,
+                                        fn_tween_completion_callback on_complete) {
+        if (!is_connected()) return Bootstrap::invalid_id;
+        return g_conn.vtable->tween_float(module_id, from, to, duration_ms, ease_type, on_complete);
+    }
+
+    void TweenService::cancel_all_for_target(void* target_ptr) {
+        if (!is_connected() || !target_ptr) return;
+        g_conn.vtable->tween_cancel_all_for_target(target_ptr);
+    }
+
+    uint32_t TweenService::anchored_position_ex(uint32_t module_id, void* rect_transform,
+                                                  float from_x, float from_y, float to_x, float to_y,
+                                                  float duration_ms, int32_t ease_type,
+                                                  fn_tween_completion_callback on_complete) {
+        if (!is_connected() || !rect_transform) return Bootstrap::invalid_id;
+        return g_conn.vtable->tween_anchored_position_ex(module_id, rect_transform,
+            from_x, from_y, to_x, to_y, duration_ms, ease_type, on_complete);
+    }
+
+    uint32_t TweenService::local_position_ex(uint32_t module_id, void* transform,
+                                              float from_x, float from_y, float from_z,
+                                              float to_x, float to_y, float to_z,
+                                              float duration_ms, int32_t ease_type,
+                                              fn_tween_completion_callback on_complete) {
+        if (!is_connected() || !transform) return Bootstrap::invalid_id;
+        return g_conn.vtable->tween_local_position_ex(module_id, transform,
+            from_x, from_y, from_z, to_x, to_y, to_z, duration_ms, ease_type, on_complete);
+    }
+
+    uint32_t TweenService::local_scale_ex(uint32_t module_id, void* transform,
+                                           float from_x, float from_y, float from_z,
+                                           float to_x, float to_y, float to_z,
+                                           float duration_ms, int32_t ease_type,
+                                           fn_tween_completion_callback on_complete) {
+        if (!is_connected() || !transform) return Bootstrap::invalid_id;
+        return g_conn.vtable->tween_local_scale_ex(module_id, transform,
+            from_x, from_y, from_z, to_x, to_y, to_z, duration_ms, ease_type, on_complete);
+    }
+
+    // ---- NameplateService ----
+
+    NameplateService& NameplateService::Get() {
+        static NameplateService instance;
+        return instance;
+    }
+
+    std::string NameplateService::create_plate(uint32_t module_id, void* player,
+                                                float pos_x, float pos_y, float pos_z,
+                                                std::string_view label, std::string_view tag) {
+        if (!is_connected() || !player) return {};
+        char buf[16]{};
+        uint32_t written = g_conn.vtable->np_create_plate(module_id, player,
+            pos_x, pos_y, pos_z,
+            label.data(), static_cast<uint32_t>(label.size()),
+            tag.data(), static_cast<uint32_t>(tag.size()),
+            buf, sizeof(buf));
+        if (written == 0) return {};
+        return std::string(buf, written);
+    }
+
+    void NameplateService::destroy_plate(uint32_t module_id, void* player, std::string_view plate_id) {
+        if (!is_connected() || !player) return;
+        g_conn.vtable->np_destroy_plate(module_id, player,
+            plate_id.data(), static_cast<uint32_t>(plate_id.size()));
+    }
+
+    void NameplateService::destroy_plates_by_tag(uint32_t module_id, void* player, std::string_view tag_prefix) {
+        if (!is_connected() || !player) return;
+        g_conn.vtable->np_destroy_plates_by_tag(module_id, player,
+            tag_prefix.data(), static_cast<uint32_t>(tag_prefix.size()));
+    }
+
+    void NameplateService::set_plate_text(uint32_t module_id, void* player,
+                                           std::string_view plate_id, std::string_view text) {
+        if (!is_connected() || !player) return;
+        g_conn.vtable->np_set_plate_text(module_id, player,
+            plate_id.data(), static_cast<uint32_t>(plate_id.size()),
+            text.data(), static_cast<uint32_t>(text.size()));
+    }
+
+    void NameplateService::set_plate_text_color(uint32_t module_id, void* player,
+                                                 std::string_view plate_id,
+                                                 float r, float g, float b, float a) {
+        if (!is_connected() || !player) return;
+        g_conn.vtable->np_set_plate_text_color(module_id, player,
+            plate_id.data(), static_cast<uint32_t>(plate_id.size()), r, g, b, a);
+    }
+
+    void NameplateService::set_plate_icon_color(uint32_t module_id, void* player,
+                                                 std::string_view plate_id,
+                                                 float r, float g, float b, float a) {
+        if (!is_connected() || !player) return;
+        g_conn.vtable->np_set_plate_icon_color(module_id, player,
+            plate_id.data(), static_cast<uint32_t>(plate_id.size()), r, g, b, a);
+    }
+
+    void NameplateService::set_plate_position(uint32_t module_id, void* player,
+                                               std::string_view plate_id,
+                                               float x, float y, float z) {
+        if (!is_connected() || !player) return;
+        g_conn.vtable->np_set_plate_position(module_id, player,
+            plate_id.data(), static_cast<uint32_t>(plate_id.size()), x, y, z);
+    }
+
+    // ---- ClientUsage ----
+
+    ClientUsage& ClientUsage::Get() {
+        static ClientUsage instance;
+        return instance;
+    }
+
+    void ClientUsage::register_client(uint32_t module_id, std::string_view client_name, std::string_view api_key) {
+        if (!is_connected()) return;
+        g_conn.vtable->cu_register_client(module_id,
+            client_name.data(), static_cast<uint32_t>(client_name.size()),
+            api_key.data(), static_cast<uint32_t>(api_key.size()));
+    }
+
+    bool ClientUsage::is_client_registered(std::string_view client_name) {
+        if (!is_connected()) return false;
+        return g_conn.vtable->cu_is_client_registered(
+            client_name.data(), static_cast<uint32_t>(client_name.size()));
+    }
+
+    // ---- Performance ----
+
+    Performance& Performance::Get() {
+        static Performance instance;
+        return instance;
+    }
+
+    int32_t Performance::get_int(int32_t setting_id) {
+        if (!is_connected()) return 0;
+        return g_conn.vtable->perf_get_int(setting_id);
+    }
+
+    void Performance::set_int(int32_t setting_id, int32_t value) {
+        if (!is_connected()) return;
+        g_conn.vtable->perf_set_int(setting_id, value);
+    }
+
+    float Performance::get_float(int32_t setting_id) {
+        if (!is_connected()) return 0.f;
+        return g_conn.vtable->perf_get_float(setting_id);
+    }
+
+    void Performance::set_float(int32_t setting_id, float value) {
+        if (!is_connected()) return;
+        g_conn.vtable->perf_set_float(setting_id, value);
+    }
+
+    void Performance::force_gc(int32_t generation) {
+        if (!is_connected()) return;
+        g_conn.vtable->perf_force_gc(generation);
+    }
+
+    void Performance::full_cleanup() {
+        if (!is_connected()) return;
+        g_conn.vtable->perf_full_cleanup();
+    }
+
 
 }

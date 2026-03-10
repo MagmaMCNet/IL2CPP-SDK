@@ -12,7 +12,7 @@
 namespace Bootstrap {
 
     constexpr uint32_t invalid_id = ~0u;
-    constexpr uint32_t vtable_version = 9;
+    constexpr uint32_t vtable_version = 10;
     
     // Shared memory prefix + suffix - append PID between them for multi-instance support
     constexpr wchar_t const* shared_memory_prefix = L"Local\\UNIx_PID_";
@@ -29,6 +29,7 @@ namespace Bootstrap {
         bool enable_trace;       // show stack trace for error/warn/assert/exception
         bool enable_info_trace;  // also show stack trace for info (default off)
         bool deobfuscate_names;
+        bool enable_quickmenu_logging;
         wchar_t log_file_path[260];  // MAX_PATH
     };
 
@@ -172,6 +173,79 @@ namespace Bootstrap {
         float to_x, float to_y, float to_z, float duration_ms, int32_t ease_type);
     using fn_tween_cancel = void(__cdecl*)(uint32_t tween_id);
     using fn_tween_cancel_all = void(__cdecl*)(uint32_t module_id);
+
+    // NameplateService v10
+    using fn_np_create_plate = uint32_t(__cdecl*)(uint32_t module_id, void* player,
+        float pos_x, float pos_y, float pos_z,
+        char const* label, uint32_t label_len,
+        char const* tag, uint32_t tag_len,
+        char* out_plate_id, uint32_t plate_id_buf_size);
+    using fn_np_destroy_plate = void(__cdecl*)(uint32_t module_id, void* player,
+        char const* plate_id, uint32_t plate_id_len);
+    using fn_np_destroy_plates_by_tag = void(__cdecl*)(uint32_t module_id, void* player,
+        char const* tag_prefix, uint32_t tag_prefix_len);
+    using fn_np_set_plate_text = void(__cdecl*)(uint32_t module_id, void* player,
+        char const* plate_id, uint32_t plate_id_len,
+        char const* text, uint32_t text_len);
+    using fn_np_set_plate_text_color = void(__cdecl*)(uint32_t module_id, void* player,
+        char const* plate_id, uint32_t plate_id_len,
+        float r, float g, float b, float a);
+    using fn_np_set_plate_icon_color = void(__cdecl*)(uint32_t module_id, void* player,
+        char const* plate_id, uint32_t plate_id_len,
+        float r, float g, float b, float a);
+    using fn_np_set_plate_position = void(__cdecl*)(uint32_t module_id, void* player,
+        char const* plate_id, uint32_t plate_id_len,
+        float x, float y, float z);
+
+    // ClientUsage v10
+    using fn_cu_register_client = void(__cdecl*)(uint32_t module_id,
+        char const* client_name, uint32_t client_name_len,
+        char const* api_key, uint32_t api_key_len);
+    using fn_cu_is_client_registered = bool(__cdecl*)(
+        char const* client_name, uint32_t client_name_len);
+
+    // TweenService additions v10
+    using fn_tween_completion_callback = void(__cdecl*)(uint32_t tween_id);
+
+    using fn_tween_float = uint32_t(__cdecl*)(uint32_t module_id,
+        float from, float to, float duration_ms, int32_t ease_type,
+        fn_tween_completion_callback on_complete);
+
+    using fn_tween_cancel_all_for_target = void(__cdecl*)(void* target_ptr);
+
+    using fn_tween_anchored_position_ex = uint32_t(__cdecl*)(uint32_t module_id,
+        void* rect_transform, float from_x, float from_y, float to_x, float to_y,
+        float duration_ms, int32_t ease_type, fn_tween_completion_callback on_complete);
+    using fn_tween_local_position_ex = uint32_t(__cdecl*)(uint32_t module_id,
+        void* transform, float from_x, float from_y, float from_z,
+        float to_x, float to_y, float to_z,
+        float duration_ms, int32_t ease_type, fn_tween_completion_callback on_complete);
+    using fn_tween_local_scale_ex = uint32_t(__cdecl*)(uint32_t module_id,
+        void* transform, float from_x, float from_y, float from_z,
+        float to_x, float to_y, float to_z,
+        float duration_ms, int32_t ease_type, fn_tween_completion_callback on_complete);
+
+    // PerformanceModule v10
+    enum class PerfSetting : int32_t {
+        MasterTextureLimit = 0,
+        AntiAliasing = 1,
+        ShadowResolution = 2,
+        PixelLightCount = 3,
+        ShaderMaxLOD = 4,
+        VSyncCount = 5,
+        // float settings
+        StreamingMipmapsBudget = 100,
+        LodBias = 101
+    };
+
+    using fn_perf_get_int = int32_t(__cdecl*)(int32_t setting_id);
+    using fn_perf_set_int = void(__cdecl*)(int32_t setting_id, int32_t value);
+    using fn_perf_get_float = float(__cdecl*)(int32_t setting_id);
+    using fn_perf_set_float = void(__cdecl*)(int32_t setting_id, float value);
+    using fn_perf_force_gc = void(__cdecl*)(int32_t generation);
+    using fn_perf_full_cleanup = void(__cdecl*)();
+    using fn_perf_set_camera_rendering_path = void(__cdecl*)(void* camera, int32_t path);
+    using fn_perf_get_camera_rendering_path = int32_t(__cdecl*)(void* camera);
 
     // Sprite enum — VRC built-ins + Bundle sprites (mirrors internal VRCSprite)
     enum class Sprite : int32_t {
@@ -358,6 +432,34 @@ namespace Bootstrap {
         fn_tween_local_scale tween_local_scale;
         fn_tween_cancel tween_cancel;
         fn_tween_cancel_all tween_cancel_all;
+
+        // NameplateService v10
+        fn_np_create_plate np_create_plate;
+        fn_np_destroy_plate np_destroy_plate;
+        fn_np_destroy_plates_by_tag np_destroy_plates_by_tag;
+        fn_np_set_plate_text np_set_plate_text;
+        fn_np_set_plate_text_color np_set_plate_text_color;
+        fn_np_set_plate_icon_color np_set_plate_icon_color;
+        fn_np_set_plate_position np_set_plate_position;
+
+        // ClientUsage v10
+        fn_cu_register_client cu_register_client;
+        fn_cu_is_client_registered cu_is_client_registered;
+
+        // TweenService additions v10
+        fn_tween_float tween_float;
+        fn_tween_cancel_all_for_target tween_cancel_all_for_target;
+        fn_tween_anchored_position_ex tween_anchored_position_ex;
+        fn_tween_local_position_ex tween_local_position_ex;
+        fn_tween_local_scale_ex tween_local_scale_ex;
+
+        // PerformanceModule v10
+        fn_perf_get_int perf_get_int;
+        fn_perf_set_int perf_set_int;
+        fn_perf_get_float perf_get_float;
+        fn_perf_set_float perf_set_float;
+        fn_perf_force_gc perf_force_gc;
+        fn_perf_full_cleanup perf_full_cleanup;
     };
 
 } // namespace Bootstrap

@@ -254,8 +254,77 @@ namespace Bootstrap::Module {
         void cancel(uint32_t tween_id);
         void cancel_all(uint32_t module_id);
 
+        // v10 additions
+        uint32_t tween_float(uint32_t module_id, float from, float to,
+                             float duration_ms, int32_t ease_type = 0,
+                             fn_tween_completion_callback on_complete = nullptr);
+        void cancel_all_for_target(void* target_ptr);
+
+        uint32_t anchored_position_ex(uint32_t module_id, void* rect_transform,
+                                       float from_x, float from_y, float to_x, float to_y,
+                                       float duration_ms, int32_t ease_type = 0,
+                                       fn_tween_completion_callback on_complete = nullptr);
+        uint32_t local_position_ex(uint32_t module_id, void* transform,
+                                    float from_x, float from_y, float from_z,
+                                    float to_x, float to_y, float to_z,
+                                    float duration_ms, int32_t ease_type = 0,
+                                    fn_tween_completion_callback on_complete = nullptr);
+        uint32_t local_scale_ex(uint32_t module_id, void* transform,
+                                 float from_x, float from_y, float from_z,
+                                 float to_x, float to_y, float to_z,
+                                 float duration_ms, int32_t ease_type = 0,
+                                 fn_tween_completion_callback on_complete = nullptr);
+
     private:
         TweenService() = default;
+    };
+
+    class NameplateService {
+    public:
+        static NameplateService& Get();
+
+        std::string create_plate(uint32_t module_id, void* player,
+                                 float pos_x, float pos_y, float pos_z,
+                                 std::string_view label, std::string_view tag = "");
+        void destroy_plate(uint32_t module_id, void* player, std::string_view plate_id);
+        void destroy_plates_by_tag(uint32_t module_id, void* player, std::string_view tag_prefix);
+        void set_plate_text(uint32_t module_id, void* player, std::string_view plate_id, std::string_view text);
+        void set_plate_text_color(uint32_t module_id, void* player, std::string_view plate_id,
+                                  float r, float g, float b, float a);
+        void set_plate_icon_color(uint32_t module_id, void* player, std::string_view plate_id,
+                                  float r, float g, float b, float a);
+        void set_plate_position(uint32_t module_id, void* player, std::string_view plate_id,
+                                float x, float y, float z);
+
+    private:
+        NameplateService() = default;
+    };
+
+    class ClientUsage {
+    public:
+        static ClientUsage& Get();
+
+        void register_client(uint32_t module_id, std::string_view client_name, std::string_view api_key);
+        bool is_client_registered(std::string_view client_name);
+
+    private:
+        ClientUsage() = default;
+    };
+
+    class Performance {
+    public:
+        static Performance& Get();
+
+        int32_t get_int(int32_t setting_id);
+        void set_int(int32_t setting_id, int32_t value);
+        float get_float(int32_t setting_id);
+        void set_float(int32_t setting_id, float value);
+
+        void force_gc(int32_t generation = 2);
+        void full_cleanup();
+
+    private:
+        Performance() = default;
     };
 
 } // namespace Bootstrap::Module
