@@ -178,11 +178,84 @@ namespace Bootstrap::Module {
         void set_page_badge(uint32_t module_id, uint32_t page_id, bool visible, std::string_view text,
                             std::nullptr_t no_color);
 
+        // v7 — enable/disable, visibility, sub-page nav, sprite utility
+        void set_button_enabled(uint32_t module_id, uint32_t button_id, bool enabled);
+        void set_button_visible(uint32_t module_id, uint32_t button_id, bool visible);
+        uint32_t get_subpage_nav_button(uint32_t module_id, uint32_t sub_page_id);
+        void set_subpage_nav_text(uint32_t module_id, uint32_t sub_page_id, std::string_view text);
+        void set_subpage_nav_icon(uint32_t module_id, uint32_t sub_page_id, int32_t sprite_id);
+        void set_image_sprite(void* image_component, int32_t sprite_id);
+
+        // v8 — foldouts, settings toggles, enum selectors, sliders, separators
+        uint32_t add_foldout(uint32_t module_id, uint32_t page_id, std::string_view title,
+                             bool default_expanded = true, bool show_background = false);
+        void set_foldout_expanded(uint32_t module_id, uint32_t foldout_id, bool expanded);
+        bool get_foldout_expanded(uint32_t module_id, uint32_t foldout_id);
+
+        uint32_t add_settings_toggle(uint32_t module_id, uint32_t foldout_id, std::string_view text,
+                                     bool default_state, Bootstrap::fn_menu_toggle_callback callback,
+                                     std::string_view config_key = "", bool show_sub_element_indicator = false);
+        uint32_t add_enum_selector(uint32_t module_id, uint32_t foldout_id, std::string_view label,
+                                   const char* const* options, uint32_t option_count,
+                                   int32_t default_index, Bootstrap::fn_menu_enum_callback callback,
+                                   std::string_view config_key = "", bool show_sub_element_indicator = false);
+        void set_enum_index(uint32_t module_id, uint32_t selector_id, int32_t index);
+        int32_t get_enum_index(uint32_t module_id, uint32_t selector_id);
+
+        uint32_t add_slider(uint32_t module_id, uint32_t foldout_id, std::string_view label,
+                            float min_val, float max_val, float default_val,
+                            Bootstrap::fn_menu_slider_callback callback,
+                            std::string_view config_key = "", std::string_view format_str = "",
+                            bool show_sub_element_indicator = false);
+        void set_slider_value(uint32_t module_id, uint32_t slider_id, float value);
+        float get_slider_value(uint32_t module_id, uint32_t slider_id);
+
+        uint32_t add_separator(uint32_t module_id, uint32_t foldout_id);
+
         void navigate_to(uint32_t page_id);
         void navigate_back();
 
     private:
         QuickMenu() = default;
+    };
+
+    class PlayerEvents {
+    public:
+        static PlayerEvents& Get();
+
+        uint32_t register_event(uint32_t module_id, Bootstrap::PlayerEvent event,
+                                Bootstrap::fn_player_simple_callback callback);
+        void unregister_event(uint32_t module_id, uint32_t callback_id);
+        void invoke(void* player, Bootstrap::PlayerEvent event);
+
+        void* get_local_player();
+        void* get_local_player_api();
+        void* get_local_vrc_player();
+
+    private:
+        PlayerEvents() = default;
+    };
+
+    class TweenService {
+    public:
+        static TweenService& Get();
+
+        uint32_t anchored_position(uint32_t module_id, void* rect_transform,
+                                   float from_x, float from_y, float to_x, float to_y,
+                                   float duration_ms, int32_t ease_type = 0);
+        uint32_t local_position(uint32_t module_id, void* transform,
+                                float from_x, float from_y, float from_z,
+                                float to_x, float to_y, float to_z,
+                                float duration_ms, int32_t ease_type = 0);
+        uint32_t local_scale(uint32_t module_id, void* transform,
+                             float from_x, float from_y, float from_z,
+                             float to_x, float to_y, float to_z,
+                             float duration_ms, int32_t ease_type = 0);
+        void cancel(uint32_t tween_id);
+        void cancel_all(uint32_t module_id);
+
+    private:
+        TweenService() = default;
     };
 
 } // namespace Bootstrap::Module

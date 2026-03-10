@@ -667,10 +667,22 @@ namespace IL2CPP::Module {
             E()->m_classGetFieldFromName)(m_native, nameStr.c_str());
         if (result) return Field{ result };
 
+        // Try unqualified reverse lookup
         const char* original = Deobfuscation::GetOriginalName(nameStr.c_str());
         if (original && original != nameStr.c_str() && std::strcmp(original, nameStr.c_str()) != 0) {
             result = reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*, const char*)>(
                 E()->m_classGetFieldFromName)(m_native, original);
+            if (result) return Field{ result };
+        }
+
+        // Try qualified reverse lookup using stable class name (member mappings key off stable, not human names)
+        std::string rawFull = raw_full_name();
+        const char* stableName = Deobfuscation::GetStableName(rawFull.c_str());
+        std::string qualifiedKey = build_member_key(stableName, nameStr.c_str());
+        original = Deobfuscation::GetOriginalName(qualifiedKey.c_str());
+        if (original && original != qualifiedKey.c_str() && std::strcmp(original, qualifiedKey.c_str()) != 0) {
+            result = reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*, const char*)>(
+                E()->m_classGetFieldFromName)(m_native, extract_member_name(original));
         }
 
         return Field{ result };
@@ -695,10 +707,22 @@ namespace IL2CPP::Module {
             E()->m_classGetMethodFromName)(m_native, nameStr.c_str(), argc);
         if (result) return Method{ result };
 
+        // Try unqualified reverse lookup
         const char* original = Deobfuscation::GetOriginalName(nameStr.c_str());
         if (original && original != nameStr.c_str() && std::strcmp(original, nameStr.c_str()) != 0) {
             result = reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*, const char*, int)>(
                 E()->m_classGetMethodFromName)(m_native, original, argc);
+            if (result) return Method{ result };
+        }
+
+        // Try qualified reverse lookup using stable class name (member mappings key off stable, not human names)
+        std::string rawFull = raw_full_name();
+        const char* stableName = Deobfuscation::GetStableName(rawFull.c_str());
+        std::string qualifiedKey = build_member_key(stableName, nameStr.c_str());
+        original = Deobfuscation::GetOriginalName(qualifiedKey.c_str());
+        if (original && original != qualifiedKey.c_str() && std::strcmp(original, qualifiedKey.c_str()) != 0) {
+            result = reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*, const char*, int)>(
+                E()->m_classGetMethodFromName)(m_native, extract_member_name(original), argc);
         }
 
         return Method{ result };
@@ -728,10 +752,22 @@ namespace IL2CPP::Module {
             E()->m_classGetPropertyFromName)(m_native, nameStr.c_str());
         if (result) return Property{ result };
 
+        // Try unqualified reverse lookup
         const char* original = Deobfuscation::GetOriginalName(nameStr.c_str());
         if (original && original != nameStr.c_str() && std::strcmp(original, nameStr.c_str()) != 0) {
             result = reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*, const char*)>(
                 E()->m_classGetPropertyFromName)(m_native, original);
+            if (result) return Property{ result };
+        }
+
+        // Try qualified reverse lookup using stable class name (member mappings key off stable, not human names)
+        std::string rawFull = raw_full_name();
+        const char* stableName = Deobfuscation::GetStableName(rawFull.c_str());
+        std::string qualifiedKey = build_member_key(stableName, nameStr.c_str());
+        original = Deobfuscation::GetOriginalName(qualifiedKey.c_str());
+        if (original && original != qualifiedKey.c_str() && std::strcmp(original, qualifiedKey.c_str()) != 0) {
+            result = reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*, const char*)>(
+                E()->m_classGetPropertyFromName)(m_native, extract_member_name(original));
         }
 
         return Property{ result };

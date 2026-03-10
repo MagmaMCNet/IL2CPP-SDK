@@ -461,6 +461,120 @@ namespace Bootstrap::Module {
             text.data(), static_cast<uint32_t>(text.size()), nullptr);
     }
 
+    // ---- QuickMenu v7 ----
+
+    void QuickMenu::set_button_enabled(uint32_t module_id, uint32_t button_id, bool enabled) {
+        if (!valid()) return;
+        g_conn.vtable->qm_set_button_enabled(module_id, button_id, enabled);
+    }
+
+    void QuickMenu::set_button_visible(uint32_t module_id, uint32_t button_id, bool visible) {
+        if (!valid()) return;
+        g_conn.vtable->qm_set_button_visible(module_id, button_id, visible);
+    }
+
+    uint32_t QuickMenu::get_subpage_nav_button(uint32_t module_id, uint32_t sub_page_id) {
+        if (!valid()) return Bootstrap::invalid_id;
+        return g_conn.vtable->qm_get_subpage_nav_button(module_id, sub_page_id);
+    }
+
+    void QuickMenu::set_subpage_nav_text(uint32_t module_id, uint32_t sub_page_id, std::string_view text) {
+        if (!valid()) return;
+        g_conn.vtable->qm_set_subpage_nav_text(module_id, sub_page_id,
+            text.data(), static_cast<uint32_t>(text.size()));
+    }
+
+    void QuickMenu::set_subpage_nav_icon(uint32_t module_id, uint32_t sub_page_id, int32_t sprite_id) {
+        if (!valid()) return;
+        g_conn.vtable->qm_set_subpage_nav_icon_vrc(module_id, sub_page_id, sprite_id);
+    }
+
+    void QuickMenu::set_image_sprite(void* image_component, int32_t sprite_id) {
+        if (!valid() || !image_component) return;
+        g_conn.vtable->qm_set_image_sprite(image_component, sprite_id);
+    }
+
+    // ---- QuickMenu v8 ----
+
+    uint32_t QuickMenu::add_foldout(uint32_t module_id, uint32_t page_id, std::string_view title,
+                                     bool default_expanded, bool show_background) {
+        if (!valid()) return Bootstrap::invalid_id;
+        return g_conn.vtable->qm_add_foldout(module_id, page_id,
+            title.data(), static_cast<uint32_t>(title.size()), default_expanded, show_background);
+    }
+
+    void QuickMenu::set_foldout_expanded(uint32_t module_id, uint32_t foldout_id, bool expanded) {
+        if (!valid()) return;
+        g_conn.vtable->qm_set_foldout_expanded(module_id, foldout_id, expanded);
+    }
+
+    bool QuickMenu::get_foldout_expanded(uint32_t module_id, uint32_t foldout_id) {
+        if (!valid()) return false;
+        return g_conn.vtable->qm_get_foldout_expanded(module_id, foldout_id);
+    }
+
+    uint32_t QuickMenu::add_settings_toggle(uint32_t module_id, uint32_t foldout_id, std::string_view text,
+                                             bool default_state, Bootstrap::fn_menu_toggle_callback callback,
+                                             std::string_view config_key, bool show_sub_element_indicator) {
+        if (!valid() || !callback) return Bootstrap::invalid_id;
+        return g_conn.vtable->qm_add_settings_toggle(module_id, foldout_id,
+            text.data(), static_cast<uint32_t>(text.size()),
+            default_state, callback,
+            config_key.data(), static_cast<uint32_t>(config_key.size()),
+            show_sub_element_indicator);
+    }
+
+    uint32_t QuickMenu::add_enum_selector(uint32_t module_id, uint32_t foldout_id, std::string_view label,
+                                           const char* const* options, uint32_t option_count,
+                                           int32_t default_index, Bootstrap::fn_menu_enum_callback callback,
+                                           std::string_view config_key, bool show_sub_element_indicator) {
+        if (!valid() || !callback) return Bootstrap::invalid_id;
+        return g_conn.vtable->qm_add_enum_selector(module_id, foldout_id,
+            label.data(), static_cast<uint32_t>(label.size()),
+            options, option_count, default_index, callback,
+            config_key.data(), static_cast<uint32_t>(config_key.size()),
+            show_sub_element_indicator);
+    }
+
+    void QuickMenu::set_enum_index(uint32_t module_id, uint32_t selector_id, int32_t index) {
+        if (!valid()) return;
+        g_conn.vtable->qm_set_enum_index(module_id, selector_id, index);
+    }
+
+    int32_t QuickMenu::get_enum_index(uint32_t module_id, uint32_t selector_id) {
+        if (!valid()) return 0;
+        return g_conn.vtable->qm_get_enum_index(module_id, selector_id);
+    }
+
+    uint32_t QuickMenu::add_slider(uint32_t module_id, uint32_t foldout_id, std::string_view label,
+                                    float min_val, float max_val, float default_val,
+                                    Bootstrap::fn_menu_slider_callback callback,
+                                    std::string_view config_key, std::string_view format_str,
+                                    bool show_sub_element_indicator) {
+        if (!valid() || !callback) return Bootstrap::invalid_id;
+        return g_conn.vtable->qm_add_slider(module_id, foldout_id,
+            label.data(), static_cast<uint32_t>(label.size()),
+            min_val, max_val, default_val, callback,
+            config_key.data(), static_cast<uint32_t>(config_key.size()),
+            format_str.data(), static_cast<uint32_t>(format_str.size()),
+            show_sub_element_indicator);
+    }
+
+    void QuickMenu::set_slider_value(uint32_t module_id, uint32_t slider_id, float value) {
+        if (!valid()) return;
+        g_conn.vtable->qm_set_slider_value(module_id, slider_id, value);
+    }
+
+    float QuickMenu::get_slider_value(uint32_t module_id, uint32_t slider_id) {
+        if (!valid()) return 0.f;
+        return g_conn.vtable->qm_get_slider_value(module_id, slider_id);
+    }
+
+    uint32_t QuickMenu::add_separator(uint32_t module_id, uint32_t foldout_id) {
+        if (!valid()) return Bootstrap::invalid_id;
+        return g_conn.vtable->qm_add_separator(module_id, foldout_id);
+    }
+
     void QuickMenu::navigate_to(uint32_t page_id) {
         if (!valid()) return;
         g_conn.vtable->qm_navigate_to(page_id);
@@ -469,6 +583,87 @@ namespace Bootstrap::Module {
     void QuickMenu::navigate_back() {
         if (!valid()) return;
         g_conn.vtable->qm_navigate_back();
+    }
+
+    // ---- PlayerEvents ----
+
+    PlayerEvents& PlayerEvents::Get() {
+        static PlayerEvents instance;
+        return instance;
+    }
+
+    uint32_t PlayerEvents::register_event(uint32_t module_id, Bootstrap::PlayerEvent event,
+                                           Bootstrap::fn_player_simple_callback callback) {
+        if (!is_connected() || !callback) return Bootstrap::invalid_id;
+        return g_conn.vtable->register_player_event(module_id, event, callback);
+    }
+
+    void PlayerEvents::unregister_event(uint32_t module_id, uint32_t callback_id) {
+        if (!is_connected()) return;
+        g_conn.vtable->unregister_player_event(module_id, callback_id);
+    }
+
+    void PlayerEvents::invoke(void* player, Bootstrap::PlayerEvent event) {
+        if (!is_connected()) return;
+        g_conn.vtable->invoke_player_event(player, event);
+    }
+
+    void* PlayerEvents::get_local_player() {
+        if (!is_connected()) return nullptr;
+        return g_conn.vtable->get_local_player();
+    }
+
+    void* PlayerEvents::get_local_player_api() {
+        if (!is_connected()) return nullptr;
+        return g_conn.vtable->get_local_player_api();
+    }
+
+    void* PlayerEvents::get_local_vrc_player() {
+        if (!is_connected()) return nullptr;
+        return g_conn.vtable->get_local_vrc_player();
+    }
+
+    // ---- TweenService ----
+
+    TweenService& TweenService::Get() {
+        static TweenService instance;
+        return instance;
+    }
+
+    uint32_t TweenService::anchored_position(uint32_t module_id, void* rect_transform,
+                                              float from_x, float from_y, float to_x, float to_y,
+                                              float duration_ms, int32_t ease_type) {
+        if (!is_connected() || !rect_transform) return Bootstrap::invalid_id;
+        return g_conn.vtable->tween_anchored_position(module_id, rect_transform,
+            from_x, from_y, to_x, to_y, duration_ms, ease_type);
+    }
+
+    uint32_t TweenService::local_position(uint32_t module_id, void* transform,
+                                           float from_x, float from_y, float from_z,
+                                           float to_x, float to_y, float to_z,
+                                           float duration_ms, int32_t ease_type) {
+        if (!is_connected() || !transform) return Bootstrap::invalid_id;
+        return g_conn.vtable->tween_local_position(module_id, transform,
+            from_x, from_y, from_z, to_x, to_y, to_z, duration_ms, ease_type);
+    }
+
+    uint32_t TweenService::local_scale(uint32_t module_id, void* transform,
+                                        float from_x, float from_y, float from_z,
+                                        float to_x, float to_y, float to_z,
+                                        float duration_ms, int32_t ease_type) {
+        if (!is_connected() || !transform) return Bootstrap::invalid_id;
+        return g_conn.vtable->tween_local_scale(module_id, transform,
+            from_x, from_y, from_z, to_x, to_y, to_z, duration_ms, ease_type);
+    }
+
+    void TweenService::cancel(uint32_t tween_id) {
+        if (!is_connected()) return;
+        g_conn.vtable->tween_cancel(tween_id);
+    }
+
+    void TweenService::cancel_all(uint32_t module_id) {
+        if (!is_connected()) return;
+        g_conn.vtable->tween_cancel_all(module_id);
     }
 
 }
