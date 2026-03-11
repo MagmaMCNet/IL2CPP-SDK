@@ -354,7 +354,7 @@ namespace IL2CPP::Module::Unity {
     // ---- Object deferred implementations ----
 
     inline Object Object::InstantiateWithParent(Transform parent) const {
-        static auto m = MethodHandler::resolve("UnityEngine.Object", "Internal_CloneSingleWithParent", 2);
+        static auto m = MethodHandler::resolve("UnityEngine.Object", "Internal_CloneSingleWithParent", 3);
         void* self = raw();
         void* p = parent.raw();
         void* params[] = { self, p };
