@@ -229,7 +229,7 @@ namespace IL2CPP::Module::Unity {
         /// Instantiate (clone) this object with a parent transform.
         /// @param parent The parent Transform for the cloned object.
         /// @return The cloned object.
-        [[nodiscard]] Object InstantiateWithParent(Transform parent) const;
+        [[nodiscard]] Object InstantiateWithParent(Transform parent, bool worldPositionStays = false) const;
 
         // ---- Legacy snake_case aliases (deprecated) ----
         [[deprecated("Use IsValid()")]] [[nodiscard]] bool is_valid() const noexcept { return IsValid(); }
