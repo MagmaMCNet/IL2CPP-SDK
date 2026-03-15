@@ -829,5 +829,48 @@ namespace Bootstrap::Module {
         g_conn.vtable->perf_full_cleanup();
     }
 
+    // ---- KeyAuth ----
+
+    KeyAuth& KeyAuth::Get() {
+        static KeyAuth instance;
+        return instance;
+    }
+
+    bool KeyAuth::is_ready() {
+        if (!is_connected()) return false;
+        return g_conn.vtable->ka_is_ready();
+    }
+
+    bool KeyAuth::get_user(Bootstrap::KeyAuthUserInfo* out) {
+        if (!is_connected() || !out) return false;
+        return g_conn.vtable->ka_get_user(out);
+    }
+
+    bool KeyAuth::has_product(std::string_view product_id, Bootstrap::KeyAuthProductResult* out) {
+        if (!is_connected() || !out) return false;
+        return g_conn.vtable->ka_has_product(product_id.data(), static_cast<uint32_t>(product_id.size()), out);
+    }
+
+    bool KeyAuth::redeem_license(std::string_view key, Bootstrap::KeyAuthRedeemResult* out) {
+        if (!is_connected() || !out) return false;
+        return g_conn.vtable->ka_redeem_license(key.data(), static_cast<uint32_t>(key.size()), out);
+    }
+
+    uint32_t KeyAuth::get_licenses(Bootstrap::KeyAuthProductResult* out_buf, uint32_t buf_count) {
+        if (!is_connected() || !out_buf || buf_count == 0) return 0;
+        return g_conn.vtable->ka_get_licenses(out_buf, buf_count);
+    }
+
+    std::optional<Bootstrap::KeyAuthUserInfo> KeyAuth::get_user() {
+        Bootstrap::KeyAuthUserInfo info{};
+        if (!get_user(&info)) return std::nullopt;
+        return info;
+    }
+
+    std::optional<Bootstrap::KeyAuthProductResult> KeyAuth::check_product(std::string_view product_id) {
+        Bootstrap::KeyAuthProductResult result{};
+        if (!has_product(product_id, &result)) return std::nullopt;
+        return result;
+    }
 
 }

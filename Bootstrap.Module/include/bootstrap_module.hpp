@@ -22,6 +22,7 @@
 #include <IL2CPP.Module/include/il2cpp_module.hpp>
 #include <string_view>
 #include <string>
+#include <optional>
 
 // VRChat class wrappers (IL2CPP::VRChat namespace)
 #include "VRChat/VRChat.hpp"
@@ -325,6 +326,24 @@ namespace Bootstrap::Module {
 
     private:
         Performance() = default;
+    };
+
+    class KeyAuth {
+    public:
+        static KeyAuth& Get();
+
+        [[nodiscard]] bool is_ready();
+        bool get_user(Bootstrap::KeyAuthUserInfo* out);
+        bool has_product(std::string_view product_id, Bootstrap::KeyAuthProductResult* out);
+        bool redeem_license(std::string_view key, Bootstrap::KeyAuthRedeemResult* out);
+        uint32_t get_licenses(Bootstrap::KeyAuthProductResult* out_buf, uint32_t buf_count);
+
+        // Convenience
+        std::optional<Bootstrap::KeyAuthUserInfo> get_user();
+        std::optional<Bootstrap::KeyAuthProductResult> check_product(std::string_view product_id);
+
+    private:
+        KeyAuth() = default;
     };
 
 } // namespace Bootstrap::Module

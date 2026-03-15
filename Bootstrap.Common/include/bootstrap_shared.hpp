@@ -12,7 +12,7 @@
 namespace Bootstrap {
 
     constexpr uint32_t invalid_id = ~0u;
-    constexpr uint32_t vtable_version = 10;
+    constexpr uint32_t vtable_version = 11;
     
     // Shared memory prefix + suffix - append PID between them for multi-instance support
     constexpr wchar_t const* shared_memory_prefix = L"Local\\UNIx_PID_";
@@ -224,6 +224,43 @@ namespace Bootstrap {
         void* transform, float from_x, float from_y, float from_z,
         float to_x, float to_y, float to_z,
         float duration_ms, int32_t ease_type, fn_tween_completion_callback on_complete);
+
+    // KeyAuth structs (v11)
+    struct KeyAuthUserInfo {
+        char username[128];
+        char user_id[64];
+        char discord_id[64];
+        char discord_username[128];
+        char discord_avatar_url[512];  // full CDN URL
+        char created_at[32];           // ISO 8601
+        uint8_t banned;
+    };
+
+    struct KeyAuthProductResult {
+        uint8_t valid;
+        uint8_t is_lifetime;
+        char product_name[128];
+        char product_id[64];
+        char expires_at[32];
+        int64_t remaining_seconds;
+    };
+
+    struct KeyAuthRedeemResult {
+        int8_t result_code;       // maps to EAT AuthResult
+        uint8_t success;
+        char product_name[128];
+        char product_id[64];
+        char key[64];
+        char activated_at[32];
+        char expires_at[32];
+    };
+
+    // KeyAuth v11
+    using fn_ka_is_ready       = bool(__cdecl*)();
+    using fn_ka_get_user       = bool(__cdecl*)(KeyAuthUserInfo* out);
+    using fn_ka_has_product    = bool(__cdecl*)(char const* product_id, uint32_t id_len, KeyAuthProductResult* out);
+    using fn_ka_redeem_license = bool(__cdecl*)(char const* key, uint32_t key_len, KeyAuthRedeemResult* out);
+    using fn_ka_get_licenses   = uint32_t(__cdecl*)(KeyAuthProductResult* out_buf, uint32_t buf_count);
 
     // PerformanceModule v10
     enum class PerfSetting : int32_t {
@@ -460,6 +497,13 @@ namespace Bootstrap {
         fn_perf_set_float perf_set_float;
         fn_perf_force_gc perf_force_gc;
         fn_perf_full_cleanup perf_full_cleanup;
+
+        // KeyAuth v11
+        fn_ka_is_ready       ka_is_ready;
+        fn_ka_get_user       ka_get_user;
+        fn_ka_has_product    ka_has_product;
+        fn_ka_redeem_license ka_redeem_license;
+        fn_ka_get_licenses   ka_get_licenses;
     };
 
 } // namespace Bootstrap
