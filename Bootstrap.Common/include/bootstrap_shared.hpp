@@ -12,7 +12,7 @@
 namespace Bootstrap {
 
     constexpr uint32_t invalid_id = ~0u;
-    constexpr uint32_t vtable_version = 13;
+    constexpr uint32_t vtable_version = 14;
     
     // Shared memory prefix + suffix - append PID between them for multi-instance support
     constexpr wchar_t const* shared_memory_prefix = L"Local\\UNIx_PID_";
@@ -141,7 +141,7 @@ namespace Bootstrap {
 
     // QuickMenu v8 — foldouts, settings toggles, enum selectors, sliders, separators
     using fn_qm_add_foldout           = uint32_t(__cdecl*)(uint32_t module_id, uint32_t page_id,
-        char const* title, uint32_t title_len, bool default_expanded, bool show_background);
+        char const* title, uint32_t title_len, bool default_expanded, bool show_background, bool auto_separators);
     using fn_qm_set_foldout_expanded  = void(__cdecl*)(uint32_t module_id, uint32_t foldout_id, bool expanded);
     using fn_qm_get_foldout_expanded  = bool(__cdecl*)(uint32_t module_id, uint32_t foldout_id);
     using fn_qm_add_settings_toggle   = uint32_t(__cdecl*)(uint32_t module_id, uint32_t foldout_id,
@@ -156,7 +156,7 @@ namespace Bootstrap {
     using fn_qm_add_slider            = uint32_t(__cdecl*)(uint32_t module_id, uint32_t foldout_id,
         char const* label, uint32_t label_len, float min_val, float max_val, float default_val,
         fn_menu_slider_callback callback, char const* config_key, uint32_t config_key_len,
-        char const* format_str, uint32_t format_str_len, bool show_sub_element_indicator);
+        char const* format_str, uint32_t format_str_len, bool show_sub_element_indicator, float power);
     using fn_qm_set_slider_value      = void(__cdecl*)(uint32_t module_id, uint32_t slider_id, float value);
     using fn_qm_get_slider_value      = float(__cdecl*)(uint32_t module_id, uint32_t slider_id);
     using fn_qm_add_separator         = uint32_t(__cdecl*)(uint32_t module_id, uint32_t foldout_id);

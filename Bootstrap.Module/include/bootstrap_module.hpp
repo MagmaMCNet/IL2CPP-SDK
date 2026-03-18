@@ -229,7 +229,8 @@ namespace Bootstrap::Module {
 
         // v8 — foldouts, settings toggles, enum selectors, sliders, separators
         uint32_t add_foldout(uint32_t module_id, uint32_t page_id, std::string_view title,
-                             bool default_expanded = true, bool show_background = false);
+                             bool default_expanded = true, bool show_background = false,
+                             bool auto_separators = false);
         void set_foldout_expanded(uint32_t module_id, uint32_t foldout_id, bool expanded);
         bool get_foldout_expanded(uint32_t module_id, uint32_t foldout_id);
 
@@ -247,7 +248,7 @@ namespace Bootstrap::Module {
                             float min_val, float max_val, float default_val,
                             Bootstrap::fn_menu_slider_callback callback,
                             std::string_view config_key = "", std::string_view format_str = "",
-                            bool show_sub_element_indicator = false);
+                            bool show_sub_element_indicator = false, float power = 1.0f);
         void set_slider_value(uint32_t module_id, uint32_t slider_id, float value);
         float get_slider_value(uint32_t module_id, uint32_t slider_id);
 

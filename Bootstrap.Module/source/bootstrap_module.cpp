@@ -910,10 +910,10 @@ namespace Bootstrap::Module {
     // ---- QuickMenu v8 ----
 
     uint32_t QuickMenu::add_foldout(uint32_t module_id, uint32_t page_id, std::string_view title,
-        bool default_expanded, bool show_background) {
+        bool default_expanded, bool show_background, bool auto_separators) {
         if (!valid()) return Bootstrap::invalid_id;
         return g_conn.vtable->qm_add_foldout(module_id, page_id,
-            title.data(), static_cast<uint32_t>(title.size()), default_expanded, show_background);
+            title.data(), static_cast<uint32_t>(title.size()), default_expanded, show_background, auto_separators);
     }
 
     void QuickMenu::set_foldout_expanded(uint32_t module_id, uint32_t foldout_id, bool expanded) {
@@ -963,14 +963,14 @@ namespace Bootstrap::Module {
         float min_val, float max_val, float default_val,
         fn_menu_slider_callback callback,
         std::string_view config_key, std::string_view format_str,
-        bool show_sub_element_indicator) {
+        bool show_sub_element_indicator, float power) {
         if (!valid() || !callback) return Bootstrap::invalid_id;
         return g_conn.vtable->qm_add_slider(module_id, foldout_id,
             label.data(), static_cast<uint32_t>(label.size()),
             min_val, max_val, default_val, callback,
             config_key.data(), static_cast<uint32_t>(config_key.size()),
             format_str.data(), static_cast<uint32_t>(format_str.size()),
-            show_sub_element_indicator);
+            show_sub_element_indicator, power);
     }
 
     void QuickMenu::set_slider_value(uint32_t module_id, uint32_t slider_id, float value) {
