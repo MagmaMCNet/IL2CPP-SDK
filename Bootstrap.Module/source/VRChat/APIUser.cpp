@@ -1,5 +1,6 @@
 #include <include/VRChat/APIUser.hpp>
 #include <include/VRChat/ApiBadge.hpp>
+#include <include/bootstrap_internal.hpp>
 #include <IL2CPP.Module/include/MethodHandler.hpp>
 #include <IL2CPP.Module/include/System/String.hpp>
 #include <IL2CPP.Module/include/System/List.hpp>
@@ -203,21 +204,8 @@ namespace IL2CPP::VRChat {
     }
 
     PlayerRank APIUser::GetPlayerRank() {
-        static constexpr std::pair<const char*, int> ranks[] = {
-            {"system_trust_troll", 6},
-            {"system_trust_veteran", 4},
-            {"system_trust_trusted", 3},
-            {"system_trust_known", 2},
-            {"system_trust_basic", 1}
-        };
-        auto tags = GetTags();
-
-        for (auto [tag, rank] : ranks) {
-            if (std::ranges::find(tags, tag) != tags.end()) {
-                return static_cast<PlayerRank>(rank);
-            }
-        }
-
-        return PlayerRank::Visitor;
+        if (!valid() || !Bootstrap::Module::is_connected()) return PlayerRank::Visitor;
+        return static_cast<PlayerRank>(
+            Bootstrap::Module::get_vtable()->get_player_rank(raw()));
     }
 } // namespace IL2CPP::VRChat

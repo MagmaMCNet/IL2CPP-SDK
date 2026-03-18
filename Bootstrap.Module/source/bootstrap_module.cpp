@@ -4,7 +4,9 @@
 #include <Windows.h>
 #include <algorithm>
 #include <atomic>
+#include <charconv>
 #include <cwchar>
+#include <sstream>
 #include <string>
 
 namespace Bootstrap::Module {
@@ -316,6 +318,415 @@ namespace Bootstrap::Module {
         g_conn.vtable->config_remove_key(m_module_id, key.data(), static_cast<uint32_t>(key.size()));
     }
 
+    // ---- ModuleConfig v12 ----
+
+    void ModuleConfig::set_vec2(std::string_view key, float x, float y) {
+        if (!is_connected()) return;
+        g_conn.vtable->config_set_vec2(m_module_id, key.data(), static_cast<uint32_t>(key.size()), x, y);
+    }
+
+    std::pair<float, float> ModuleConfig::get_vec2(std::string_view key, float def_x, float def_y) {
+        if (!is_connected()) return { def_x, def_y };
+        float x, y;
+        g_conn.vtable->config_get_vec2(m_module_id, key.data(), static_cast<uint32_t>(key.size()),
+                                       &x, &y, def_x, def_y);
+        return { x, y };
+    }
+
+    void ModuleConfig::set_vec3(std::string_view key, float x, float y, float z) {
+        if (!is_connected()) return;
+        g_conn.vtable->config_set_vec3(m_module_id, key.data(), static_cast<uint32_t>(key.size()), x, y, z);
+    }
+
+    std::tuple<float, float, float> ModuleConfig::get_vec3(std::string_view key, float def_x, float def_y, float def_z) {
+        if (!is_connected()) return { def_x, def_y, def_z };
+        float x, y, z;
+        g_conn.vtable->config_get_vec3(m_module_id, key.data(), static_cast<uint32_t>(key.size()),
+                                       &x, &y, &z, def_x, def_y, def_z);
+        return { x, y, z };
+    }
+
+    void ModuleConfig::set_vec4(std::string_view key, float x, float y, float z, float w) {
+        if (!is_connected()) return;
+        g_conn.vtable->config_set_vec4(m_module_id, key.data(), static_cast<uint32_t>(key.size()), x, y, z, w);
+    }
+
+    std::tuple<float, float, float, float> ModuleConfig::get_vec4(std::string_view key,
+                                                                    float def_x, float def_y,
+                                                                    float def_z, float def_w) {
+        if (!is_connected()) return { def_x, def_y, def_z, def_w };
+        float x, y, z, w;
+        g_conn.vtable->config_get_vec4(m_module_id, key.data(), static_cast<uint32_t>(key.size()),
+                                       &x, &y, &z, &w, def_x, def_y, def_z, def_w);
+        return { x, y, z, w };
+    }
+
+    void ModuleConfig::set_color(std::string_view key, float r, float g, float b, float a) {
+        if (!is_connected()) return;
+        g_conn.vtable->config_set_color(m_module_id, key.data(), static_cast<uint32_t>(key.size()), r, g, b, a);
+    }
+
+    std::tuple<float, float, float, float> ModuleConfig::get_color(std::string_view key,
+                                                                     float def_r, float def_g,
+                                                                     float def_b, float def_a) {
+        if (!is_connected()) return { def_r, def_g, def_b, def_a };
+        float r, g, b, a;
+        g_conn.vtable->config_get_color(m_module_id, key.data(), static_cast<uint32_t>(key.size()),
+                                        &r, &g, &b, &a, def_r, def_g, def_b, def_a);
+        return { r, g, b, a };
+    }
+
+    void ModuleConfig::set_json(std::string_view key, std::string_view json) {
+        if (!is_connected()) return;
+        g_conn.vtable->config_set_json(m_module_id, key.data(), static_cast<uint32_t>(key.size()),
+                                       json.data(), static_cast<uint32_t>(json.size()));
+    }
+
+    std::string ModuleConfig::get_json(std::string_view key) {
+        if (!is_connected()) return {};
+        char buf[4096];
+        uint32_t len = g_conn.vtable->config_get_json(m_module_id, key.data(),
+            static_cast<uint32_t>(key.size()), buf, sizeof(buf));
+        if (len == 0) return {};
+        return std::string(buf, len);
+    }
+
+    std::vector<std::string> ModuleConfig::get_keys() {
+        if (!is_connected()) return {};
+        char buf[8192];
+        uint32_t len = g_conn.vtable->config_get_keys(m_module_id, buf, sizeof(buf));
+        if (len == 0) return {};
+
+        std::vector<std::string> keys;
+        uint32_t start = 0;
+        for (uint32_t i = 0; i < len; ++i) {
+            if (buf[i] == '\0') {
+                if (i > start) keys.emplace_back(buf + start, i - start);
+                start = i + 1;
+            }
+        }
+        if (start < len) keys.emplace_back(buf + start, len - start);
+        return keys;
+    }
+
+    void ModuleConfig::clear() {
+        if (!is_connected()) return;
+        g_conn.vtable->config_clear(m_module_id);
+    }
+
+    // ---- ModuleConfig v14: C++ native type convenience ----
+
+    namespace {
+
+        // Minimal JSON helpers for array serialization — no external dependency required.
+
+        std::string escape_json_string(std::string_view s) {
+            std::string out;
+            out.reserve(s.size() + 2);
+            out += '"';
+            for (char c : s) {
+                switch (c) {
+                    case '"':  out += "\\\""; break;
+                    case '\\': out += "\\\\"; break;
+                    case '\n': out += "\\n";  break;
+                    case '\r': out += "\\r";  break;
+                    case '\t': out += "\\t";  break;
+                    default:   out += c;      break;
+                }
+            }
+            out += '"';
+            return out;
+        }
+
+        std::string unescape_json_string(std::string_view s) {
+            if (s.size() < 2 || s.front() != '"' || s.back() != '"') return std::string(s);
+            s.remove_prefix(1);
+            s.remove_suffix(1);
+            std::string out;
+            out.reserve(s.size());
+            for (size_t i = 0; i < s.size(); ++i) {
+                if (s[i] == '\\' && i + 1 < s.size()) {
+                    switch (s[++i]) {
+                        case '"':  out += '"';  break;
+                        case '\\': out += '\\'; break;
+                        case 'n':  out += '\n'; break;
+                        case 'r':  out += '\r'; break;
+                        case 't':  out += '\t'; break;
+                        default:   out += '\\'; out += s[i]; break;
+                    }
+                } else {
+                    out += s[i];
+                }
+            }
+            return out;
+        }
+
+        // Split a JSON array body (content between [ and ]) into elements,
+        // respecting quoted strings. Returns empty on malformed input.
+        std::vector<std::string_view> split_json_array(std::string_view json) {
+            std::vector<std::string_view> elems;
+            // skip whitespace and find '['
+            size_t pos = json.find('[');
+            if (pos == std::string_view::npos) return elems;
+            ++pos;
+
+            while (pos < json.size()) {
+                // skip whitespace
+                while (pos < json.size() && (json[pos] == ' ' || json[pos] == '\t' ||
+                       json[pos] == '\n' || json[pos] == '\r')) ++pos;
+                if (pos >= json.size() || json[pos] == ']') break;
+
+                size_t start = pos;
+                if (json[pos] == '"') {
+                    // quoted string — find matching unescaped close quote
+                    ++pos;
+                    while (pos < json.size()) {
+                        if (json[pos] == '\\') { pos += 2; continue; }
+                        if (json[pos] == '"') { ++pos; break; }
+                        ++pos;
+                    }
+                } else {
+                    // number, bool, null — read until comma or ]
+                    while (pos < json.size() && json[pos] != ',' && json[pos] != ']') ++pos;
+                }
+                // trim trailing whitespace from element
+                size_t end = pos;
+                while (end > start && (json[end - 1] == ' ' || json[end - 1] == '\t' ||
+                       json[end - 1] == '\n' || json[end - 1] == '\r')) --end;
+                if (end > start) elems.push_back(json.substr(start, end - start));
+
+                // skip whitespace then comma
+                while (pos < json.size() && (json[pos] == ' ' || json[pos] == '\t' ||
+                       json[pos] == '\n' || json[pos] == '\r')) ++pos;
+                if (pos < json.size() && json[pos] == ',') ++pos;
+            }
+            return elems;
+        }
+
+    } // anon namespace
+
+    void ModuleConfig::set_double(std::string_view key, double value) {
+        char buf[64];
+        auto [ptr, ec] = std::to_chars(buf, buf + sizeof(buf), value);
+        if (ec == std::errc()) set_string(key, std::string_view(buf, ptr - buf));
+    }
+
+    double ModuleConfig::get_double(std::string_view key, double default_val) {
+        auto s = get_string(key);
+        if (s.empty()) return default_val;
+        double val;
+        auto [ptr, ec] = std::from_chars(s.data(), s.data() + s.size(), val);
+        return ec == std::errc() ? val : default_val;
+    }
+
+    void ModuleConfig::set_int64(std::string_view key, int64_t value) {
+        char buf[32];
+        auto [ptr, ec] = std::to_chars(buf, buf + sizeof(buf), value);
+        if (ec == std::errc()) set_string(key, std::string_view(buf, ptr - buf));
+    }
+
+    int64_t ModuleConfig::get_int64(std::string_view key, int64_t default_val) {
+        auto s = get_string(key);
+        if (s.empty()) return default_val;
+        int64_t val;
+        auto [ptr, ec] = std::from_chars(s.data(), s.data() + s.size(), val);
+        return ec == std::errc() ? val : default_val;
+    }
+
+    void ModuleConfig::set_uint32(std::string_view key, uint32_t value) {
+        set_int(key, static_cast<int32_t>(value));
+    }
+
+    uint32_t ModuleConfig::get_uint32(std::string_view key, uint32_t default_val) {
+        return static_cast<uint32_t>(get_int(key, static_cast<int32_t>(default_val)));
+    }
+
+    void ModuleConfig::set_int_array(std::string_view key, std::vector<int32_t> const& values) {
+        std::ostringstream os;
+        os << '[';
+        for (size_t i = 0; i < values.size(); ++i) {
+            if (i) os << ',';
+            os << values[i];
+        }
+        os << ']';
+        set_json(key, os.str());
+    }
+
+    std::vector<int32_t> ModuleConfig::get_int_array(std::string_view key) {
+        auto json = get_json(key);
+        if (json.empty()) return {};
+        auto elems = split_json_array(json);
+        std::vector<int32_t> result;
+        result.reserve(elems.size());
+        for (auto e : elems) {
+            int32_t val = 0;
+            std::from_chars(e.data(), e.data() + e.size(), val);
+            result.push_back(val);
+        }
+        return result;
+    }
+
+    void ModuleConfig::set_float_array(std::string_view key, std::vector<float> const& values) {
+        std::ostringstream os;
+        os << '[';
+        for (size_t i = 0; i < values.size(); ++i) {
+            if (i) os << ',';
+            char buf[32];
+            auto [ptr, ec] = std::to_chars(buf, buf + sizeof(buf), values[i]);
+            os.write(buf, ptr - buf);
+        }
+        os << ']';
+        set_json(key, os.str());
+    }
+
+    std::vector<float> ModuleConfig::get_float_array(std::string_view key) {
+        auto json = get_json(key);
+        if (json.empty()) return {};
+        auto elems = split_json_array(json);
+        std::vector<float> result;
+        result.reserve(elems.size());
+        for (auto e : elems) {
+            float val = 0.f;
+            std::from_chars(e.data(), e.data() + e.size(), val);
+            result.push_back(val);
+        }
+        return result;
+    }
+
+    void ModuleConfig::set_string_array(std::string_view key, std::vector<std::string> const& values) {
+        std::string json = "[";
+        for (size_t i = 0; i < values.size(); ++i) {
+            if (i) json += ',';
+            json += escape_json_string(values[i]);
+        }
+        json += ']';
+        set_json(key, json);
+    }
+
+    std::vector<std::string> ModuleConfig::get_string_array(std::string_view key) {
+        auto json = get_json(key);
+        if (json.empty()) return {};
+        auto elems = split_json_array(json);
+        std::vector<std::string> result;
+        result.reserve(elems.size());
+        for (auto e : elems) result.push_back(unescape_json_string(e));
+        return result;
+    }
+
+    void ModuleConfig::set_bool_array(std::string_view key, std::vector<bool> const& values) {
+        std::string json = "[";
+        for (size_t i = 0; i < values.size(); ++i) {
+            if (i) json += ',';
+            json += values[i] ? "true" : "false";
+        }
+        json += ']';
+        set_json(key, json);
+    }
+
+    std::vector<bool> ModuleConfig::get_bool_array(std::string_view key) {
+        auto json = get_json(key);
+        if (json.empty()) return {};
+        auto elems = split_json_array(json);
+        std::vector<bool> result;
+        result.reserve(elems.size());
+        for (auto e : elems) result.push_back(e == "true");
+        return result;
+    }
+
+    void ModuleConfig::set_double_array(std::string_view key, std::vector<double> const& values) {
+        std::ostringstream os;
+        os << '[';
+        for (size_t i = 0; i < values.size(); ++i) {
+            if (i) os << ',';
+            char buf[64];
+            auto [ptr, ec] = std::to_chars(buf, buf + sizeof(buf), values[i]);
+            os.write(buf, ptr - buf);
+        }
+        os << ']';
+        set_json(key, os.str());
+    }
+
+    std::vector<double> ModuleConfig::get_double_array(std::string_view key) {
+        auto json = get_json(key);
+        if (json.empty()) return {};
+        auto elems = split_json_array(json);
+        std::vector<double> result;
+        result.reserve(elems.size());
+        for (auto e : elems) {
+            double val = 0.0;
+            std::from_chars(e.data(), e.data() + e.size(), val);
+            result.push_back(val);
+        }
+        return result;
+    }
+
+    void ModuleConfig::set_string_map(std::string_view key,
+                                       std::vector<std::pair<std::string, std::string>> const& entries) {
+        std::string json = "{";
+        for (size_t i = 0; i < entries.size(); ++i) {
+            if (i) json += ',';
+            json += escape_json_string(entries[i].first);
+            json += ':';
+            json += escape_json_string(entries[i].second);
+        }
+        json += '}';
+        set_json(key, json);
+    }
+
+    std::vector<std::pair<std::string, std::string>> ModuleConfig::get_string_map(std::string_view key) {
+        auto json = get_json(key);
+        if (json.empty()) return {};
+
+        std::vector<std::pair<std::string, std::string>> result;
+        // Minimal JSON object parser: {"key":"val","key2":"val2"}
+        size_t pos = json.find('{');
+        if (pos == std::string::npos) return result;
+        ++pos;
+
+        while (pos < json.size()) {
+            // skip whitespace
+            while (pos < json.size() && (json[pos] == ' ' || json[pos] == '\n' ||
+                   json[pos] == '\r' || json[pos] == '\t')) ++pos;
+            if (pos >= json.size() || json[pos] == '}') break;
+
+            // read key (must be quoted string)
+            if (json[pos] != '"') break;
+            size_t key_start = pos;
+            ++pos;
+            while (pos < json.size()) {
+                if (json[pos] == '\\') { pos += 2; continue; }
+                if (json[pos] == '"') { ++pos; break; }
+                ++pos;
+            }
+            auto k = unescape_json_string(std::string_view(json.data() + key_start, pos - key_start));
+
+            // skip whitespace + colon
+            while (pos < json.size() && json[pos] != ':') ++pos;
+            if (pos < json.size()) ++pos;
+            while (pos < json.size() && (json[pos] == ' ' || json[pos] == '\n' ||
+                   json[pos] == '\r' || json[pos] == '\t')) ++pos;
+
+            // read value (must be quoted string)
+            if (pos >= json.size() || json[pos] != '"') break;
+            size_t val_start = pos;
+            ++pos;
+            while (pos < json.size()) {
+                if (json[pos] == '\\') { pos += 2; continue; }
+                if (json[pos] == '"') { ++pos; break; }
+                ++pos;
+            }
+            auto v = unescape_json_string(std::string_view(json.data() + val_start, pos - val_start));
+
+            result.emplace_back(std::move(k), std::move(v));
+
+            // skip whitespace + comma
+            while (pos < json.size() && (json[pos] == ' ' || json[pos] == '\n' ||
+                   json[pos] == '\r' || json[pos] == '\t')) ++pos;
+            if (pos < json.size() && json[pos] == ',') ++pos;
+        }
+        return result;
+    }
+
     // ---- MessageBus ----
 
     MessageBus& MessageBus::Get() {
@@ -623,6 +1034,19 @@ namespace Bootstrap::Module {
         return g_conn.vtable->get_local_vrc_player();
     }
 
+    Bootstrap::PlayerRank PlayerEvents::get_player_rank(void* player) {
+        if (!is_connected() || !player) return Bootstrap::PlayerRank::Visitor;
+        return static_cast<Bootstrap::PlayerRank>(
+            g_conn.vtable->get_player_rank(player));
+    }
+
+    Bootstrap::Color PlayerEvents::get_rank_color(Bootstrap::PlayerRank rank) {
+        Bootstrap::Color c{ 1.f, 1.f, 1.f, 1.f };
+        if (!is_connected()) return c;
+        g_conn.vtable->get_rank_color(static_cast<uint8_t>(rank), &c.r, &c.g, &c.b, &c.a);
+        return c;
+    }
+
     // ---- TweenService ----
 
     TweenService& TweenService::Get() {
@@ -871,6 +1295,170 @@ namespace Bootstrap::Module {
         Bootstrap::KeyAuthProductResult result{};
         if (!has_product(product_id, &result)) return std::nullopt;
         return result;
+    }
+
+    // ---- WebSocket ----
+
+    WebSocket& WebSocket::Get() {
+        static WebSocket instance;
+        return instance;
+    }
+
+    uint32_t WebSocket::connect(uint32_t module_id, std::string_view url, std::string_view protocols) {
+        if (!is_connected()) return Bootstrap::invalid_id;
+        return g_conn.vtable->ws_connect(module_id,
+            url.data(), static_cast<uint32_t>(url.size()),
+            protocols.data(), static_cast<uint32_t>(protocols.size()));
+    }
+
+    bool WebSocket::send(uint32_t module_id, uint32_t handle, const void* data, uint32_t len, bool binary) {
+        if (!is_connected()) return false;
+        return g_conn.vtable->ws_send(module_id, handle,
+            static_cast<uint8_t const*>(data), len, binary);
+    }
+
+    bool WebSocket::send(uint32_t module_id, uint32_t handle, std::string_view text) {
+        return send(module_id, handle, text.data(), static_cast<uint32_t>(text.size()), false);
+    }
+
+    void WebSocket::close(uint32_t module_id, uint32_t handle, uint16_t code, std::string_view reason) {
+        if (!is_connected()) return;
+        g_conn.vtable->ws_close(module_id, handle, code,
+            reason.data(), static_cast<uint32_t>(reason.size()));
+    }
+
+    bool WebSocket::is_connected(uint32_t handle) {
+        if (!Bootstrap::Module::is_connected()) return false;
+        return g_conn.vtable->ws_is_connected(handle);
+    }
+
+    void WebSocket::set_callbacks(uint32_t module_id, uint32_t handle,
+                                   fn_ws_open_callback on_open, fn_ws_message_callback on_message,
+                                   fn_ws_close_callback on_close, fn_ws_error_callback on_error) {
+        if (!Bootstrap::Module::is_connected()) return;
+        g_conn.vtable->ws_set_callbacks(module_id, handle, on_open, on_message, on_close, on_error);
+    }
+
+    // ---- FileSystem ----
+
+    FileSystem& FileSystem::Get() {
+        static FileSystem instance;
+        return instance;
+    }
+
+    bool FileSystem::write_file(uint32_t module_id, std::string_view path, const void* data, uint32_t len) {
+        if (!is_connected()) return false;
+        return g_conn.vtable->fs_write_file(module_id,
+            path.data(), static_cast<uint32_t>(path.size()),
+            static_cast<uint8_t const*>(data), len);
+    }
+
+    bool FileSystem::write_file(uint32_t module_id, std::string_view path, std::string_view data) {
+        return write_file(module_id, path, data.data(), static_cast<uint32_t>(data.size()));
+    }
+
+    std::string FileSystem::read_file(uint32_t module_id, std::string_view path) {
+        if (!is_connected()) return {};
+        // First get size to allocate appropriately
+        uint64_t sz = g_conn.vtable->fs_file_size(module_id,
+            path.data(), static_cast<uint32_t>(path.size()));
+        if (sz == 0) {
+            // Might still be a valid empty file or not exist — try a small read
+            char buf[4096];
+            uint32_t len = g_conn.vtable->fs_read_file(module_id,
+                path.data(), static_cast<uint32_t>(path.size()), buf, sizeof(buf));
+            if (len == 0) return {};
+            return std::string(buf, len);
+        }
+        // Cap at reasonable size for a single read
+        uint32_t read_size = static_cast<uint32_t>((std::min)(sz, static_cast<uint64_t>(16u * 1024u * 1024u)));
+        std::string result(read_size, '\0');
+        uint32_t len = g_conn.vtable->fs_read_file(module_id,
+            path.data(), static_cast<uint32_t>(path.size()),
+            result.data(), read_size);
+        result.resize(len);
+        return result;
+    }
+
+    bool FileSystem::file_exists(uint32_t module_id, std::string_view path) {
+        if (!is_connected()) return false;
+        return g_conn.vtable->fs_file_exists(module_id,
+            path.data(), static_cast<uint32_t>(path.size()));
+    }
+
+    bool FileSystem::delete_file(uint32_t module_id, std::string_view path) {
+        if (!is_connected()) return false;
+        return g_conn.vtable->fs_delete_file(module_id,
+            path.data(), static_cast<uint32_t>(path.size()));
+    }
+
+    bool FileSystem::create_directory(uint32_t module_id, std::string_view path) {
+        if (!is_connected()) return false;
+        return g_conn.vtable->fs_create_dir(module_id,
+            path.data(), static_cast<uint32_t>(path.size()));
+    }
+
+    bool FileSystem::delete_directory(uint32_t module_id, std::string_view path) {
+        if (!is_connected()) return false;
+        return g_conn.vtable->fs_delete_dir(module_id,
+            path.data(), static_cast<uint32_t>(path.size()));
+    }
+
+    std::vector<std::string> FileSystem::list_directory(uint32_t module_id, std::string_view path) {
+        if (!is_connected()) return {};
+        char buf[8192];
+        uint32_t len = g_conn.vtable->fs_list_dir(module_id,
+            path.data(), static_cast<uint32_t>(path.size()), buf, sizeof(buf));
+        if (len == 0) return {};
+
+        // Entries are null-delimited
+        std::vector<std::string> entries;
+        uint32_t start = 0;
+        for (uint32_t i = 0; i < len; ++i) {
+            if (buf[i] == '\0') {
+                if (i > start) entries.emplace_back(buf + start, i - start);
+                start = i + 1;
+            }
+        }
+        if (start < len) entries.emplace_back(buf + start, len - start);
+        return entries;
+    }
+
+    uint64_t FileSystem::file_size(uint32_t module_id, std::string_view path) {
+        if (!is_connected()) return 0;
+        return g_conn.vtable->fs_file_size(module_id,
+            path.data(), static_cast<uint32_t>(path.size()));
+    }
+
+    bool FileSystem::append_file(uint32_t module_id, std::string_view path, const void* data, uint32_t len) {
+        if (!is_connected()) return false;
+        return g_conn.vtable->fs_append_file(module_id,
+            path.data(), static_cast<uint32_t>(path.size()),
+            static_cast<uint8_t const*>(data), len);
+    }
+
+    bool FileSystem::append_file(uint32_t module_id, std::string_view path, std::string_view data) {
+        return append_file(module_id, path, data.data(), static_cast<uint32_t>(data.size()));
+    }
+
+    // ---- Clipboard ----
+
+    Clipboard& Clipboard::Get() {
+        static Clipboard instance;
+        return instance;
+    }
+
+    bool Clipboard::set(std::string_view text) {
+        if (!is_connected()) return false;
+        return g_conn.vtable->clipboard_set(text.data(), static_cast<uint32_t>(text.size()));
+    }
+
+    std::string Clipboard::get() {
+        if (!is_connected()) return {};
+        char buf[4096];
+        uint32_t len = g_conn.vtable->clipboard_get(buf, sizeof(buf));
+        if (len == 0) return {};
+        return std::string(buf, len);
     }
 
 }

@@ -5,21 +5,15 @@
 // ============================================================================
 
 #include "ApiModel.hpp"
+#include <Bootstrap.Common/include/bootstrap_shared.hpp>
 #include <string>
 #include <vector>
 
 namespace IL2CPP::VRChat {
 
     class ApiBadge;
-    enum class PlayerRank : unsigned char {
-        Visitor = 0,       ///< New user, default rank
-        Basic = 1,         ///< Has basic trust
-        Known = 2,         ///< Known user
-        Trusted = 3,       ///< Trusted user
-        Veteran = 4,       ///< Veteran/Legend user
-        Administrator = 5, ///< VRChat staff
-        Troll = 6          ///< Flagged as problematic
-    };
+    using PlayerRank = Bootstrap::PlayerRank;
+
     class APIUser : public ApiModel {
     public:
         using ApiModel::ApiModel;

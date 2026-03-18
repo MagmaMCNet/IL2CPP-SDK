@@ -23,6 +23,8 @@
 #include <string_view>
 #include <string>
 #include <optional>
+#include <tuple>
+#include <vector>
 
 // VRChat class wrappers (IL2CPP::VRChat namespace)
 #include "VRChat/VRChat.hpp"
@@ -124,6 +126,44 @@ namespace Bootstrap::Module {
         void save();
         bool has_key(std::string_view key);
         void remove_key(std::string_view key);
+
+        // v12 additions
+        void set_vec2(std::string_view key, float x, float y);
+        std::pair<float, float> get_vec2(std::string_view key, float def_x = 0, float def_y = 0);
+        void set_vec3(std::string_view key, float x, float y, float z);
+        std::tuple<float, float, float> get_vec3(std::string_view key, float def_x = 0, float def_y = 0, float def_z = 0);
+        void set_vec4(std::string_view key, float x, float y, float z, float w);
+        std::tuple<float, float, float, float> get_vec4(std::string_view key, float def_x = 0, float def_y = 0, float def_z = 0, float def_w = 0);
+        void set_color(std::string_view key, float r, float g, float b, float a);
+        std::tuple<float, float, float, float> get_color(std::string_view key, float def_r = 0, float def_g = 0, float def_b = 0, float def_a = 1);
+        void set_json(std::string_view key, std::string_view json);
+        std::string get_json(std::string_view key);
+        std::vector<std::string> get_keys();
+        void clear();
+
+        // v14: C++ native types — convenience wrappers
+        void set_double(std::string_view key, double value);
+        double get_double(std::string_view key, double default_val = 0.0);
+        void set_int64(std::string_view key, int64_t value);
+        int64_t get_int64(std::string_view key, int64_t default_val = 0);
+        void set_uint32(std::string_view key, uint32_t value);
+        uint32_t get_uint32(std::string_view key, uint32_t default_val = 0);
+
+        // Arrays (stored as JSON via set_json/get_json)
+        void set_int_array(std::string_view key, std::vector<int32_t> const& values);
+        std::vector<int32_t> get_int_array(std::string_view key);
+        void set_float_array(std::string_view key, std::vector<float> const& values);
+        std::vector<float> get_float_array(std::string_view key);
+        void set_string_array(std::string_view key, std::vector<std::string> const& values);
+        std::vector<std::string> get_string_array(std::string_view key);
+        void set_bool_array(std::string_view key, std::vector<bool> const& values);
+        std::vector<bool> get_bool_array(std::string_view key);
+        void set_double_array(std::string_view key, std::vector<double> const& values);
+        std::vector<double> get_double_array(std::string_view key);
+
+        // Key-value maps (stored as JSON)
+        void set_string_map(std::string_view key, std::vector<std::pair<std::string, std::string>> const& entries);
+        std::vector<std::pair<std::string, std::string>> get_string_map(std::string_view key);
 
     private:
         uint32_t m_module_id;
@@ -232,6 +272,10 @@ namespace Bootstrap::Module {
         void* get_local_player();
         void* get_local_player_api();
         void* get_local_vrc_player();
+
+        // v13: Player rank (bootstrap hooks get_tags to inject tags based on bio)
+        Bootstrap::PlayerRank get_player_rank(void* player);
+        Bootstrap::Color get_rank_color(Bootstrap::PlayerRank rank);
 
     private:
         PlayerEvents() = default;
@@ -344,6 +388,57 @@ namespace Bootstrap::Module {
 
     private:
         KeyAuth() = default;
+    };
+
+    // v12: WebSocket
+    class WebSocket {
+    public:
+        static WebSocket& Get();
+
+        uint32_t connect(uint32_t module_id, std::string_view url, std::string_view protocols = "");
+        bool send(uint32_t module_id, uint32_t handle, const void* data, uint32_t len, bool binary = false);
+        bool send(uint32_t module_id, uint32_t handle, std::string_view text);
+        void close(uint32_t module_id, uint32_t handle, uint16_t code = 1000, std::string_view reason = "");
+        bool is_connected(uint32_t handle);
+        void set_callbacks(uint32_t module_id, uint32_t handle,
+            fn_ws_open_callback on_open, fn_ws_message_callback on_message,
+            fn_ws_close_callback on_close, fn_ws_error_callback on_error);
+
+    private:
+        WebSocket() = default;
+    };
+
+    // v12: Sandboxed Filesystem
+    class FileSystem {
+    public:
+        static FileSystem& Get();
+
+        bool write_file(uint32_t module_id, std::string_view path, const void* data, uint32_t len);
+        bool write_file(uint32_t module_id, std::string_view path, std::string_view data);
+        std::string read_file(uint32_t module_id, std::string_view path);
+        bool file_exists(uint32_t module_id, std::string_view path);
+        bool delete_file(uint32_t module_id, std::string_view path);
+        bool create_directory(uint32_t module_id, std::string_view path);
+        bool delete_directory(uint32_t module_id, std::string_view path);
+        std::vector<std::string> list_directory(uint32_t module_id, std::string_view path);
+        uint64_t file_size(uint32_t module_id, std::string_view path);
+        bool append_file(uint32_t module_id, std::string_view path, const void* data, uint32_t len);
+        bool append_file(uint32_t module_id, std::string_view path, std::string_view data);
+
+    private:
+        FileSystem() = default;
+    };
+
+    // v12: Clipboard
+    class Clipboard {
+    public:
+        static Clipboard& Get();
+
+        bool set(std::string_view text);
+        std::string get();
+
+    private:
+        Clipboard() = default;
     };
 
 } // namespace Bootstrap::Module

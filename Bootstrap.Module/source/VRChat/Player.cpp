@@ -35,4 +35,18 @@ namespace IL2CPP::VRChat {
         return IL2CPP::Module::ManagedObject(*reinterpret_cast<void**>(reinterpret_cast<uintptr_t>(m_native) + data->USpeaker));
     }
 
+    PlayerRank Player::GetPlayerRank() {
+        if (!valid() || !Bootstrap::Module::is_connected()) return PlayerRank::Visitor;
+        return static_cast<PlayerRank>(
+            Bootstrap::Module::get_vtable()->get_player_rank(m_native));
+    }
+
+    Bootstrap::Color Player::GetRankColor(PlayerRank rank) {
+        Bootstrap::Color c{ 1.f, 1.f, 1.f, 1.f };
+        if (!Bootstrap::Module::is_connected()) return c;
+        Bootstrap::Module::get_vtable()->get_rank_color(
+            static_cast<uint8_t>(rank), &c.r, &c.g, &c.b, &c.a);
+        return c;
+    }
+
 } // namespace IL2CPP::VRChat

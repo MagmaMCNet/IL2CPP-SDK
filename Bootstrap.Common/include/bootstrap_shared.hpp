@@ -12,7 +12,7 @@
 namespace Bootstrap {
 
     constexpr uint32_t invalid_id = ~0u;
-    constexpr uint32_t vtable_version = 11;
+    constexpr uint32_t vtable_version = 13;
     
     // Shared memory prefix + suffix - append PID between them for multi-instance support
     constexpr wchar_t const* shared_memory_prefix = L"Local\\UNIx_PID_";
@@ -284,6 +284,88 @@ namespace Bootstrap {
     using fn_perf_set_camera_rendering_path = void(__cdecl*)(void* camera, int32_t path);
     using fn_perf_get_camera_rendering_path = int32_t(__cdecl*)(void* camera);
 
+    // WebSocket v12
+    using fn_ws_open_callback    = void(__cdecl*)(uint32_t handle);
+    using fn_ws_message_callback = void(__cdecl*)(uint32_t handle, uint8_t const* data, uint32_t len, bool binary);
+    using fn_ws_close_callback   = void(__cdecl*)(uint32_t handle, uint16_t code, char const* reason, uint32_t reason_len);
+    using fn_ws_error_callback   = void(__cdecl*)(uint32_t handle, char const* msg, uint32_t msg_len);
+
+    using fn_ws_connect       = uint32_t(__cdecl*)(uint32_t module_id, char const* url, uint32_t url_len,
+                                    char const* protocols, uint32_t protocols_len);
+    using fn_ws_send          = bool(__cdecl*)(uint32_t module_id, uint32_t handle,
+                                    uint8_t const* data, uint32_t data_len, bool binary);
+    using fn_ws_close         = void(__cdecl*)(uint32_t module_id, uint32_t handle,
+                                    uint16_t code, char const* reason, uint32_t reason_len);
+    using fn_ws_is_connected  = bool(__cdecl*)(uint32_t handle);
+    using fn_ws_set_callbacks = void(__cdecl*)(uint32_t module_id, uint32_t handle,
+                                    fn_ws_open_callback on_open, fn_ws_message_callback on_message,
+                                    fn_ws_close_callback on_close, fn_ws_error_callback on_error);
+
+    // Config enhanced v12
+    using fn_config_set_vec2  = void(__cdecl*)(uint32_t module_id, char const* key, uint32_t key_len, float x, float y);
+    using fn_config_get_vec2  = void(__cdecl*)(uint32_t module_id, char const* key, uint32_t key_len,
+                                    float* out_x, float* out_y, float def_x, float def_y);
+    using fn_config_set_vec3  = void(__cdecl*)(uint32_t module_id, char const* key, uint32_t key_len, float x, float y, float z);
+    using fn_config_get_vec3  = void(__cdecl*)(uint32_t module_id, char const* key, uint32_t key_len,
+                                    float* out_x, float* out_y, float* out_z, float def_x, float def_y, float def_z);
+    using fn_config_set_vec4  = void(__cdecl*)(uint32_t module_id, char const* key, uint32_t key_len, float x, float y, float z, float w);
+    using fn_config_get_vec4  = void(__cdecl*)(uint32_t module_id, char const* key, uint32_t key_len,
+                                    float* out_x, float* out_y, float* out_z, float* out_w,
+                                    float def_x, float def_y, float def_z, float def_w);
+    using fn_config_set_color = void(__cdecl*)(uint32_t module_id, char const* key, uint32_t key_len, float r, float g, float b, float a);
+    using fn_config_get_color = void(__cdecl*)(uint32_t module_id, char const* key, uint32_t key_len,
+                                    float* out_r, float* out_g, float* out_b, float* out_a,
+                                    float def_r, float def_g, float def_b, float def_a);
+    using fn_config_get_keys  = uint32_t(__cdecl*)(uint32_t module_id, char* out_buf, uint32_t buf_size);
+    using fn_config_clear     = void(__cdecl*)(uint32_t module_id);
+    using fn_config_set_json  = void(__cdecl*)(uint32_t module_id, char const* key, uint32_t key_len, char const* json, uint32_t json_len);
+    using fn_config_get_json  = uint32_t(__cdecl*)(uint32_t module_id, char const* key, uint32_t key_len, char* out_buf, uint32_t buf_size);
+
+    // Filesystem v12
+    using fn_fs_write_file  = bool(__cdecl*)(uint32_t module_id, char const* path, uint32_t path_len, uint8_t const* data, uint32_t data_len);
+    using fn_fs_read_file   = uint32_t(__cdecl*)(uint32_t module_id, char const* path, uint32_t path_len, char* out_buf, uint32_t buf_size);
+    using fn_fs_file_exists = bool(__cdecl*)(uint32_t module_id, char const* path, uint32_t path_len);
+    using fn_fs_delete_file = bool(__cdecl*)(uint32_t module_id, char const* path, uint32_t path_len);
+    using fn_fs_create_dir  = bool(__cdecl*)(uint32_t module_id, char const* path, uint32_t path_len);
+    using fn_fs_delete_dir  = bool(__cdecl*)(uint32_t module_id, char const* path, uint32_t path_len);
+    using fn_fs_list_dir    = uint32_t(__cdecl*)(uint32_t module_id, char const* path, uint32_t path_len, char* out_buf, uint32_t buf_size);
+    using fn_fs_file_size   = uint64_t(__cdecl*)(uint32_t module_id, char const* path, uint32_t path_len);
+    using fn_fs_append_file = bool(__cdecl*)(uint32_t module_id, char const* path, uint32_t path_len, uint8_t const* data, uint32_t data_len);
+
+    // Clipboard v12
+    using fn_clipboard_set = bool(__cdecl*)(char const* text, uint32_t text_len);
+    using fn_clipboard_get = uint32_t(__cdecl*)(char* out_buf, uint32_t buf_size);
+
+    // PlayerRank v13
+    enum class PlayerRank : uint8_t {
+        Visitor = 0,
+        NewUser = 1,
+        User = 2,
+        Known = 3,
+        Trusted = 4,
+        Administrator = 5,
+        Troll = 6
+    };
+    enum class ApiPlayerRank : uint8_t {
+        Visitor = 0,
+        Basic = 1,
+        Known = 2,
+        Trusted = 3,
+        Veteran = 4,
+        Administrator = 5,
+        Troll = 6
+    };
+    struct Color {
+        float r, g, b, a;
+    };
+
+    // Player Rank v13 — bootstrap hooks get_tags to inject tags based on bio:
+    //   bio contains "46 56 58" + not local player → "admin_moderator" tag
+    //   bio contains "46 56 58" (any player)       → "system_early_adopter" tag
+    // GetPlayerRank reads the (possibly hooked) tags to determine rank.
+    using fn_get_player_rank = uint8_t(__cdecl*)(void* player);
+    using fn_get_rank_color  = void(__cdecl*)(uint8_t rank, float* r, float* g, float* b, float* a);
+
     // Sprite enum — VRC built-ins + Bundle sprites (mirrors internal VRCSprite)
     enum class Sprite : int32_t {
         Rocket, Notification, MapIcon, Sound,
@@ -504,6 +586,46 @@ namespace Bootstrap {
         fn_ka_has_product    ka_has_product;
         fn_ka_redeem_license ka_redeem_license;
         fn_ka_get_licenses   ka_get_licenses;
+
+        // WebSocket v12
+        fn_ws_connect       ws_connect;
+        fn_ws_send          ws_send;
+        fn_ws_close         ws_close;
+        fn_ws_is_connected  ws_is_connected;
+        fn_ws_set_callbacks ws_set_callbacks;
+
+        // Config enhanced v12
+        fn_config_set_vec2  config_set_vec2;
+        fn_config_get_vec2  config_get_vec2;
+        fn_config_set_vec3  config_set_vec3;
+        fn_config_get_vec3  config_get_vec3;
+        fn_config_set_vec4  config_set_vec4;
+        fn_config_get_vec4  config_get_vec4;
+        fn_config_set_color config_set_color;
+        fn_config_get_color config_get_color;
+        fn_config_get_keys  config_get_keys;
+        fn_config_clear     config_clear;
+        fn_config_set_json  config_set_json;
+        fn_config_get_json  config_get_json;
+
+        // Filesystem v12
+        fn_fs_write_file  fs_write_file;
+        fn_fs_read_file   fs_read_file;
+        fn_fs_file_exists fs_file_exists;
+        fn_fs_delete_file fs_delete_file;
+        fn_fs_create_dir  fs_create_dir;
+        fn_fs_delete_dir  fs_delete_dir;
+        fn_fs_list_dir    fs_list_dir;
+        fn_fs_file_size   fs_file_size;
+        fn_fs_append_file fs_append_file;
+
+        // Clipboard v12
+        fn_clipboard_set clipboard_set;
+        fn_clipboard_get clipboard_get;
+
+        // Player Rank v13
+        fn_get_player_rank get_player_rank;
+        fn_get_rank_color  get_rank_color;
     };
 
 } // namespace Bootstrap
