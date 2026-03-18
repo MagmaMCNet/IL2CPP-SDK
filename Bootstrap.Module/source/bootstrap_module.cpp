@@ -33,8 +33,8 @@ namespace Bootstrap::Module {
             return true;
 
         std::wstring memName = std::wstring(Bootstrap::shared_memory_prefix) +
-                               std::to_wstring(GetCurrentProcessId()) +
-                               Bootstrap::shared_memory_suffix;
+            std::to_wstring(GetCurrentProcessId()) +
+            Bootstrap::shared_memory_suffix;
 
         g_conn.shared_memory_handle = OpenFileMappingW(
             FILE_MAP_READ, FALSE, memName.c_str());
@@ -281,7 +281,7 @@ namespace Bootstrap::Module {
     void ModuleConfig::set_string(std::string_view key, std::string_view value) {
         if (!is_connected()) return;
         g_conn.vtable->config_set_string(m_module_id, key.data(), static_cast<uint32_t>(key.size()),
-                                         value.data(), static_cast<uint32_t>(value.size()));
+            value.data(), static_cast<uint32_t>(value.size()));
     }
 
     std::string ModuleConfig::get_string(std::string_view key, std::string_view default_val) {
@@ -329,7 +329,7 @@ namespace Bootstrap::Module {
         if (!is_connected()) return { def_x, def_y };
         float x, y;
         g_conn.vtable->config_get_vec2(m_module_id, key.data(), static_cast<uint32_t>(key.size()),
-                                       &x, &y, def_x, def_y);
+            &x, &y, def_x, def_y);
         return { x, y };
     }
 
@@ -342,7 +342,7 @@ namespace Bootstrap::Module {
         if (!is_connected()) return { def_x, def_y, def_z };
         float x, y, z;
         g_conn.vtable->config_get_vec3(m_module_id, key.data(), static_cast<uint32_t>(key.size()),
-                                       &x, &y, &z, def_x, def_y, def_z);
+            &x, &y, &z, def_x, def_y, def_z);
         return { x, y, z };
     }
 
@@ -352,12 +352,12 @@ namespace Bootstrap::Module {
     }
 
     std::tuple<float, float, float, float> ModuleConfig::get_vec4(std::string_view key,
-                                                                    float def_x, float def_y,
-                                                                    float def_z, float def_w) {
+        float def_x, float def_y,
+        float def_z, float def_w) {
         if (!is_connected()) return { def_x, def_y, def_z, def_w };
         float x, y, z, w;
         g_conn.vtable->config_get_vec4(m_module_id, key.data(), static_cast<uint32_t>(key.size()),
-                                       &x, &y, &z, &w, def_x, def_y, def_z, def_w);
+            &x, &y, &z, &w, def_x, def_y, def_z, def_w);
         return { x, y, z, w };
     }
 
@@ -367,19 +367,19 @@ namespace Bootstrap::Module {
     }
 
     std::tuple<float, float, float, float> ModuleConfig::get_color(std::string_view key,
-                                                                     float def_r, float def_g,
-                                                                     float def_b, float def_a) {
+        float def_r, float def_g,
+        float def_b, float def_a) {
         if (!is_connected()) return { def_r, def_g, def_b, def_a };
         float r, g, b, a;
         g_conn.vtable->config_get_color(m_module_id, key.data(), static_cast<uint32_t>(key.size()),
-                                        &r, &g, &b, &a, def_r, def_g, def_b, def_a);
+            &r, &g, &b, &a, def_r, def_g, def_b, def_a);
         return { r, g, b, a };
     }
 
     void ModuleConfig::set_json(std::string_view key, std::string_view json) {
         if (!is_connected()) return;
         g_conn.vtable->config_set_json(m_module_id, key.data(), static_cast<uint32_t>(key.size()),
-                                       json.data(), static_cast<uint32_t>(json.size()));
+            json.data(), static_cast<uint32_t>(json.size()));
     }
 
     std::string ModuleConfig::get_json(std::string_view key) {
@@ -426,12 +426,12 @@ namespace Bootstrap::Module {
             out += '"';
             for (char c : s) {
                 switch (c) {
-                    case '"':  out += "\\\""; break;
-                    case '\\': out += "\\\\"; break;
-                    case '\n': out += "\\n";  break;
-                    case '\r': out += "\\r";  break;
-                    case '\t': out += "\\t";  break;
-                    default:   out += c;      break;
+                case '"':  out += "\\\""; break;
+                case '\\': out += "\\\\"; break;
+                case '\n': out += "\\n";  break;
+                case '\r': out += "\\r";  break;
+                case '\t': out += "\\t";  break;
+                default:   out += c;      break;
                 }
             }
             out += '"';
@@ -447,14 +447,15 @@ namespace Bootstrap::Module {
             for (size_t i = 0; i < s.size(); ++i) {
                 if (s[i] == '\\' && i + 1 < s.size()) {
                     switch (s[++i]) {
-                        case '"':  out += '"';  break;
-                        case '\\': out += '\\'; break;
-                        case 'n':  out += '\n'; break;
-                        case 'r':  out += '\r'; break;
-                        case 't':  out += '\t'; break;
-                        default:   out += '\\'; out += s[i]; break;
+                    case '"':  out += '"';  break;
+                    case '\\': out += '\\'; break;
+                    case 'n':  out += '\n'; break;
+                    case 'r':  out += '\r'; break;
+                    case 't':  out += '\t'; break;
+                    default:   out += '\\'; out += s[i]; break;
                     }
-                } else {
+                }
+                else {
                     out += s[i];
                 }
             }
@@ -473,7 +474,7 @@ namespace Bootstrap::Module {
             while (pos < json.size()) {
                 // skip whitespace
                 while (pos < json.size() && (json[pos] == ' ' || json[pos] == '\t' ||
-                       json[pos] == '\n' || json[pos] == '\r')) ++pos;
+                    json[pos] == '\n' || json[pos] == '\r')) ++pos;
                 if (pos >= json.size() || json[pos] == ']') break;
 
                 size_t start = pos;
@@ -485,19 +486,20 @@ namespace Bootstrap::Module {
                         if (json[pos] == '"') { ++pos; break; }
                         ++pos;
                     }
-                } else {
+                }
+                else {
                     // number, bool, null — read until comma or ]
                     while (pos < json.size() && json[pos] != ',' && json[pos] != ']') ++pos;
                 }
                 // trim trailing whitespace from element
                 size_t end = pos;
                 while (end > start && (json[end - 1] == ' ' || json[end - 1] == '\t' ||
-                       json[end - 1] == '\n' || json[end - 1] == '\r')) --end;
+                    json[end - 1] == '\n' || json[end - 1] == '\r')) --end;
                 if (end > start) elems.push_back(json.substr(start, end - start));
 
                 // skip whitespace then comma
                 while (pos < json.size() && (json[pos] == ' ' || json[pos] == '\t' ||
-                       json[pos] == '\n' || json[pos] == '\r')) ++pos;
+                    json[pos] == '\n' || json[pos] == '\r')) ++pos;
                 if (pos < json.size() && json[pos] == ',') ++pos;
             }
             return elems;
@@ -661,7 +663,7 @@ namespace Bootstrap::Module {
     }
 
     void ModuleConfig::set_string_map(std::string_view key,
-                                       std::vector<std::pair<std::string, std::string>> const& entries) {
+        std::vector<std::pair<std::string, std::string>> const& entries) {
         std::string json = "{";
         for (size_t i = 0; i < entries.size(); ++i) {
             if (i) json += ',';
@@ -686,7 +688,7 @@ namespace Bootstrap::Module {
         while (pos < json.size()) {
             // skip whitespace
             while (pos < json.size() && (json[pos] == ' ' || json[pos] == '\n' ||
-                   json[pos] == '\r' || json[pos] == '\t')) ++pos;
+                json[pos] == '\r' || json[pos] == '\t')) ++pos;
             if (pos >= json.size() || json[pos] == '}') break;
 
             // read key (must be quoted string)
@@ -704,7 +706,7 @@ namespace Bootstrap::Module {
             while (pos < json.size() && json[pos] != ':') ++pos;
             if (pos < json.size()) ++pos;
             while (pos < json.size() && (json[pos] == ' ' || json[pos] == '\n' ||
-                   json[pos] == '\r' || json[pos] == '\t')) ++pos;
+                json[pos] == '\r' || json[pos] == '\t')) ++pos;
 
             // read value (must be quoted string)
             if (pos >= json.size() || json[pos] != '"') break;
@@ -721,7 +723,7 @@ namespace Bootstrap::Module {
 
             // skip whitespace + comma
             while (pos < json.size() && (json[pos] == ' ' || json[pos] == '\n' ||
-                   json[pos] == '\r' || json[pos] == '\t')) ++pos;
+                json[pos] == '\r' || json[pos] == '\t')) ++pos;
             if (pos < json.size() && json[pos] == ',') ++pos;
         }
         return result;
@@ -747,7 +749,7 @@ namespace Bootstrap::Module {
     void MessageBus::publish(uint32_t module_id, std::string_view topic, const void* data, uint32_t data_len) {
         if (!is_connected()) return;
         g_conn.vtable->publish_message(module_id, topic.data(), static_cast<uint32_t>(topic.size()),
-                                       static_cast<uint8_t const*>(data), data_len);
+            static_cast<uint8_t const*>(data), data_len);
     }
 
     void MessageBus::publish(uint32_t module_id, std::string_view topic, std::string_view message) {
@@ -789,7 +791,7 @@ namespace Bootstrap::Module {
     }
 
     uint32_t QuickMenu::add_button(uint32_t module_id, uint32_t page_id, std::string_view text,
-                                    Bootstrap::fn_menu_button_callback callback) {
+        Bootstrap::fn_menu_button_callback callback) {
         if (!valid() || !callback) return Bootstrap::invalid_id;
         return g_conn.vtable->qm_add_button(module_id, page_id,
             text.data(), static_cast<uint32_t>(text.size()), callback);
@@ -807,8 +809,8 @@ namespace Bootstrap::Module {
     }
 
     uint32_t QuickMenu::add_toggle(uint32_t module_id, uint32_t page_id, std::string_view text,
-                                    bool default_state, Bootstrap::fn_menu_toggle_callback callback,
-                                    std::string_view config_key) {
+        bool default_state, Bootstrap::fn_menu_toggle_callback callback,
+        std::string_view config_key) {
         if (!valid() || !callback) return Bootstrap::invalid_id;
         return g_conn.vtable->qm_add_toggle(module_id, page_id,
             text.data(), static_cast<uint32_t>(text.size()),
@@ -858,7 +860,7 @@ namespace Bootstrap::Module {
     }
 
     void QuickMenu::set_page_badge(uint32_t module_id, uint32_t page_id, bool visible,
-                                    std::string_view text, float r, float g, float b, float a) {
+        std::string_view text, float r, float g, float b, float a) {
         if (!valid()) return;
         float rgba[4] = { r, g, b, a };
         g_conn.vtable->qm_set_page_badge(module_id, page_id, visible,
@@ -866,7 +868,7 @@ namespace Bootstrap::Module {
     }
 
     void QuickMenu::set_page_badge(uint32_t module_id, uint32_t page_id, bool visible,
-                                    std::string_view text, std::nullptr_t) {
+        std::string_view text, std::nullptr_t) {
         if (!valid()) return;
         g_conn.vtable->qm_set_page_badge(module_id, page_id, visible,
             text.data(), static_cast<uint32_t>(text.size()), nullptr);
@@ -908,7 +910,7 @@ namespace Bootstrap::Module {
     // ---- QuickMenu v8 ----
 
     uint32_t QuickMenu::add_foldout(uint32_t module_id, uint32_t page_id, std::string_view title,
-                                     bool default_expanded, bool show_background) {
+        bool default_expanded, bool show_background) {
         if (!valid()) return Bootstrap::invalid_id;
         return g_conn.vtable->qm_add_foldout(module_id, page_id,
             title.data(), static_cast<uint32_t>(title.size()), default_expanded, show_background);
@@ -925,8 +927,8 @@ namespace Bootstrap::Module {
     }
 
     uint32_t QuickMenu::add_settings_toggle(uint32_t module_id, uint32_t foldout_id, std::string_view text,
-                                             bool default_state, fn_menu_toggle_callback callback,
-                                             std::string_view config_key, bool show_sub_element_indicator) {
+        bool default_state, fn_menu_toggle_callback callback,
+        std::string_view config_key, bool show_sub_element_indicator) {
         if (!valid() || !callback) return Bootstrap::invalid_id;
         return g_conn.vtable->qm_add_settings_toggle(module_id, foldout_id,
             text.data(), static_cast<uint32_t>(text.size()),
@@ -936,9 +938,9 @@ namespace Bootstrap::Module {
     }
 
     uint32_t QuickMenu::add_enum_selector(uint32_t module_id, uint32_t foldout_id, std::string_view label,
-                                           const char* const* options, uint32_t option_count,
-                                           int32_t default_index, fn_menu_enum_callback callback,
-                                           std::string_view config_key, bool show_sub_element_indicator) {
+        const char* const* options, uint32_t option_count,
+        int32_t default_index, fn_menu_enum_callback callback,
+        std::string_view config_key, bool show_sub_element_indicator) {
         if (!valid() || !callback) return Bootstrap::invalid_id;
         return g_conn.vtable->qm_add_enum_selector(module_id, foldout_id,
             label.data(), static_cast<uint32_t>(label.size()),
@@ -958,10 +960,10 @@ namespace Bootstrap::Module {
     }
 
     uint32_t QuickMenu::add_slider(uint32_t module_id, uint32_t foldout_id, std::string_view label,
-                                    float min_val, float max_val, float default_val,
-                                    fn_menu_slider_callback callback,
-                                    std::string_view config_key, std::string_view format_str,
-                                    bool show_sub_element_indicator) {
+        float min_val, float max_val, float default_val,
+        fn_menu_slider_callback callback,
+        std::string_view config_key, std::string_view format_str,
+        bool show_sub_element_indicator) {
         if (!valid() || !callback) return Bootstrap::invalid_id;
         return g_conn.vtable->qm_add_slider(module_id, foldout_id,
             label.data(), static_cast<uint32_t>(label.size()),
@@ -1004,7 +1006,7 @@ namespace Bootstrap::Module {
     }
 
     uint32_t PlayerEvents::register_event(uint32_t module_id, Bootstrap::PlayerEvent event,
-                                           fn_player_simple_callback callback) {
+        fn_player_simple_callback callback) {
         if (!is_connected() || !callback) return Bootstrap::invalid_id;
         return g_conn.vtable->register_player_event(module_id, event, callback);
     }
@@ -1055,26 +1057,26 @@ namespace Bootstrap::Module {
     }
 
     uint32_t TweenService::anchored_position(uint32_t module_id, void* rect_transform,
-                                              float from_x, float from_y, float to_x, float to_y,
-                                              float duration_ms, int32_t ease_type) {
+        float from_x, float from_y, float to_x, float to_y,
+        float duration_ms, int32_t ease_type) {
         if (!is_connected() || !rect_transform) return Bootstrap::invalid_id;
         return g_conn.vtable->tween_anchored_position(module_id, rect_transform,
             from_x, from_y, to_x, to_y, duration_ms, ease_type);
     }
 
     uint32_t TweenService::local_position(uint32_t module_id, void* transform,
-                                           float from_x, float from_y, float from_z,
-                                           float to_x, float to_y, float to_z,
-                                           float duration_ms, int32_t ease_type) {
+        float from_x, float from_y, float from_z,
+        float to_x, float to_y, float to_z,
+        float duration_ms, int32_t ease_type) {
         if (!is_connected() || !transform) return Bootstrap::invalid_id;
         return g_conn.vtable->tween_local_position(module_id, transform,
             from_x, from_y, from_z, to_x, to_y, to_z, duration_ms, ease_type);
     }
 
     uint32_t TweenService::local_scale(uint32_t module_id, void* transform,
-                                        float from_x, float from_y, float from_z,
-                                        float to_x, float to_y, float to_z,
-                                        float duration_ms, int32_t ease_type) {
+        float from_x, float from_y, float from_z,
+        float to_x, float to_y, float to_z,
+        float duration_ms, int32_t ease_type) {
         if (!is_connected() || !transform) return Bootstrap::invalid_id;
         return g_conn.vtable->tween_local_scale(module_id, transform,
             from_x, from_y, from_z, to_x, to_y, to_z, duration_ms, ease_type);
@@ -1091,8 +1093,8 @@ namespace Bootstrap::Module {
     }
 
     uint32_t TweenService::tween_float(uint32_t module_id, float from, float to,
-                                        float duration_ms, int32_t ease_type,
-                                        fn_tween_completion_callback on_complete) {
+        float duration_ms, int32_t ease_type,
+        fn_tween_completion_callback on_complete) {
         if (!is_connected()) return Bootstrap::invalid_id;
         return g_conn.vtable->tween_float(module_id, from, to, duration_ms, ease_type, on_complete);
     }
@@ -1103,29 +1105,29 @@ namespace Bootstrap::Module {
     }
 
     uint32_t TweenService::anchored_position_ex(uint32_t module_id, void* rect_transform,
-                                                  float from_x, float from_y, float to_x, float to_y,
-                                                  float duration_ms, int32_t ease_type,
-                                                  fn_tween_completion_callback on_complete) {
+        float from_x, float from_y, float to_x, float to_y,
+        float duration_ms, int32_t ease_type,
+        fn_tween_completion_callback on_complete) {
         if (!is_connected() || !rect_transform) return Bootstrap::invalid_id;
         return g_conn.vtable->tween_anchored_position_ex(module_id, rect_transform,
             from_x, from_y, to_x, to_y, duration_ms, ease_type, on_complete);
     }
 
     uint32_t TweenService::local_position_ex(uint32_t module_id, void* transform,
-                                              float from_x, float from_y, float from_z,
-                                              float to_x, float to_y, float to_z,
-                                              float duration_ms, int32_t ease_type,
-                                              fn_tween_completion_callback on_complete) {
+        float from_x, float from_y, float from_z,
+        float to_x, float to_y, float to_z,
+        float duration_ms, int32_t ease_type,
+        fn_tween_completion_callback on_complete) {
         if (!is_connected() || !transform) return Bootstrap::invalid_id;
         return g_conn.vtable->tween_local_position_ex(module_id, transform,
             from_x, from_y, from_z, to_x, to_y, to_z, duration_ms, ease_type, on_complete);
     }
 
     uint32_t TweenService::local_scale_ex(uint32_t module_id, void* transform,
-                                           float from_x, float from_y, float from_z,
-                                           float to_x, float to_y, float to_z,
-                                           float duration_ms, int32_t ease_type,
-                                           fn_tween_completion_callback on_complete) {
+        float from_x, float from_y, float from_z,
+        float to_x, float to_y, float to_z,
+        float duration_ms, int32_t ease_type,
+        fn_tween_completion_callback on_complete) {
         if (!is_connected() || !transform) return Bootstrap::invalid_id;
         return g_conn.vtable->tween_local_scale_ex(module_id, transform,
             from_x, from_y, from_z, to_x, to_y, to_z, duration_ms, ease_type, on_complete);
@@ -1139,8 +1141,8 @@ namespace Bootstrap::Module {
     }
 
     std::string NameplateService::create_plate(uint32_t module_id, void* player,
-                                                float pos_x, float pos_y, float pos_z,
-                                                std::string_view label, std::string_view tag) {
+        float pos_x, float pos_y, float pos_z,
+        std::string_view label, std::string_view tag) {
         if (!is_connected() || !player) return {};
         char buf[16]{};
         uint32_t written = g_conn.vtable->np_create_plate(module_id, player,
@@ -1165,7 +1167,7 @@ namespace Bootstrap::Module {
     }
 
     void NameplateService::set_plate_text(uint32_t module_id, void* player,
-                                           std::string_view plate_id, std::string_view text) {
+        std::string_view plate_id, std::string_view text) {
         if (!is_connected() || !player) return;
         g_conn.vtable->np_set_plate_text(module_id, player,
             plate_id.data(), static_cast<uint32_t>(plate_id.size()),
@@ -1173,24 +1175,24 @@ namespace Bootstrap::Module {
     }
 
     void NameplateService::set_plate_text_color(uint32_t module_id, void* player,
-                                                 std::string_view plate_id,
-                                                 float r, float g, float b, float a) {
+        std::string_view plate_id,
+        float r, float g, float b, float a) {
         if (!is_connected() || !player) return;
         g_conn.vtable->np_set_plate_text_color(module_id, player,
             plate_id.data(), static_cast<uint32_t>(plate_id.size()), r, g, b, a);
     }
 
     void NameplateService::set_plate_icon_color(uint32_t module_id, void* player,
-                                                 std::string_view plate_id,
-                                                 float r, float g, float b, float a) {
+        std::string_view plate_id,
+        float r, float g, float b, float a) {
         if (!is_connected() || !player) return;
         g_conn.vtable->np_set_plate_icon_color(module_id, player,
             plate_id.data(), static_cast<uint32_t>(plate_id.size()), r, g, b, a);
     }
 
     void NameplateService::set_plate_position(uint32_t module_id, void* player,
-                                               std::string_view plate_id,
-                                               float x, float y, float z) {
+        std::string_view plate_id,
+        float x, float y, float z) {
         if (!is_connected() || !player) return;
         g_conn.vtable->np_set_plate_position(module_id, player,
             plate_id.data(), static_cast<uint32_t>(plate_id.size()), x, y, z);
@@ -1305,14 +1307,14 @@ namespace Bootstrap::Module {
     }
 
     uint32_t WebSocket::connect(uint32_t module_id, std::string_view url, std::string_view protocols) {
-        if (!is_connected()) return Bootstrap::invalid_id;
+        if (!Bootstrap::Module::is_connected()) return Bootstrap::invalid_id;
         return g_conn.vtable->ws_connect(module_id,
             url.data(), static_cast<uint32_t>(url.size()),
             protocols.data(), static_cast<uint32_t>(protocols.size()));
     }
 
     bool WebSocket::send(uint32_t module_id, uint32_t handle, const void* data, uint32_t len, bool binary) {
-        if (!is_connected()) return false;
+        if (!Bootstrap::Module::is_connected()) return false;
         return g_conn.vtable->ws_send(module_id, handle,
             static_cast<uint8_t const*>(data), len, binary);
     }
@@ -1322,7 +1324,7 @@ namespace Bootstrap::Module {
     }
 
     void WebSocket::close(uint32_t module_id, uint32_t handle, uint16_t code, std::string_view reason) {
-        if (!is_connected()) return;
+        if (!Bootstrap::Module::is_connected()) return;
         g_conn.vtable->ws_close(module_id, handle, code,
             reason.data(), static_cast<uint32_t>(reason.size()));
     }
@@ -1333,8 +1335,8 @@ namespace Bootstrap::Module {
     }
 
     void WebSocket::set_callbacks(uint32_t module_id, uint32_t handle,
-                                   fn_ws_open_callback on_open, fn_ws_message_callback on_message,
-                                   fn_ws_close_callback on_close, fn_ws_error_callback on_error) {
+        fn_ws_open_callback on_open, fn_ws_message_callback on_message,
+        fn_ws_close_callback on_close, fn_ws_error_callback on_error) {
         if (!Bootstrap::Module::is_connected()) return;
         g_conn.vtable->ws_set_callbacks(module_id, handle, on_open, on_message, on_close, on_error);
     }
