@@ -7,9 +7,10 @@
                      "IL2CPP.Common",
                      "IL2CPP.Module",
                      "Logging.Common",
-                     "Logging.Module"
+                     "Logging.Module",
+                     "SharedMemory.Common"
                  ],
-    "generated":  "2026-03-20T11:47:57Z",
+    "generated":  "2026-03-20T22:43:38Z",
     "min_loader_version":  "6.3.0",
-    "version":  "4.0.0"
+    "version":  "4.0.1"
 }
