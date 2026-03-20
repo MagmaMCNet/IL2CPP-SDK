@@ -3,20 +3,6 @@
 #include <functional>
 #include <vector>
 
-// ============================================================================
-//  IL2CPP.Module::System::HashSet<T>
-//
-//  Wraps il2cppHashSet<T>. Provides element iteration and lookup.
-//
-//  Layout (after il2cppObject 0x10):
-//    int* buckets           (+0x10)
-//    Slot* slots            (+0x18)  // Slot = { int hashCode, int next, T value }
-//    int count              (+0x20)
-//    int lastIndex          (+0x24)
-//    int freeList           (+0x28)
-//    void* comparer         (+0x30)
-// ============================================================================
-
 namespace IL2CPP::Module::System {
 
     template<typename T>

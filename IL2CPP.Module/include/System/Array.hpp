@@ -6,16 +6,6 @@
 #include <ranges>
 #include <concepts>
 
-// ============================================================================
-//  IL2CPP.Module::System::Array<T>
-//
-//  Wraps an il2cppArray<T>. Provides STL-compatible iterators, span access,
-//  and functional utilities (Filter, Map, ForEach) without exposing the raw
-//  il2cppArray struct.
-//
-//  Layout: il2cppObject(0x10) + il2cppArrayBounds*(0x8) + uintptr_t maxLength + T values[]
-// ============================================================================
-
 namespace IL2CPP::Module::System {
 
     template<typename T>
@@ -59,7 +49,7 @@ namespace IL2CPP::Module::System {
         [[nodiscard]] std::span<T> as_span() { return { data(), size() }; }
         [[nodiscard]] std::span<const T> as_span() const { return { data(), size() }; }
 
-        // ---- Iterators ----
+
         [[nodiscard]] T* begin() { return data(); }
         [[nodiscard]] T* end() { return data() + size(); }
         [[nodiscard]] const T* begin() const { return data(); }

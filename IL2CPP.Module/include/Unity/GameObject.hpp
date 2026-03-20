@@ -7,10 +7,6 @@
 #include <IL2CPP.Common/il2cpp_types.hpp>
 #include <vector>
 
-// ============================================================================
-//  IL2CPP.Module::Unity::GameObject
-// ============================================================================
-
 namespace IL2CPP::Module::Unity {
 
     class Transform;
@@ -64,7 +60,6 @@ namespace IL2CPP::Module::Unity {
         /// Get the Transform component.
         [[nodiscard]] Transform GetTransform() const;
 
-        // ---- Component Accessors ----
 
         /// Get a component by System.Type.
         [[nodiscard]] Component GetComponent(Il2CppSystemType* systemType) const {
@@ -137,7 +132,6 @@ namespace IL2CPP::Module::Unity {
             return AddComponent(reinterpret_cast<Il2CppSystemType*>(t.get_system_type_object()));
         }
 
-        // ---- GetComponents ----
 
         /// Get all components of the specified type.
         [[nodiscard]] std::vector<Component> GetComponents(Il2CppSystemType* systemType) const {
@@ -257,7 +251,6 @@ namespace IL2CPP::Module::Unity {
             return TryGetComponent(reinterpret_cast<Il2CppSystemType*>(t.get_system_type_object()), out);
         }
 
-        // ---- Active State ----
 
         [[nodiscard]] bool GetActive() const {
             static auto m = MethodHandler::resolve("UnityEngine.GameObject", "get_active", 0);
@@ -280,7 +273,6 @@ namespace IL2CPP::Module::Unity {
             MethodHandler::invoke(m, raw(), params);
         }
 
-        // ---- Layer ----
 
         [[nodiscard]] unsigned int GetLayer() const {
             static auto m = MethodHandler::resolve("UnityEngine.GameObject", "get_layer", 0);
@@ -294,14 +286,12 @@ namespace IL2CPP::Module::Unity {
             MethodHandler::invoke(m, raw(), params);
         }
 
-        // ---- Scene ----
 
         [[nodiscard]] Scene GetScene() const {
             static auto m = MethodHandler::resolve("UnityEngine.GameObject", "get_scene", 0);
             return MethodHandler::invoke<Scene>(m, raw());
         }
 
-        // ---- Tag Methods ----
 
         [[nodiscard]] std::string GetTag() const {
             static auto m = MethodHandler::resolve("UnityEngine.GameObject", "get_tag", 0);
@@ -312,8 +302,11 @@ namespace IL2CPP::Module::Unity {
             if (len <= 0) return "";
 
             wchar_t* wstr = reinterpret_cast<wchar_t*>(static_cast<char*>(str) + 0x14);
-            std::wstring ws(wstr, len);
-            return std::string(ws.begin(), ws.end());
+            int bytes = WideCharToMultiByte(CP_UTF8, 0, wstr, len, nullptr, 0, nullptr, nullptr);
+            if (bytes <= 0) return "";
+            std::string out(static_cast<size_t>(bytes), '\0');
+            WideCharToMultiByte(CP_UTF8, 0, wstr, len, out.data(), bytes, nullptr, nullptr);
+            return out;
         }
 
         void SetTag(std::string_view tag) {
@@ -336,7 +329,6 @@ namespace IL2CPP::Module::Unity {
             return MethodHandler::invoke<bool>(m, raw(), params);
         }
 
-        // ---- Message Methods ----
 
         void SendMessage(std::string_view methodName, SendMessageOptions options = SendMessageOptions::RequireReceiver) {
             static auto m = MethodHandler::resolve("UnityEngine.GameObject", "SendMessage", 2);
@@ -371,22 +363,6 @@ namespace IL2CPP::Module::Unity {
             MethodHandler::invoke(m, raw(), params);
         }
 
-        // ---- Legacy snake_case aliases (deprecated) ----
-        [[deprecated("Use Find()")]] [[nodiscard]] static GameObject find(std::string_view n) { return Find(n); }
-        [[deprecated("Use FindWithTag()")]] [[nodiscard]] static GameObject find_with_tag(std::string_view t) { return FindWithTag(t); }
-        [[deprecated("Use FindGameObjectsWithTag()")]] [[nodiscard]] static std::vector<GameObject> find_game_objects_with_tag(std::string_view t) { return FindGameObjectsWithTag(t); }
-        [[deprecated("Use CreatePrimitive()")]] [[nodiscard]] static GameObject create_primitive(PrimitiveType t) { return CreatePrimitive(t); }
-        [[deprecated("Use GetTransform()")]] [[nodiscard]] Transform get_transform() const;
-        [[deprecated("Use GetActive()")]] [[nodiscard]] bool get_active() const { return GetActive(); }
-        [[deprecated("Use GetActiveSelf()")]] [[nodiscard]] bool get_active_self() const { return GetActiveSelf(); }
-        [[deprecated("Use GetActiveInHierarchy()")]] [[nodiscard]] bool get_active_in_hierarchy() const { return GetActiveInHierarchy(); }
-        [[deprecated("Use SetActive()")]] void set_active(bool a) { SetActive(a); }
-        [[deprecated("Use GetLayer()")]] [[nodiscard]] unsigned int get_layer() const { return GetLayer(); }
-        [[deprecated("Use SetLayer()")]] void set_layer(unsigned int l) { SetLayer(l); }
-        [[deprecated("Use GetScene()")]] [[nodiscard]] Scene get_scene() const { return GetScene(); }
-        [[deprecated("Use GetTag()")]] [[nodiscard]] std::string get_tag() const { return GetTag(); }
-        [[deprecated("Use SetTag()")]] void set_tag(std::string_view t) { SetTag(t); }
-        [[deprecated("Use CompareTag()")]] [[nodiscard]] bool compare_tag(std::string_view t) const { return CompareTag(t); }
     };
 
     // Type alias for backwards compatibility

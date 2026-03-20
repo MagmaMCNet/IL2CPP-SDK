@@ -1,9 +1,5 @@
 #pragma once
 
-// ============================================================================
-//  PlayerNameplate - VRChat player nameplate MonoBehaviour wrapper
-// ============================================================================
-
 #include <IL2CPP.Module/include/il2cpp_module.hpp>
 
 namespace IL2CPP::VRChat {

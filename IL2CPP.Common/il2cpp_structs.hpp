@@ -3,48 +3,32 @@
 #include <string_view>
 #include <type_traits>
 
-// ============================================================================
-//  IL2CPP.Common - IL2CPP Structure Definitions
-//
-//  Mirrors the in-memory layout of Unity's IL2CPP metadata structures.
-//  These are shared between IL2CPP.Core and IL2CPP.Module (and any consumer
-//  that needs direct struct member access through raw pointers).
-// ============================================================================
-
 namespace IL2CPP {
 
-	// ---- Pointer validation helper ----
-	extern "C" [[nodiscard]] __forceinline bool IsValid(void* ptr) noexcept
+	extern "C" [[nodiscard]] __forceinline bool IsValid(const void* ptr) noexcept
 	{
 		if (!ptr) return false;
 		constexpr uintptr_t minAddr = 0x10000;
-		constexpr uintptr_t maxAddr = 0x7FFFFFFF0000;
+		constexpr uintptr_t maxAddr = 0x7FFFFFFFFFFF;
 		uintptr_t addr = reinterpret_cast<uintptr_t>(ptr);
 		return addr >= minAddr && addr <= maxAddr;
 	}
 
-	// ---- Unboxing helper ----
 	[[nodiscard]] __forceinline void* Unbox(void* obj) noexcept
 	{
 		return static_cast<char*>(obj) + 0x10;
 	}
 
-	// ---- Type trait ----
 	template<typename>
 	struct is_const_member_fn : std::false_type {};
 
 	template<typename R, typename C, typename... Args>
 	struct is_const_member_fn<R(C::*)(Args...) const> : std::true_type {};
 
-	// ---- Forward declarations ----
 	struct il2cppFieldInfo;
 	struct il2cppMethodInfo;
 	struct il2cppClass;
 	
-	// ====================================================================
-	//  Image / Assembly
-	// ====================================================================
-
 	struct il2cppImage
 	{
 		const char* m_pName;
@@ -65,6 +49,7 @@ namespace IL2CPP {
 		int m_iBuild;
 		int m_bRevision;
 		unsigned char m_uPublicKeyToken[8];
+		uint8_t _pad[4] = {};
 	};
 
 	struct il2cppAssembly
@@ -73,12 +58,9 @@ namespace IL2CPP {
 		unsigned int m_uToken;
 		int m_ReferencedAssemblyStart;
 		int m_ReferencedAssemblyCount;
+		uint32_t _pad = 0;
 		il2cppAssemblyName m_aName;
 	};
-
-	// ====================================================================
-	//  Type
-	// ====================================================================
 
 #ifdef UNITY_VERSION_2022_3_8_HIGHER_
 	struct il2cppType
@@ -103,12 +85,9 @@ namespace IL2CPP {
 		unsigned int m_uMods : 6;
 		unsigned int m_uByref : 1;
 		unsigned int m_uPinned : 1;
+		uint32_t _pad = 0;
 	};
 #endif
-
-	// ====================================================================
-	//  Class
-	// ====================================================================
 
 	struct il2cppVirtualInvokeData
 	{
@@ -128,6 +107,7 @@ namespace IL2CPP {
 	{
 		il2cppClass* m_pInterfaceType;
 		int32_t m_iOffset;
+		uint32_t _pad = 0;
 	};
 
 	struct il2cppClass
@@ -160,6 +140,7 @@ namespace IL2CPP {
 		uint32_t m_uInitExceptionGCHandle;
 		uint32_t m_uCCtorStarted;
 		uint32_t m_uCCtorFinished;
+		uint32_t _pad1 = 0;
 		size_t m_uCCtorThread;
 		void* m_pGenericContainerHandle;
 		uint32_t m_uInstanceSize;
@@ -197,6 +178,7 @@ namespace IL2CPP {
 		uint8_t m_bIsAbstract : 1;
 		uint8_t m_bIsInterface : 1;
 		uint8_t m_bIsSealed : 1;
+		uint8_t _pad2[4] = {};
 		il2cppVirtualInvokeData m_vtable[255];
 	};
 
@@ -204,10 +186,6 @@ namespace IL2CPP {
 		il2cppClass* m_pClass = nullptr;
 		void* m_pMonitor = nullptr;
 	};
-
-	// ====================================================================
-	//  Field / Parameter / Method / Property
-	// ====================================================================
 
 	struct il2cppFieldInfo
 	{
@@ -217,6 +195,7 @@ namespace IL2CPP {
 		int m_iOffset;
 		int m_iAttributeIndex;
 		unsigned int m_uToken;
+		uint32_t _pad = 0;
 	};
 
 	struct il2cppParameterInfo
@@ -258,6 +237,7 @@ namespace IL2CPP {
 		unsigned char m_uInflated : 1;
 		unsigned char m_uWrapperType : 1;
 		unsigned char m_uMarshaledFromNative : 1;
+		uint8_t _pad[4] = {};
 	};
 
 	struct il2cppPropertyInfo
@@ -274,11 +254,8 @@ namespace IL2CPP {
 	{
 		uintptr_t m_uLength;
 		int m_iLowerBound;
+		uint32_t _pad = 0;
 	};
-
-	// ====================================================================
-	//  Object
-	// ====================================================================
 
 	struct il2cppObject {
 		il2cppClass* m_pClass = nullptr;

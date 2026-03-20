@@ -3,17 +3,12 @@
 #include "../MethodHandler.hpp"
 #include <IL2CPP.Common/il2cpp_types.hpp>
 
-// ============================================================================
-//  IL2CPP.Module::Unity::Rigidbody
-// ============================================================================
-
 namespace IL2CPP::Module::Unity {
 
     class Rigidbody : public Component {
     public:
         using Component::Component;
 
-        // ---- Velocity ----
         [[nodiscard]] Vector3 GetVelocity() const {
             static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "get_velocity", 0);
             return MethodHandler::invoke<Vector3>(m, raw());
@@ -36,7 +31,6 @@ namespace IL2CPP::Module::Unity {
             MethodHandler::invoke(m, raw(), params);
         }
 
-        // ---- Mass / Drag ----
         [[nodiscard]] float GetMass() const {
             static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "get_mass", 0);
             return MethodHandler::invoke<float>(m, raw());
@@ -74,7 +68,6 @@ namespace IL2CPP::Module::Unity {
             MethodHandler::invoke(m, raw(), params);
         }
 
-        // ---- Gravity / Kinematic ----
         [[nodiscard]] bool GetUseGravity() const {
             static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "get_useGravity", 0);
             return MethodHandler::invoke<bool>(m, raw());
@@ -95,7 +88,6 @@ namespace IL2CPP::Module::Unity {
             MethodHandler::invoke(m, raw(), params);
         }
 
-        // ---- Forces ----
         void AddForce(const Vector3& force, ForceMode mode = ForceMode::Force) {
             static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "AddForce", 2);
             Vector3 f = force;
@@ -129,7 +121,6 @@ namespace IL2CPP::Module::Unity {
             MethodHandler::invoke(m, raw(), params);
         }
 
-        // ---- Position / Rotation ----
         void MovePosition(const Vector3& pos) {
             static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "MovePosition", 1);
             Vector3 p = pos;
@@ -152,7 +143,6 @@ namespace IL2CPP::Module::Unity {
             MethodHandler::invoke(m, raw(), params);
         }
 
-        // ---- Sleep ----
         void Sleep() {
             static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "Sleep", 0);
             MethodHandler::invoke(m, raw());
@@ -168,7 +158,6 @@ namespace IL2CPP::Module::Unity {
             return MethodHandler::invoke<bool>(m, raw());
         }
 
-        // ---- Freeze / Detect Collisions ----
         [[nodiscard]] bool GetFreezeRotation() const {
             static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "get_freezeRotation", 0);
             return MethodHandler::invoke<bool>(m, raw());
@@ -189,7 +178,6 @@ namespace IL2CPP::Module::Unity {
             MethodHandler::invoke(m, raw(), params);
         }
 
-        // ---- Rigidbody Position / Rotation (physics interpolated) ----
         [[nodiscard]] Vector3 GetPosition() const {
             static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "get_position", 0);
             return MethodHandler::invoke<Vector3>(m, raw());
@@ -212,7 +200,6 @@ namespace IL2CPP::Module::Unity {
             MethodHandler::invoke(m, raw(), params);
         }
 
-        // ---- Center of Mass ----
         [[nodiscard]] Vector3 GetCenterOfMass() const {
             static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "get_centerOfMass", 0);
             return MethodHandler::invoke<Vector3>(m, raw());
@@ -224,7 +211,6 @@ namespace IL2CPP::Module::Unity {
             MethodHandler::invoke(m, raw(), params);
         }
 
-        // ---- Interpolation / Collision Detection Mode ----
         [[nodiscard]] RigidbodyInterpolation GetInterpolation() const {
             static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "get_interpolation", 0);
             return static_cast<RigidbodyInterpolation>(MethodHandler::invoke<int>(m, raw()));
@@ -247,7 +233,6 @@ namespace IL2CPP::Module::Unity {
             MethodHandler::invoke(m, raw(), params);
         }
 
-        // ---- Velocity Queries ----
         [[nodiscard]] Vector3 GetRelativePointVelocity(const Vector3& relativePoint) const {
             static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "GetRelativePointVelocity", 1);
             Vector3 rp = relativePoint;
@@ -262,7 +247,6 @@ namespace IL2CPP::Module::Unity {
             return MethodHandler::invoke<Vector3>(m, raw(), params);
         }
 
-        // ---- Bounds ----
         [[nodiscard]] Vector3 ClosestPointOnBounds(const Vector3& position) const {
             static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "ClosestPointOnBounds", 1);
             Vector3 p = position;
@@ -270,7 +254,6 @@ namespace IL2CPP::Module::Unity {
             return MethodHandler::invoke<Vector3>(m, raw(), params);
         }
 
-        // ---- Constraints ----
         [[nodiscard]] RigidbodyConstraints GetConstraints() const {
             static auto m = MethodHandler::resolve("UnityEngine.Rigidbody", "get_constraints", 0);
             return static_cast<RigidbodyConstraints>(MethodHandler::invoke<int>(m, raw()));
@@ -281,35 +264,10 @@ namespace IL2CPP::Module::Unity {
             void* params[] = { &val };
             MethodHandler::invoke(m, raw(), params);
         }
-
-        // ---- Legacy snake_case aliases (deprecated) ----
-        [[deprecated("Use GetVelocity()")]] [[nodiscard]] Vector3 get_velocity() const { return GetVelocity(); }
-        [[deprecated("Use SetVelocity()")]] void set_velocity(const Vector3& v) { SetVelocity(v); }
-        [[deprecated("Use GetAngularVelocity()")]] [[nodiscard]] Vector3 get_angular_velocity() const { return GetAngularVelocity(); }
-        [[deprecated("Use SetAngularVelocity()")]] void set_angular_velocity(const Vector3& v) { SetAngularVelocity(v); }
-        [[deprecated("Use GetMass()")]] [[nodiscard]] float get_mass() const { return GetMass(); }
-        [[deprecated("Use SetMass()")]] void set_mass(float m) { SetMass(m); }
-        [[deprecated("Use GetDrag()")]] [[nodiscard]] float get_drag() const { return GetDrag(); }
-        [[deprecated("Use SetDrag()")]] void set_drag(float d) { SetDrag(d); }
-        [[deprecated("Use GetAngularDrag()")]] [[nodiscard]] float get_angular_drag() const { return GetAngularDrag(); }
-        [[deprecated("Use SetAngularDrag()")]] void set_angular_drag(float d) { SetAngularDrag(d); }
-        [[deprecated("Use SetDensity()")]] void set_density(float d) { SetDensity(d); }
-        [[deprecated("Use GetUseGravity()")]] [[nodiscard]] bool get_use_gravity() const { return GetUseGravity(); }
-        [[deprecated("Use SetUseGravity()")]] void set_use_gravity(bool u) { SetUseGravity(u); }
-        [[deprecated("Use GetIsKinematic()")]] [[nodiscard]] bool get_is_kinematic() const { return GetIsKinematic(); }
-        [[deprecated("Use SetIsKinematic()")]] void set_is_kinematic(bool k) { SetIsKinematic(k); }
-        [[deprecated("Use AddForce()")]] void add_force(const Vector3& f, ForceMode m = ForceMode::Force) { AddForce(f, m); }
-        [[deprecated("Use AddTorque()")]] void add_torque(const Vector3& t, ForceMode m = ForceMode::Force) { AddTorque(t, m); }
-        [[deprecated("Use MovePosition()")]] void move_position(const Vector3& p) { MovePosition(p); }
-        [[deprecated("Use MoveRotation()")]] void move_rotation(const Quaternion& r) { MoveRotation(r); }
-        [[deprecated("Use Sleep()")]] void sleep() { Sleep(); }
-        [[deprecated("Use WakeUp()")]] void wake_up() { WakeUp(); }
-        [[deprecated("Use IsSleeping()")]] [[nodiscard]] bool is_sleeping() const { return IsSleeping(); }
     };
 
 } // namespace IL2CPP::Module::Unity
 
-// ---- Deferred implementation requiring complete Rigidbody type ----
 #include "Collider.hpp"
 
 namespace IL2CPP::Module::Unity {
@@ -317,5 +275,4 @@ namespace IL2CPP::Module::Unity {
         static auto m = MethodHandler::resolve("UnityEngine.Collider", "get_attachedRigidbody", 0);
         return Rigidbody{ MethodHandler::invoke<void*>(m, raw()) };
     }
-    inline Rigidbody Collider::get_attached_rigidbody() const { return GetAttachedRigidbody(); }
 } // deferred

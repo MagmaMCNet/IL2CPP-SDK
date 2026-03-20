@@ -1,19 +1,6 @@
 #pragma once
 #include "Array.hpp"
 
-// ============================================================================
-//  IL2CPP.Module::System::Queue<T>
-//
-//  Wraps System.Collections.Generic.Queue<T>.
-//
-//  Layout (after il2cppObject 0x10):
-//    T[]  _array    (+0x10)
-//    int  _head     (+0x18)
-//    int  _tail     (+0x1C)
-//    int  _size     (+0x20)
-//    int  _version  (+0x24)
-// ============================================================================
-
 namespace IL2CPP::Module::System {
 
     template<typename T>

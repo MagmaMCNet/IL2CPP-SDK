@@ -2,10 +2,6 @@
 #include "../MethodHandler.hpp"
 #include <IL2CPP.Common/il2cpp_types.hpp>
 
-// ============================================================================
-//  IL2CPP.Module::Unity::Screen - Static utility class for screen information
-// ============================================================================
-
 namespace IL2CPP::Module::Unity {
 
     enum class FullScreenMode : int {
@@ -73,17 +69,6 @@ namespace IL2CPP::Module::Unity {
             void* params[] = { &width, &height, &fullScreen, &refreshRate };
             MethodHandler::invoke(m, nullptr, params);
         }
-
-        // ---- Legacy snake_case aliases (deprecated) ----
-        [[deprecated("Use GetWidth()")]] [[nodiscard]] static int get_width() { return GetWidth(); }
-        [[deprecated("Use GetHeight()")]] [[nodiscard]] static int get_height() { return GetHeight(); }
-        [[deprecated("Use GetDpi()")]] [[nodiscard]] static float get_dpi() { return GetDpi(); }
-        [[deprecated("Use GetFullScreen()")]] [[nodiscard]] static bool get_full_screen() { return GetFullScreen(); }
-        [[deprecated("Use SetFullScreen()")]] static void set_full_screen(bool f) { SetFullScreen(f); }
-        [[deprecated("Use GetFullScreenMode()")]] [[nodiscard]] static FullScreenMode get_full_screen_mode() { return GetFullScreenMode(); }
-        [[deprecated("Use SetFullScreenMode()")]] static void set_full_screen_mode(FullScreenMode m) { SetFullScreenMode(m); }
-        [[deprecated("Use GetCurrentResolution()")]] [[nodiscard]] static Resolution get_current_resolution() { return GetCurrentResolution(); }
-        [[deprecated("Use SetResolution()")]] static void set_resolution(int w, int h, bool f, int r = 0) { SetResolution(w, h, f, r); }
     };
 
 } // namespace IL2CPP::Module::Unity

@@ -1,6 +1,7 @@
 #include <bootstrap_module.hpp>
 #include <bootstrap_internal.hpp>
 #include <IL2CPP.Module/include/il2cpp_module.hpp>
+#include <SharedMemory.Common/shared_memory.hpp>
 #include <Windows.h>
 #include <algorithm>
 #include <atomic>
@@ -15,7 +16,6 @@ namespace Bootstrap::Module {
 
         struct ConnectionState {
             std::atomic<bool> connected{ false };
-            HANDLE shared_memory_handle = nullptr;
             Bootstrap::BootstrapVtable const* vtable = nullptr;
         };
 
@@ -23,7 +23,6 @@ namespace Bootstrap::Module {
 
     }
 
-    // Internal accessor for VRChat class implementations
     Bootstrap::BootstrapVtable const* get_vtable() noexcept {
         return g_conn.vtable;
     }
@@ -32,37 +31,14 @@ namespace Bootstrap::Module {
         if (g_conn.connected.exchange(true, std::memory_order_acq_rel))
             return true;
 
-        std::wstring memName = std::wstring(Bootstrap::shared_memory_prefix) +
-            std::to_wstring(GetCurrentProcessId()) +
-            Bootstrap::shared_memory_suffix;
-
-        g_conn.shared_memory_handle = OpenFileMappingW(
-            FILE_MAP_READ, FALSE, memName.c_str());
-
-
-        if (!g_conn.shared_memory_handle) {
-            g_conn.connected.store(false, std::memory_order_release);
-            return false;
-        }
-
-        g_conn.vtable = static_cast<Bootstrap::BootstrapVtable const*>(
-            MapViewOfFile(g_conn.shared_memory_handle, FILE_MAP_READ,
-                0, 0, sizeof(Bootstrap::BootstrapVtable)));
-
+        g_conn.vtable = SharedMemory::Resolve<Bootstrap::BootstrapVtable>("Bootstrap.Vtable");
         if (!g_conn.vtable || g_conn.vtable->version != Bootstrap::vtable_version) {
-            if (g_conn.vtable) {
-                UnmapViewOfFile(const_cast<Bootstrap::BootstrapVtable*>(g_conn.vtable));
-                g_conn.vtable = nullptr;
-            }
-            CloseHandle(g_conn.shared_memory_handle);
-            g_conn.shared_memory_handle = nullptr;
+            g_conn.vtable = nullptr;
             g_conn.connected.store(false, std::memory_order_release);
             return false;
         }
 
-        if (g_conn.vtable) {
-            IL2CPP::Module::Connect();
-        }
+        (void)IL2CPP::Module::Connect();
         return true;
     }
 
@@ -70,15 +46,7 @@ namespace Bootstrap::Module {
         if (!g_conn.connected.exchange(false, std::memory_order_acq_rel))
             return;
 
-        if (g_conn.vtable) {
-            UnmapViewOfFile(const_cast<Bootstrap::BootstrapVtable*>(g_conn.vtable));
-            g_conn.vtable = nullptr;
-        }
-
-        if (g_conn.shared_memory_handle) {
-            CloseHandle(g_conn.shared_memory_handle);
-            g_conn.shared_memory_handle = nullptr;
-        }
+        g_conn.vtable = nullptr;
     }
 
     bool is_connected() noexcept {
@@ -228,7 +196,7 @@ namespace Bootstrap::Module {
         g_conn.vtable->unregister_explorer_callback(module_id, callback_id);
     }
 
-    // ---- Rendering ----
+    // Rendering
 
     Rendering& Rendering::Get() {
         static Rendering instance;
@@ -254,7 +222,7 @@ namespace Bootstrap::Module {
         return g_conn.vtable->get_imgui_context();
     }
 
-    // ---- ModuleConfig ----
+    // ModuleConfig
 
     ModuleConfig::ModuleConfig(uint32_t module_id) : m_module_id(module_id) {}
 
@@ -318,7 +286,7 @@ namespace Bootstrap::Module {
         g_conn.vtable->config_remove_key(m_module_id, key.data(), static_cast<uint32_t>(key.size()));
     }
 
-    // ---- ModuleConfig v12 ----
+    // ModuleConfig (extended)
 
     void ModuleConfig::set_vec2(std::string_view key, float x, float y) {
         if (!is_connected()) return;
@@ -414,7 +382,7 @@ namespace Bootstrap::Module {
         g_conn.vtable->config_clear(m_module_id);
     }
 
-    // ---- ModuleConfig v14: C++ native type convenience ----
+    // ModuleConfig (native type convenience)
 
     namespace {
 
@@ -729,7 +697,7 @@ namespace Bootstrap::Module {
         return result;
     }
 
-    // ---- MessageBus ----
+    // MessageBus
 
     MessageBus& MessageBus::Get() {
         static MessageBus instance;
@@ -756,7 +724,7 @@ namespace Bootstrap::Module {
         publish(module_id, topic, message.data(), static_cast<uint32_t>(message.size()));
     }
 
-    // ---- QuickMenu ----
+    // QuickMenu
 
     QuickMenu& QuickMenu::Get() {
         static QuickMenu instance;
@@ -874,7 +842,7 @@ namespace Bootstrap::Module {
             text.data(), static_cast<uint32_t>(text.size()), nullptr);
     }
 
-    // ---- QuickMenu v7 ----
+    // QuickMenu (state and navigation)
 
     void QuickMenu::set_button_enabled(uint32_t module_id, uint32_t button_id, bool enabled) {
         if (!valid()) return;
@@ -907,7 +875,7 @@ namespace Bootstrap::Module {
         g_conn.vtable->qm_set_image_sprite(image_component, sprite_id);
     }
 
-    // ---- QuickMenu v8 ----
+    // QuickMenu (foldouts, settings, sliders)
 
     uint32_t QuickMenu::add_foldout(uint32_t module_id, uint32_t page_id, std::string_view title,
         bool default_expanded, bool show_background, bool auto_separators) {
@@ -998,7 +966,7 @@ namespace Bootstrap::Module {
         g_conn.vtable->qm_navigate_back();
     }
 
-    // ---- PlayerEvents ----
+    // PlayerEvents
 
     PlayerEvents& PlayerEvents::Get() {
         static PlayerEvents instance;
@@ -1049,7 +1017,7 @@ namespace Bootstrap::Module {
         return c;
     }
 
-    // ---- TweenService ----
+    // TweenService
 
     TweenService& TweenService::Get() {
         static TweenService instance;
@@ -1133,7 +1101,7 @@ namespace Bootstrap::Module {
             from_x, from_y, from_z, to_x, to_y, to_z, duration_ms, ease_type, on_complete);
     }
 
-    // ---- NameplateService ----
+    // NameplateService
 
     NameplateService& NameplateService::Get() {
         static NameplateService instance;
@@ -1198,7 +1166,7 @@ namespace Bootstrap::Module {
             plate_id.data(), static_cast<uint32_t>(plate_id.size()), x, y, z);
     }
 
-    // ---- ClientUsage ----
+    // ClientUsage
 
     ClientUsage& ClientUsage::Get() {
         static ClientUsage instance;
@@ -1218,7 +1186,7 @@ namespace Bootstrap::Module {
             client_name.data(), static_cast<uint32_t>(client_name.size()));
     }
 
-    // ---- Performance ----
+    // Performance
 
     Performance& Performance::Get() {
         static Performance instance;
@@ -1255,7 +1223,7 @@ namespace Bootstrap::Module {
         g_conn.vtable->perf_full_cleanup();
     }
 
-    // ---- KeyAuth ----
+    // KeyAuth
 
     KeyAuth& KeyAuth::Get() {
         static KeyAuth instance;
@@ -1299,7 +1267,7 @@ namespace Bootstrap::Module {
         return result;
     }
 
-    // ---- WebSocket ----
+    // WebSocket
 
     WebSocket& WebSocket::Get() {
         static WebSocket instance;
@@ -1341,7 +1309,7 @@ namespace Bootstrap::Module {
         g_conn.vtable->ws_set_callbacks(module_id, handle, on_open, on_message, on_close, on_error);
     }
 
-    // ---- FileSystem ----
+    // FileSystem
 
     FileSystem& FileSystem::Get() {
         static FileSystem instance;
@@ -1443,7 +1411,7 @@ namespace Bootstrap::Module {
         return append_file(module_id, path, data.data(), static_cast<uint32_t>(data.size()));
     }
 
-    // ---- Clipboard ----
+    // Clipboard
 
     Clipboard& Clipboard::Get() {
         static Clipboard instance;

@@ -1,29 +1,6 @@
 #pragma once
 #include <IL2CPP.Common/il2cpp_shared.hpp>
 
-// ============================================================================
-//  IL2CPP.Module::Unity::Callbacks
-//
-//  High-level wrapper for Unity event callbacks. Allows modules to register
-//  functions that get called during Unity's update loop events.
-//
-//  USAGE:
-//      #include <IL2CPP.Module/include/Unity/UnityCallbacks.hpp>
-//
-//      void MyUpdate() {
-//          // Called every Unity Update
-//      }
-//
-//      void MyOnSceneLoaded(int scene, int loadMode) {
-//          // Called when a scene is loaded
-//      }
-//
-//      // In your module init:
-//      IL2CPP::Module::Unity::Callbacks::Initialize();  // Must call once
-//      IL2CPP::Module::Unity::Callbacks::Register<MyUpdate>(IL2CPP::UnityEvent::Update);
-//      IL2CPP::Module::Unity::Callbacks::Register<MyOnSceneLoaded>(IL2CPP::UnityEvent::OnSceneLoaded);
-// ============================================================================
-
 namespace IL2CPP::Module {
     [[nodiscard]] il2cpp_exports const* GetExports() noexcept;
 }

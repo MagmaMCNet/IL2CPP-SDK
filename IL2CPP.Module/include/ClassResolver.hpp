@@ -7,38 +7,6 @@
 #include <optional>
 #include <cstring>
 
-// ============================================================================
-//  IL2CPP.Module - ClassResolver
-//
-//  High-level class resolution system ported from IL2CPP.Core.
-//  Uses the Module's opaque handle wrappers (Class, Field, Method, Type)
-//  instead of raw il2cpp pointers. All IL2CPP calls route through the
-//  shared vtable.
-//
-//  Usage:
-//      auto klass = IL2CPP::Module::Class::find("SomeNamespace.SomeClass");
-//      IL2CPP::Module::ClassResolver resolver(klass);
-//
-//      int healthOffset = 0;
-//      void* damagePtr = nullptr;
-//
-//      resolver.field()
-//          .byTypeName("Single")
-//          .notStatic()
-//          .required()
-//          .toOffset(healthOffset)
-//          .deobfuscate("SomeClass::", "health");
-//
-//      resolver.method()
-//          .byName("TakeDamage")
-//          .withParams(1)
-//          .toPtr(damagePtr);
-//
-//      if (resolver.resolve()) {
-//          // healthOffset and damagePtr are now populated
-//      }
-// ============================================================================
-
 namespace IL2CPP::Module {
 
     // Forward declarations
@@ -48,9 +16,6 @@ namespace IL2CPP::Module {
     class IndexedFieldCollector;
     class ClassResolver;
 
-    // ========================================================================
-    //  Helper: get il2cppClass* from a Field's type via Core vtable
-    // ========================================================================
 
     namespace detail {
         inline Class ClassFromFieldType(Field field) {
@@ -104,9 +69,6 @@ namespace IL2CPP::Module {
         }
     }
 
-    // ========================================================================
-    //  FieldQuery
-    // ========================================================================
 
     class FieldQuery {
         friend class ClassResolver;
@@ -234,9 +196,6 @@ namespace IL2CPP::Module {
         void reset() { m_matched = Field{}; }
     };
 
-    // ========================================================================
-    //  MethodQuery
-    // ========================================================================
 
     class MethodQuery {
         friend class ClassResolver;
@@ -364,9 +323,6 @@ namespace IL2CPP::Module {
         void reset() { m_matched.clear(); }
     };
 
-    // ========================================================================
-    //  FieldCounter
-    // ========================================================================
 
     class FieldCounter {
         friend class ClassResolver;
@@ -424,9 +380,6 @@ namespace IL2CPP::Module {
         void reset() { m_count = 0; }
     };
 
-    // ========================================================================
-    //  IndexedFieldCollector
-    // ========================================================================
 
     class IndexedFieldCollector {
         friend class ClassResolver;
@@ -551,9 +504,6 @@ namespace IL2CPP::Module {
         void reset() { m_captured.clear(); }
     };
 
-    // ========================================================================
-    //  ClassResolver
-    // ========================================================================
 
     class ClassResolver {
         Class                               m_klass;
@@ -602,7 +552,7 @@ namespace IL2CPP::Module {
 
             reset();
 
-            // ---- Fields ----
+
             auto fields = m_klass.get_fields();
             for (auto& field : fields) {
                 Class fieldClass = detail::ClassFromFieldType(field);
@@ -630,7 +580,7 @@ namespace IL2CPP::Module {
             for (const auto& q : m_fieldQueries)
                 if (!q.valid()) return false;
 
-            // ---- Methods ----
+
             if (!m_methodQueries.empty()) {
                 auto methods = m_klass.get_methods();
                 for (auto& method : methods)

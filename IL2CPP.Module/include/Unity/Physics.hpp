@@ -2,10 +2,6 @@
 #include "../MethodHandler.hpp"
 #include <IL2CPP.Common/il2cpp_types.hpp>
 
-// ============================================================================
-//  IL2CPP.Module::Unity::Physics - Static utility class for physics queries
-// ============================================================================
-
 namespace IL2CPP::Module::Unity {
 
     class Physics {
@@ -66,7 +62,6 @@ namespace IL2CPP::Module::Unity {
             return SphereCast(ray.origin, radius, ray.direction, hit, maxDistance, layerMask);
         }
 
-        // ---- Utility Methods ----
 
         [[nodiscard]] static Ray CreateRayToward(const Vector3& from, const Vector3& to) {
             Vector3 dir = to - from;
@@ -82,17 +77,6 @@ namespace IL2CPP::Module::Unity {
             RaycastHit hit;
             return !Raycast(from, dir, hit, dist, layerMask);
         }
-
-        // ---- Legacy snake_case aliases (deprecated) ----
-        [[deprecated("Use Raycast()")]] [[nodiscard]] static bool raycast(const Vector3& o, const Vector3& d, RaycastHit& h, float m = 1e10f, LayerMask l = LayerMask(-1)) { return Raycast(o, d, h, m, l); }
-        [[deprecated("Use Raycast()")]] [[nodiscard]] static bool raycast(const Vector3& o, const Vector3& d, float m = 1e10f, LayerMask l = LayerMask(-1)) { return Raycast(o, d, m, l); }
-        [[deprecated("Use Raycast()")]] [[nodiscard]] static bool raycast(const Ray& r, RaycastHit& h, float m = 1e10f, LayerMask l = LayerMask(-1)) { return Raycast(r, h, m, l); }
-        [[deprecated("Use Raycast()")]] [[nodiscard]] static bool raycast(const Ray& r, float m = 1e10f, LayerMask l = LayerMask(-1)) { return Raycast(r, m, l); }
-        [[deprecated("Use SphereCast()")]] [[nodiscard]] static bool sphere_cast(const Vector3& o, float ra, const Vector3& d, RaycastHit& h, float m = 1e10f, LayerMask l = LayerMask(-1)) { return SphereCast(o, ra, d, h, m, l); }
-        [[deprecated("Use SphereCast()")]] [[nodiscard]] static bool sphere_cast(const Vector3& o, float ra, const Vector3& d, float m = 1e10f, LayerMask l = LayerMask(-1)) { return SphereCast(o, ra, d, m, l); }
-        [[deprecated("Use SphereCast()")]] [[nodiscard]] static bool sphere_cast(const Ray& r, float ra, RaycastHit& h, float m = 1e10f, LayerMask l = LayerMask(-1)) { return SphereCast(r, ra, h, m, l); }
-        [[deprecated("Use CreateRayToward()")]] [[nodiscard]] static Ray create_ray_toward(const Vector3& f, const Vector3& t) { return CreateRayToward(f, t); }
-        [[deprecated("Use LineOfSight()")]] [[nodiscard]] static bool line_of_sight(const Vector3& f, const Vector3& t, LayerMask l = LayerMask(-1)) { return LineOfSight(f, t, l); }
     };
 
 } // namespace IL2CPP::Module::Unity

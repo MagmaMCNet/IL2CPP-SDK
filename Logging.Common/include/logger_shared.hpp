@@ -78,32 +78,35 @@ namespace Logger {
     constexpr ModuleId invalid_module_id{ invalid_id, invalid_id };
 
     struct LogEntry {
-        Level        lvl;
-        ModuleId    id;
         char const* message;
-        uint32_t     message_length;
         char const* file;
-        uint32_t     line;
         char const* function;
+        ModuleId    id;
+        uint32_t    message_length;
+        uint32_t    line;
+        Level       lvl;
+        uint8_t     _pad[7] = {};
     };
 
     struct ModuleInfo {
-        uint32_t         id;
         char const* name;
-        uint32_t         name_length;
-        LevelMask       mask;
-        Color            fg;
-        Color            bg;
+        uint32_t    id;
+        uint32_t    name_length;
+        LevelMask   mask;
+        Color       fg;
+        Color       bg;
+        uint8_t     _pad[5] = {};
     };
 
     struct SubmoduleInfo {
-        uint32_t         module_id;
-        uint32_t         submodule_id;
         char const* name;
-        uint32_t         name_length;
-        LevelMask       mask;
-        Color            fg;
-        Color            bg;
+        uint32_t    module_id;
+        uint32_t    submodule_id;
+        uint32_t    name_length;
+        LevelMask   mask;
+        Color       fg;
+        Color       bg;
+        uint8_t     _pad = 0;
     };
 
     using fn_log = void(__cdecl*)(LogEntry const*);
@@ -119,7 +122,6 @@ namespace Logger {
     using fn_flush = void(__cdecl*)();
 
     struct LoggerVtable {
-        uint32_t              version;
         fn_log                log;
         fn_register_module    register_module;
         fn_register_submod    register_submodule;
@@ -131,11 +133,10 @@ namespace Logger {
         fn_set_submod_color   set_submodule_color;
         fn_is_enabled         is_enabled;
         fn_flush              flush;
+        uint32_t              version;
+        uint32_t              _pad = 0;
     };
 
     constexpr uint32_t vtable_version = 1;
-    constexpr wchar_t const* shared_memory_prefix = L"Local\\UNIx_PID_";
-    constexpr wchar_t const* shared_memory_suffix = L"_Logger";
 
-
-}
+} // namespace Logger

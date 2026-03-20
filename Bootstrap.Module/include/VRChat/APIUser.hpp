@@ -1,9 +1,5 @@
 #pragma once
 
-// ============================================================================
-//  APIUser - VRChat API user model
-// ============================================================================
-
 #include "ApiModel.hpp"
 #include <Bootstrap.Common/include/bootstrap_shared.hpp>
 #include <string>

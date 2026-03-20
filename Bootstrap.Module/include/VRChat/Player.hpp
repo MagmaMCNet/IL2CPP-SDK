@@ -1,9 +1,5 @@
 #pragma once
 
-// ============================================================================
-//  Player - VRChat Player MonoBehaviour wrapper
-// ============================================================================
-
 #include <IL2CPP.Module/include/il2cpp_module.hpp>
 #include <Bootstrap.Common/include/bootstrap_shared.hpp>
 

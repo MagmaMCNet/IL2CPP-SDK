@@ -1,10 +1,6 @@
 #pragma once
 #include "../MethodHandler.hpp"
 
-// ============================================================================
-//  IL2CPP.Module::Unity::Time - Static utility class
-// ============================================================================
-
 namespace IL2CPP::Module::Unity {
 
     class Time {
@@ -108,19 +104,6 @@ namespace IL2CPP::Module::Unity {
             static auto m = MethodHandler::resolve("UnityEngine.Time", "get_captureFramerate", 0);
             return MethodHandler::invoke<int>(m, nullptr);
         }
-
-        // ---- Legacy snake_case aliases (deprecated) ----
-        [[deprecated("Use GetTime()")]] [[nodiscard]] static float get_time() { return GetTime(); }
-        [[deprecated("Use GetTimeAsDouble()")]] [[nodiscard]] static double get_time_as_double() { return GetTimeAsDouble(); }
-        [[deprecated("Use GetDeltaTime()")]] [[nodiscard]] static float get_delta_time() { return GetDeltaTime(); }
-        [[deprecated("Use GetFixedDeltaTime()")]] [[nodiscard]] static float get_fixed_delta_time() { return GetFixedDeltaTime(); }
-        [[deprecated("Use GetUnscaledDeltaTime()")]] [[nodiscard]] static float get_unscaled_delta_time() { return GetUnscaledDeltaTime(); }
-        [[deprecated("Use GetUnscaledTime()")]] [[nodiscard]] static float get_unscaled_time() { return GetUnscaledTime(); }
-        [[deprecated("Use GetFixedTime()")]] [[nodiscard]] static float get_fixed_time() { return GetFixedTime(); }
-        [[deprecated("Use GetTimeScale()")]] [[nodiscard]] static float get_time_scale() { return GetTimeScale(); }
-        [[deprecated("Use SetTimeScale()")]] static void set_time_scale(float s) { SetTimeScale(s); }
-        [[deprecated("Use GetFrameCount()")]] [[nodiscard]] static int get_frame_count() { return GetFrameCount(); }
-        [[deprecated("Use GetRealtimeSinceStartup()")]] [[nodiscard]] static float get_realtime_since_startup() { return GetRealtimeSinceStartup(); }
     };
 
 } // namespace IL2CPP::Module::Unity

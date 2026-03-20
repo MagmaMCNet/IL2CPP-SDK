@@ -1,9 +1,5 @@
 #pragma once
 
-// ============================================================================
-//  Networking - VRChat SDK Networking static utility class
-// ============================================================================
-
 #include "VRCPlayerApi.hpp"
 #include <IL2CPP.Module/include/il2cpp_module.hpp>
 #include <IL2CPP.Module/include/ManagedObject.hpp>

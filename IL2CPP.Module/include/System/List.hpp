@@ -1,13 +1,6 @@
 #pragma once
 #include "Array.hpp"
 
-// ============================================================================
-//  IL2CPP.Module::System::List<T>
-//
-//  Wraps il2cppList<T>. Layout:
-//    il2cppObject(0x10) + il2cppArray<T>* items + int size + int version + ...
-// ============================================================================
-
 namespace IL2CPP::Module::System {
 
     template<typename T>
@@ -44,7 +37,7 @@ namespace IL2CPP::Module::System {
         [[nodiscard]] std::span<T> as_span() { return items().as_span(); }
         [[nodiscard]] std::span<const T> as_span() const { return items().as_span(); }
 
-        // ---- Iterators (iterate over entire internal array) ----
+
         [[nodiscard]] T* begin() { return items().begin(); }
         [[nodiscard]] T* end() { return items().end(); }
         [[nodiscard]] const T* begin() const { return items().begin(); }

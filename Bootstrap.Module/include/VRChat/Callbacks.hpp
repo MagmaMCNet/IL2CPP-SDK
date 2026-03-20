@@ -1,12 +1,5 @@
 #pragma once
 
-// ============================================================================
-//  VRChat Callbacks - Typed callback aliases for VRChat events
-//
-//  These are ABI-compatible with the void*-based callbacks in bootstrap_shared.hpp
-//  on MSVC x64 (Player/VRCPlayerApi are trivial void* wrappers).
-// ============================================================================
-
 #include "VRCPlayerApi.hpp"
 #include "Player.hpp"
 

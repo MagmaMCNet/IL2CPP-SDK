@@ -1,9 +1,5 @@
 #pragma once
 
-// ============================================================================
-//  UdonBehaviour - VRChat Udon scripting behaviour
-// ============================================================================
-
 #include "VRC_Interactable.hpp"
 #include "Enums.hpp"
 #include <string>

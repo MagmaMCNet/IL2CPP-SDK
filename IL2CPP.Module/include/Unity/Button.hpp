@@ -8,7 +8,7 @@ namespace IL2CPP::Module::Unity {
     public:
         using Selectable::Selectable;
 
-        // ---- onClick (get, raw pointer to UnityEvent) ----
+
         [[nodiscard]] void* GetOnClickRaw() const {
             static auto m = MethodHandler::resolve("UnityEngine.UI.Button", "get_onClick", 0);
             return MethodHandler::invoke<void*>(m, raw());

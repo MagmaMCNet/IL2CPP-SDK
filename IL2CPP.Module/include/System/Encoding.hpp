@@ -19,7 +19,7 @@ namespace IL2CPP::Module::System {
     public:
         using ManagedObject::ManagedObject;
 
-        // ---- Static encoding instances ----
+
         [[nodiscard]] static Encoding GetUTF8() {
             static auto m = MethodHandler::resolve("System.Text.Encoding", "get_UTF8", 0);
             return Encoding{ MethodHandler::invoke<void*>(m, nullptr) };
@@ -40,7 +40,7 @@ namespace IL2CPP::Module::System {
             return Encoding{ MethodHandler::invoke<void*>(m, nullptr) };
         }
 
-        // ---- GetBytes (string -> byte[]) ----
+
         [[nodiscard]] void* GetBytes(std::string_view str) const {
             static auto m = MethodHandler::resolve("System.Text.Encoding", "GetBytes", 1);
             auto* e = GetExports();
@@ -58,7 +58,7 @@ namespace IL2CPP::Module::System {
             return a.to_vector();
         }
 
-        // ---- GetString (byte[] -> string) ----
+
         [[nodiscard]] std::string GetString(void* byteArray) const {
             static auto m = MethodHandler::resolve("System.Text.Encoding", "GetString", 1);
             if (!byteArray) return "";

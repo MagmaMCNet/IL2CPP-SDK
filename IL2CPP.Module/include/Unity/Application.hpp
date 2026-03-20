@@ -4,10 +4,7 @@
 #include <IL2CPP.Common/il2cpp_shared.hpp>
 #include <string>
 #include <string_view>
-
-// ============================================================================
-//  IL2CPP.Module::Unity::Application - Static utility class for application info
-// ============================================================================
+#include <Windows.h>
 
 namespace IL2CPP::Module {
     [[nodiscard]] IL2CPP::il2cpp_exports const* GetExports() noexcept;
@@ -37,8 +34,11 @@ namespace IL2CPP::Module::Unity {
             int len = *reinterpret_cast<int*>(static_cast<char*>(str) + 0x10);
             if (len <= 0) return "";
             wchar_t* wstr = reinterpret_cast<wchar_t*>(static_cast<char*>(str) + 0x14);
-            std::wstring ws(wstr, len);
-            return std::string(ws.begin(), ws.end());
+            int bytes = WideCharToMultiByte(CP_UTF8, 0, wstr, len, nullptr, 0, nullptr, nullptr);
+            if (bytes <= 0) return "";
+            std::string out(static_cast<size_t>(bytes), '\0');
+            WideCharToMultiByte(CP_UTF8, 0, wstr, len, out.data(), bytes, nullptr, nullptr);
+            return out;
         }
 
     public:
@@ -49,8 +49,11 @@ namespace IL2CPP::Module::Unity {
             int len = *reinterpret_cast<int*>(static_cast<char*>(str) + 0x10);
             if (len <= 0) return "";
             wchar_t* wstr = reinterpret_cast<wchar_t*>(static_cast<char*>(str) + 0x14);
-            std::wstring ws(wstr, len);
-            return std::string(ws.begin(), ws.end());
+            int bytes = WideCharToMultiByte(CP_UTF8, 0, wstr, len, nullptr, 0, nullptr, nullptr);
+            if (bytes <= 0) return "";
+            std::string out(static_cast<size_t>(bytes), '\0');
+            WideCharToMultiByte(CP_UTF8, 0, wstr, len, out.data(), bytes, nullptr, nullptr);
+            return out;
         }
 
         [[nodiscard]] static std::string GetPersistentDataPath() {
@@ -60,8 +63,11 @@ namespace IL2CPP::Module::Unity {
             int len = *reinterpret_cast<int*>(static_cast<char*>(str) + 0x10);
             if (len <= 0) return "";
             wchar_t* wstr = reinterpret_cast<wchar_t*>(static_cast<char*>(str) + 0x14);
-            std::wstring ws(wstr, len);
-            return std::string(ws.begin(), ws.end());
+            int bytes = WideCharToMultiByte(CP_UTF8, 0, wstr, len, nullptr, 0, nullptr, nullptr);
+            if (bytes <= 0) return "";
+            std::string out(static_cast<size_t>(bytes), '\0');
+            WideCharToMultiByte(CP_UTF8, 0, wstr, len, out.data(), bytes, nullptr, nullptr);
+            return out;
         }
 
         [[nodiscard]] static std::string GetStreamingAssetsPath() {
@@ -71,8 +77,11 @@ namespace IL2CPP::Module::Unity {
             int len = *reinterpret_cast<int*>(static_cast<char*>(str) + 0x10);
             if (len <= 0) return "";
             wchar_t* wstr = reinterpret_cast<wchar_t*>(static_cast<char*>(str) + 0x14);
-            std::wstring ws(wstr, len);
-            return std::string(ws.begin(), ws.end());
+            int bytes = WideCharToMultiByte(CP_UTF8, 0, wstr, len, nullptr, 0, nullptr, nullptr);
+            if (bytes <= 0) return "";
+            std::string out(static_cast<size_t>(bytes), '\0');
+            WideCharToMultiByte(CP_UTF8, 0, wstr, len, out.data(), bytes, nullptr, nullptr);
+            return out;
         }
 
         [[nodiscard]] static bool GetIsPlaying() {
@@ -97,8 +106,11 @@ namespace IL2CPP::Module::Unity {
             int len = *reinterpret_cast<int*>(static_cast<char*>(str) + 0x10);
             if (len <= 0) return "";
             wchar_t* wstr = reinterpret_cast<wchar_t*>(static_cast<char*>(str) + 0x14);
-            std::wstring ws(wstr, len);
-            return std::string(ws.begin(), ws.end());
+            int bytes = WideCharToMultiByte(CP_UTF8, 0, wstr, len, nullptr, 0, nullptr, nullptr);
+            if (bytes <= 0) return "";
+            std::string out(static_cast<size_t>(bytes), '\0');
+            WideCharToMultiByte(CP_UTF8, 0, wstr, len, out.data(), bytes, nullptr, nullptr);
+            return out;
         }
 
         [[nodiscard]] static std::string GetProductName() {
@@ -108,8 +120,11 @@ namespace IL2CPP::Module::Unity {
             int len = *reinterpret_cast<int*>(static_cast<char*>(str) + 0x10);
             if (len <= 0) return "";
             wchar_t* wstr = reinterpret_cast<wchar_t*>(static_cast<char*>(str) + 0x14);
-            std::wstring ws(wstr, len);
-            return std::string(ws.begin(), ws.end());
+            int bytes = WideCharToMultiByte(CP_UTF8, 0, wstr, len, nullptr, 0, nullptr, nullptr);
+            if (bytes <= 0) return "";
+            std::string out(static_cast<size_t>(bytes), '\0');
+            WideCharToMultiByte(CP_UTF8, 0, wstr, len, out.data(), bytes, nullptr, nullptr);
+            return out;
         }
 
         [[nodiscard]] static std::string GetCompanyName() {
@@ -119,8 +134,11 @@ namespace IL2CPP::Module::Unity {
             int len = *reinterpret_cast<int*>(static_cast<char*>(str) + 0x10);
             if (len <= 0) return "";
             wchar_t* wstr = reinterpret_cast<wchar_t*>(static_cast<char*>(str) + 0x14);
-            std::wstring ws(wstr, len);
-            return std::string(ws.begin(), ws.end());
+            int bytes = WideCharToMultiByte(CP_UTF8, 0, wstr, len, nullptr, 0, nullptr, nullptr);
+            if (bytes <= 0) return "";
+            std::string out(static_cast<size_t>(bytes), '\0');
+            WideCharToMultiByte(CP_UTF8, 0, wstr, len, out.data(), bytes, nullptr, nullptr);
+            return out;
         }
 
         static void Quit() {
@@ -154,21 +172,6 @@ namespace IL2CPP::Module::Unity {
             void* params[] = { &frameRate };
             MethodHandler::invoke(m, nullptr, params);
         }
-
-        // ---- Legacy snake_case aliases (deprecated) ----
-        [[deprecated("Use GetDataPath()")]] [[nodiscard]] static std::string get_data_path() { return GetDataPath(); }
-        [[deprecated("Use GetPersistentDataPath()")]] [[nodiscard]] static std::string get_persistent_data_path() { return GetPersistentDataPath(); }
-        [[deprecated("Use GetStreamingAssetsPath()")]] [[nodiscard]] static std::string get_streaming_assets_path() { return GetStreamingAssetsPath(); }
-        [[deprecated("Use GetIsPlaying()")]] [[nodiscard]] static bool get_is_playing() { return GetIsPlaying(); }
-        [[deprecated("Use GetIsEditor()")]] [[nodiscard]] static bool get_is_editor() { return GetIsEditor(); }
-        [[deprecated("Use GetPlatform()")]] [[nodiscard]] static RuntimePlatform get_platform() { return GetPlatform(); }
-        [[deprecated("Use GetVersion()")]] [[nodiscard]] static std::string get_version() { return GetVersion(); }
-        [[deprecated("Use GetProductName()")]] [[nodiscard]] static std::string get_product_name() { return GetProductName(); }
-        [[deprecated("Use GetCompanyName()")]] [[nodiscard]] static std::string get_company_name() { return GetCompanyName(); }
-        [[deprecated("Use Quit()")]] static void quit() { Quit(); }
-        [[deprecated("Use OpenURL()")]] static void open_url(std::string_view u) { OpenURL(u); }
-        [[deprecated("Use GetTargetFrameRate()")]] [[nodiscard]] static int get_target_frame_rate() { return GetTargetFrameRate(); }
-        [[deprecated("Use SetTargetFrameRate()")]] static void set_target_frame_rate(int f) { SetTargetFrameRate(f); }
     };
 
 } // namespace IL2CPP::Module::Unity

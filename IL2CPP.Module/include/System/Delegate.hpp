@@ -5,36 +5,6 @@
 #include <IL2CPP.Common/il2cpp_shared.hpp>
 #include <IL2CPP.Common/il2cpp_structs.hpp>
 
-// ============================================================================
-//  IL2CPP.Module::System::Delegate
-//
-//  IL2CPP delegate in-memory layout (after il2cppObject header at 0x10):
-//
-//    +0x10  method_ptr      void*               — raw function pointer
-//    +0x18  invoke_impl     void*               — invocation trampoline
-//    +0x20  m_target        il2cppObject*        — target object (or self for closed static)
-//    +0x28  method          il2cppMethodInfo*    — method metadata (can be null for native)
-//    +0x30  delegate_trampoline  void*           — (internal)
-//    +0x38  extra_arg       void*               — extra context (internal)
-//    +0x40  method_code     void*               — (internal)
-//
-//  When IL2CPP invokes a delegate, it calls invoke_impl:
-//    invoke_impl(m_target, <args...>, method)
-//
-//  For native C++ delegates, we set both method_ptr and invoke_impl to
-//  our native function. Your C++ function must match the IL2CPP calling
-//  convention — __fastcall on x64 with a trailing void* method param:
-//
-//    Action:          void(__fastcall*)(void* target, void* method)
-//    Action<int>:     void(__fastcall*)(void* target, int arg, void* method)
-//    Action<T1, T2>:  void(__fastcall*)(void* target, T1 a, T2 b, void* method)
-//    Func<TRet>:      TRet(__fastcall*)(void* target, void* method)
-//    Func<T, TRet>:   TRet(__fastcall*)(void* target, T arg, void* method)
-//
-//  The 'target' parameter will be whatever you set as m_target (or nullptr).
-//  The 'method' parameter will be the il2cppMethodInfo* (or nullptr for native).
-// ============================================================================
-
 namespace IL2CPP::Module::System {
 
     class Delegate : public ManagedObject {
@@ -48,7 +18,6 @@ namespace IL2CPP::Module::System {
 
         using ManagedObject::ManagedObject;
 
-        // ---- Field accessors ----
 
         [[nodiscard]] void* GetTarget() const {
             static auto m = MethodHandler::resolve("System.Delegate", "get_Target", 0);
@@ -65,7 +34,6 @@ namespace IL2CPP::Module::System {
             return read<void*>(kInvokeImplOffset);
         }
 
-        // ---- Combine / Remove ----
 
         static Delegate Combine(Delegate a, Delegate b) {
             static auto m = MethodHandler::resolve("System.Delegate", "Combine", 2);
@@ -89,7 +57,6 @@ namespace IL2CPP::Module::System {
             return MethodHandler::invoke<void*>(m, raw(), params);
         }
 
-        // ---- Create from IL2CPP MethodInfo ----
 
         [[nodiscard]] static Delegate CreateForStaticMethod(std::string_view delegateTypeName, void* targetMethodInfo) {
             auto* e = GetExports();
@@ -135,9 +102,6 @@ namespace IL2CPP::Module::System {
             return Delegate{ delegateObj };
         }
 
-        // ================================================================
-        //  Create delegates from native C++ function pointers
-        // ================================================================
 
         /// Create a delegate that calls a native C++ function.
         ///
@@ -191,9 +155,6 @@ namespace IL2CPP::Module::System {
         }
     };
 
-    // ====================================================================
-    //  Action — System.Action (no args)
-    // ====================================================================
 
     class Action : public Delegate {
     public:
@@ -224,9 +185,6 @@ namespace IL2CPP::Module::System {
         }
     };
 
-    // ====================================================================
-    //  Action1<T> — System.Action<T> (one arg)
-    // ====================================================================
 
     template<typename T>
     class Action1 : public Delegate {
@@ -250,9 +208,6 @@ namespace IL2CPP::Module::System {
         }
     };
 
-    // ====================================================================
-    //  Action2<T1, T2> — System.Action<T1, T2> (two args)
-    // ====================================================================
 
     template<typename T1, typename T2>
     class Action2 : public Delegate {
@@ -272,9 +227,6 @@ namespace IL2CPP::Module::System {
         }
     };
 
-    // ====================================================================
-    //  Func<TResult> — System.Func<TResult> (no args, returns value)
-    // ====================================================================
 
     template<typename TResult>
     class Func : public Delegate {
@@ -296,9 +248,6 @@ namespace IL2CPP::Module::System {
         }
     };
 
-    // ====================================================================
-    //  Func1<T, TResult> — System.Func<T, TResult> (one arg, returns value)
-    // ====================================================================
 
     template<typename T, typename TResult>
     class Func1 : public Delegate {

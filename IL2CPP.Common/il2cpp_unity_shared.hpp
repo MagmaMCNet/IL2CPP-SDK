@@ -1,20 +1,9 @@
 #pragma once
 #include <cstdint>
 
-// ============================================================================
-//  IL2CPP.Common - Shared Unity Function Tables
-//
-//  This struct is populated by IL2CPP.Core (via ResolveCall) and shared with
-//  IL2CPP.Module through a second shared memory block ("Global\IL2CPP.Unity").
-//
-//  All function pointer slots are void* - callers cast to appropriate signature.
-//  The struct layout exactly mirrors the per-class function tables from
-//  UnityStructure.hpp in Core, aggregated into a single memory block.
-// ============================================================================
-
 namespace IL2CPP {
 
-    // ---- Object ----
+
     struct objectFunctions_t {
         void* m_Destroy = nullptr;
         void* m_DestroyImmediate = nullptr;
@@ -27,7 +16,6 @@ namespace IL2CPP {
         void* m_DontDestroyOnLoad = nullptr;
     };
 
-    // ---- GameObject ----
     struct gameObjectFunctions_t {
         void* m_AddComponent = nullptr; void* m_CreatePrimitive = nullptr; void* m_Find = nullptr;
         void* m_FindGameObjectsWithTag = nullptr; void* m_FindGameObjectWithTag = nullptr;
@@ -43,7 +31,6 @@ namespace IL2CPP {
         void* m_BroadcastMessage = nullptr; void* m_TryGetComponent = nullptr;
     };
 
-    // ---- Component ----
     struct componentFunctions_t {
         void* m_GetTransform = nullptr;
         void* m_GetGameObject = nullptr;
@@ -57,20 +44,17 @@ namespace IL2CPP {
         void* m_GetComponentsInParent = nullptr;
     };
 
-    // ---- Collider ----
     struct colliderFunctions_t {
         void* m_GetEnabled = nullptr; void* m_SetEnabled = nullptr;
         void* m_GetIsTrigger = nullptr; void* m_SetIsTrigger = nullptr;
         void* m_GetAttachedRigidbody = nullptr;
     };
 
-    // ---- Behaviour ----
     struct behaviourFunctions_t {
         void* m_GetEnabled = nullptr; void* m_SetEnabled = nullptr;
         void* m_GetIsActiveAndEnabled = nullptr;
     };
 
-    // ---- MonoBehaviour ----
     struct monoBehaviourFunctions_t {
         void* m_Invoke = nullptr;
         void* m_CancelInvoke = nullptr;
@@ -79,7 +63,6 @@ namespace IL2CPP {
         void* m_StartCoroutine = nullptr;
     };
 
-    // ---- Transform ----
     struct transformFunctions_t {
         void* m_GetPosition = nullptr; void* m_SetPosition = nullptr;
         void* m_GetLocalPosition = nullptr; void* m_SetLocalPosition = nullptr;
@@ -110,7 +93,6 @@ namespace IL2CPP {
         void* m_RotateAroundLocal = nullptr;
     };
 
-    // ---- Rigidbody ----
     struct rigidbodyFunctions_t {
         void* m_SetDensity = nullptr;
         void* m_GetMass = nullptr; void* m_SetMass = nullptr;
@@ -145,7 +127,6 @@ namespace IL2CPP {
         void* m_GetConstraints = nullptr; void* m_SetConstraints = nullptr;
     };
 
-    // ---- Time ----
     struct timeFunctions_t {
         void* m_GetTime = nullptr;
         void* m_GetTimeAsDouble = nullptr;
@@ -173,7 +154,6 @@ namespace IL2CPP {
         void* m_GetCaptureFramerate = nullptr;
     };
 
-    // ---- Input ----
     struct inputFunctions_t {
         void* m_GetAxis = nullptr;
         void* m_GetAxisRaw = nullptr;
@@ -197,13 +177,11 @@ namespace IL2CPP {
         void* m_GetTouches = nullptr;
     };
 
-    // ---- LayerMask ----
     struct layerMaskFunctions_t {
         void* m_LayerToName = nullptr;
         void* m_NameToLayer = nullptr;
     };
 
-    // ---- Camera ----
     struct cameraFunctions_t {
         void* m_GetMain = nullptr;
         void* m_GetCurrent = nullptr;
@@ -228,7 +206,6 @@ namespace IL2CPP {
         void* m_GetAllCamerasCount = nullptr;
     };
 
-    // ---- Physics ----
     struct physicsFunctions_t {
         void* m_Raycast = nullptr;
         void* m_SphereCast = nullptr;
@@ -239,7 +216,6 @@ namespace IL2CPP {
         void* m_GetGravity = nullptr; void* m_SetGravity = nullptr;
     };
 
-    // ---- Screen ----
     struct screenFunctions_t {
         void* m_GetWidth = nullptr;
         void* m_GetHeight = nullptr;
@@ -250,7 +226,6 @@ namespace IL2CPP {
         void* m_SetResolution = nullptr;
     };
 
-    // ---- Application ----
     struct applicationFunctions_t {
         void* m_GetDataPath = nullptr;
         void* m_GetPersistentDataPath = nullptr;
@@ -267,18 +242,12 @@ namespace IL2CPP {
         void* m_GetTargetFrameRate = nullptr; void* m_SetTargetFrameRate = nullptr;
     };
 
-    // ---- Cursor ----
     struct cursorFunctions_t {
         void* m_GetVisible = nullptr; void* m_SetVisible = nullptr;
         void* m_GetLockState = nullptr; void* m_SetLockState = nullptr;
     };
 
-    // ========================================================================
-    //  Aggregate Unity Functions Struct (shared memory block)
-    // ========================================================================
-
     struct unity_functions {
-        uint32_t                m_uVersion;
         objectFunctions_t       object;
         gameObjectFunctions_t   gameObject;
         componentFunctions_t    component;
@@ -295,12 +264,11 @@ namespace IL2CPP {
         screenFunctions_t       screen;
         applicationFunctions_t  application;
         cursorFunctions_t       cursor;
+        uint32_t                m_uVersion;
+        uint32_t                _reserved = 0;
     };
 
-    // ---- Version & shared memory name ----
     constexpr uint32_t       unity_version      = 2;
-    constexpr wchar_t const* unity_shared_prefix = L"Local\\UNIx_PID_";
-    constexpr wchar_t const* unity_shared_suffix = L"_IL2CPPUnity";
 
 
 } // namespace IL2CPP

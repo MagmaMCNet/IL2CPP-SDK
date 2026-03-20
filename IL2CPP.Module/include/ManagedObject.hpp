@@ -9,14 +9,6 @@
 #include <utility>
 #include <vector>
 
-// ============================================================================
-//  IL2CPP.Module - ManagedObject
-//
-//  High-level wrapper around il2cppObject*. Provides type-safe, template-based
-//  field/method/property access. All Unity and .NET wrapper classes derive
-//  from this. Use raw() to get the underlying pointer for low-level usage.
-// ============================================================================
-
 namespace IL2CPP::Module {
 
     class ManagedObject {
@@ -27,7 +19,6 @@ namespace IL2CPP::Module {
         ManagedObject() = default;
         explicit ManagedObject(void* raw) : m_native(raw) {}
 
-        // ---- Raw access ----
 
         /// Get the raw il2cppObject* pointer.
         [[nodiscard]] void* raw() const noexcept { return m_native; }
@@ -41,7 +32,6 @@ namespace IL2CPP::Module {
         /// Get the class handle for this object.
         [[nodiscard]] Class get_class() const;
 
-        // ---- Reflection-based field access ----
 
         template<typename T>
         [[nodiscard]] T get_field(int fieldOffset) const {
@@ -143,7 +133,6 @@ namespace IL2CPP::Module {
             setter.invoke(m_native, params);
         }
 
-        // ---- Direct offset access (low-level escape hatch) ----
 
         /// Read a value at a raw offset from the object base.
         template<typename T>
@@ -166,7 +155,6 @@ namespace IL2CPP::Module {
             return reinterpret_cast<T*>(static_cast<char*>(m_native) + offset);
         }
 
-        // ---- Method invocation ----
 
         /// Call a method by name with typed return. Uses runtime invoke.
         template<typename TReturn>
@@ -205,7 +193,6 @@ namespace IL2CPP::Module {
         /// Get a method handle by name.
         [[nodiscard]] Method get_method_info(std::string_view name, int argc = -1) const;
 
-        // ---- Static field access ----
 
         /// Get a static field value by name.
         template<typename T>
@@ -231,7 +218,6 @@ namespace IL2CPP::Module {
             f.set_static_value(&value);
         }
 
-        // ---- Field discovery ----
 
         /// Check if a field with the given name exists on this object's class.
         [[nodiscard]] bool has_field(std::string_view name) const;
@@ -254,7 +240,6 @@ namespace IL2CPP::Module {
         /// Find all fields matching a predicate.
         [[nodiscard]] std::vector<Field> find_fields(const std::function<bool(const Field&)>& predicate) const;
 
-        // ---- Field iteration ----
 
         /// Get all fields for this object's class (convenience wrapper).
         [[nodiscard]] std::vector<Field> get_fields() const;
@@ -265,7 +250,6 @@ namespace IL2CPP::Module {
         /// Get a list of {name, offset} pairs for all instance fields.
         [[nodiscard]] std::vector<std::pair<const char*, int>> get_field_offsets() const;
 
-        // ---- Method discovery ----
 
         /// Check if a method with the given name exists (optionally matching arg count).
         [[nodiscard]] bool has_method(std::string_view name, int argc = -1) const;
@@ -282,7 +266,6 @@ namespace IL2CPP::Module {
         /// Find all methods with the given parameter count.
         [[nodiscard]] std::vector<Method> find_methods_by_param_count(int count) const;
 
-        // ---- Object utilities ----
 
         /// Get the instance size in bytes (from the class metadata).
         [[nodiscard]] uint32_t instance_size() const;
@@ -317,7 +300,6 @@ namespace IL2CPP::Module {
             return T{ m_native };
         }
 
-        // ---- Boxing / Unboxing ----
 
         /// Unbox this managed object to a value type T.
         template<typename T>
@@ -338,7 +320,6 @@ namespace IL2CPP::Module {
             return box_value(klass, &value);
         }
 
-        // ---- String convenience helpers ----
 
         [[nodiscard]] std::string get_string_field(std::string_view name) const;
         [[nodiscard]] std::string get_string_property(std::string_view name) const;
@@ -346,7 +327,6 @@ namespace IL2CPP::Module {
         void set_string_field(std::string_view name, std::string_view value);
         void set_string_property(std::string_view name, std::string_view value);
 
-        // ---- Equality ----
 
         [[nodiscard]] bool operator==(const ManagedObject& other) const noexcept { return m_native == other.m_native; }
         [[nodiscard]] bool operator!=(const ManagedObject& other) const noexcept { return m_native != other.m_native; }

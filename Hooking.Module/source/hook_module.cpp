@@ -1,20 +1,18 @@
 #include <include/hook_module.hpp>
+#include <SharedMemory.Common/shared_memory.hpp>
 #include <Windows.h>
 #include <atomic>
-#include <string>
-
 
 namespace Hooking::Module {
 
     namespace {
 
-        struct connection_state {
+        struct ConnectionState {
             std::atomic<bool>       connected{ false };
-            HANDLE                  shared_memory_handle = nullptr;
             HookVtable const*      vtable = nullptr;
         };
 
-        connection_state g_conn;
+        ConnectionState g_conn;
 
     }
 
@@ -26,30 +24,9 @@ namespace Hooking::Module {
         if (g_conn.connected.exchange(true, std::memory_order_acq_rel))
             return true;
 
-        std::wstring memName = std::wstring(shared_memory_prefix) + 
-                               std::to_wstring(GetCurrentProcessId()) + 
-                               shared_memory_suffix;
-
-        g_conn.shared_memory_handle = OpenFileMappingW(
-            FILE_MAP_READ, FALSE, memName.c_str());
-
-
-        if (!g_conn.shared_memory_handle) {
-            g_conn.connected.store(false, std::memory_order_release);
-            return false;
-        }
-
-        g_conn.vtable = static_cast<HookVtable const*>(
-            MapViewOfFile(g_conn.shared_memory_handle, FILE_MAP_READ,
-                          0, 0, sizeof(HookVtable)));
-
+        g_conn.vtable = SharedMemory::Resolve<HookVtable>("Hooking.Vtable");
         if (!g_conn.vtable || g_conn.vtable->version != vtable_version) {
-            if (g_conn.vtable) {
-                UnmapViewOfFile(const_cast<HookVtable*>(g_conn.vtable));
-                g_conn.vtable = nullptr;
-            }
-            CloseHandle(g_conn.shared_memory_handle);
-            g_conn.shared_memory_handle = nullptr;
+            g_conn.vtable = nullptr;
             g_conn.connected.store(false, std::memory_order_release);
             return false;
         }
@@ -60,16 +37,7 @@ namespace Hooking::Module {
     void Disconnect() {
         if (!g_conn.connected.exchange(false, std::memory_order_acq_rel))
             return;
-
-        if (g_conn.vtable) {
-            UnmapViewOfFile(const_cast<HookVtable*>(g_conn.vtable));
-            g_conn.vtable = nullptr;
-        }
-
-        if (g_conn.shared_memory_handle) {
-            CloseHandle(g_conn.shared_memory_handle);
-            g_conn.shared_memory_handle = nullptr;
-        }
+        g_conn.vtable = nullptr;
     }
 
     bool is_connected() noexcept {
@@ -203,4 +171,4 @@ namespace Hooking::Module {
         return g_conn.vtable->is_ui_ready();
     }
 
-}
+} // namespace Hooking::Module

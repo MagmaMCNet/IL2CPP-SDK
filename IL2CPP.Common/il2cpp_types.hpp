@@ -6,11 +6,6 @@
 #include <sstream>
 #include <iomanip>
 
-// ============================================================================
-//  IL2CPP.Common - Pure value types used across Core and Module
-//  These have ZERO dependency on IL2CPP internals -- just math and structs.
-// ============================================================================
-
 namespace IL2CPP {
 
     constexpr float DEG2RAD = std::numbers::pi_v<float> / 180.f;
@@ -21,10 +16,6 @@ namespace IL2CPP {
         oss << std::fixed << std::setprecision(3) << f;
         return oss.str();
     }
-
-    // ========================================================================
-    //  Vector Types
-    // ========================================================================
 
     struct Vector2 {
         float x, y;
@@ -109,10 +100,6 @@ namespace IL2CPP {
         [[nodiscard]] std::string ToString() const { return "vec4i(" + std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(z) + ", " + std::to_string(w) + ")"; }
     };
 
-    // ========================================================================
-    //  Quaternion
-    // ========================================================================
-
     struct Quaternion {
         float x, y, z, w;
         constexpr Quaternion() : x(0.f), y(0.f), z(0.f), w(0.f) {}
@@ -158,16 +145,8 @@ namespace IL2CPP {
         [[nodiscard]] std::string ToString() const { return "quaternion(" + fmtf(x) + ", " + fmtf(y) + ", " + fmtf(z) + ", " + fmtf(w) + ")"; }
     };
 
-    // ========================================================================
-    //  Matrix Types
-    // ========================================================================
-
     struct Matrix3x3 { float m[3][3] = {}; constexpr Matrix3x3() = default; float* operator[](int i) { return m[i]; } const float* operator[](int i) const { return m[i]; } };
     struct Matrix4x4 { float m[4][4] = {}; constexpr Matrix4x4() = default; float* operator[](int i) { return m[i]; } const float* operator[](int i) const { return m[i]; } };
-
-    // ========================================================================
-    //  Geometry Types
-    // ========================================================================
 
     struct Bounds { Vector3 m_vCenter, m_vExtents; constexpr Bounds() = default; constexpr Bounds(const Vector3& c, const Vector3& e) : m_vCenter(c), m_vExtents(e) {} [[nodiscard]] std::string ToString() const { return "Bounds(center=" + m_vCenter.ToString() + ", extents=" + m_vExtents.ToString() + ")"; } };
     struct BoundsInt { Vector3Int m_vPosition, m_vSize; constexpr BoundsInt() = default; constexpr BoundsInt(const Vector3Int& p, const Vector3Int& s) : m_vPosition(p), m_vSize(s) {} [[nodiscard]] std::string ToString() const { return "BoundsInt(position=" + m_vPosition.ToString() + ", size=" + m_vSize.ToString() + ")"; } };
@@ -178,23 +157,11 @@ namespace IL2CPP {
 
     struct RaycastHit { Vector3 point; Vector3 normal; uint32_t FaceID; float distance; Vector2 uv; int collider; };
 
-    // ========================================================================
-    //  Color Types
-    // ========================================================================
-
     struct Color { float r = 0, g = 0, b = 0, a = 0; constexpr Color() = default; constexpr Color(float fr, float fg, float fb, float fa = 1.f) : r(fr), g(fg), b(fb), a(fa) {} [[nodiscard]] std::string ToString() const { return "Color(" + fmtf(r) + ", " + fmtf(g) + ", " + fmtf(b) + ", " + fmtf(a) + ")"; } };
     struct Color32 { uint8_t r = 0, g = 0, b = 0, a = 0; constexpr Color32() = default; constexpr Color32(uint8_t cr, uint8_t cg, uint8_t cb, uint8_t ca) : r(cr), g(cg), b(cb), a(ca) {} };
 
-    // ========================================================================
-    //  Misc Types
-    // ========================================================================
-
     struct LayerMask { int m_Mask = 0; constexpr LayerMask() = default; constexpr LayerMask(int mask) : m_Mask(mask) {} [[nodiscard]] constexpr int value() const { return m_Mask; } };
     struct Scene { int handle = 0; };
-
-    // ========================================================================
-    //  Enums
-    // ========================================================================
 
     enum class LoadSceneMode : int { Single, Additive };
     enum class TouchPhase : int { Began = 0, Moved, Stationary, Ended, Canceled };
@@ -227,10 +194,6 @@ namespace IL2CPP {
         Help = 315, Print, SysReq, Break, Menu,
         Mouse0 = 323, Mouse1, Mouse2, Mouse3, Mouse4, Mouse5, Mouse6,
     };
-
-    // ========================================================================
-    //  Unity UI / TextMeshPro Enums
-    // ========================================================================
 
     enum class RenderMode : int {
         WorldSpace = 0,

@@ -1,9 +1,5 @@
 #pragma once
 
-// ============================================================================
-//  VRChatEvents - Player lifecycle event registration
-// ============================================================================
-
 #include "Callbacks.hpp"
 #include <Bootstrap.Common/include/bootstrap_shared.hpp>
 #include <cstdint>

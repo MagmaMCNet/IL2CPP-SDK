@@ -1,9 +1,5 @@
 #pragma once
 
-// ============================================================================
-//  VRCPlayer - VRChat VRCPlayer MonoBehaviour wrapper
-// ============================================================================
-
 #include <IL2CPP.Module/include/il2cpp_module.hpp>
 
 namespace IL2CPP::VRChat {

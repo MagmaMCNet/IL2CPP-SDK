@@ -1,9 +1,5 @@
 #pragma once
 
-// ============================================================================
-//  VRCPlayerApi - VRChat SDK player API wrapper
-// ============================================================================
-
 #include "Enums.hpp"
 #include <IL2CPP.Module/include/il2cpp_module.hpp>
 #include <IL2CPP.Common/il2cpp_shared.hpp>

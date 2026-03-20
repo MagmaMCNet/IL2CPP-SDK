@@ -6,8 +6,6 @@ namespace IL2CPP::VRChat {
 
     using IL2CPP::Module::MethodHandler;
 
-    // ---- Properties ----
-
     std::string LocalizableString::GetKey() {
         static auto m = MethodHandler::resolve("VRC.Localization.LocalizableString", "get_Key", 0);
         void* str = MethodHandler::invoke<void*>(m, raw());
@@ -38,8 +36,6 @@ namespace IL2CPP::VRChat {
         return MethodHandler::invoke<bool>(m, raw());
     }
 
-    // ---- Methods ----
-
     std::string LocalizableString::ToString() {
         static auto m = MethodHandler::resolve("VRC.Localization.LocalizableString", "ToString", 0);
         void* str = MethodHandler::invoke<void*>(m, raw());
@@ -57,15 +53,11 @@ namespace IL2CPP::VRChat {
         return IL2CPP::Module::System::String(result).to_string();
     }
 
-    // ---- Static ----
-
     LocalizableString LocalizableString::Empty() {
         static auto m = MethodHandler::resolve("VRC.Localization.LocalizableString", "get_Empty", 0);
         void* result = MethodHandler::invoke<void*>(m, nullptr);
         return LocalizableString{ result };
     }
-
-    // ---- Construction helpers (LocalizableStringExtensions) ----
 
     LocalizableString LocalizableString::Localize(std::string_view text) {
         static auto m = MethodHandler::resolve("VRC.Localization.LocalizableStringExtensions", "Localize", 1);

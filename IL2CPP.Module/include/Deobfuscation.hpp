@@ -36,6 +36,22 @@ namespace IL2CPP::Module {
                 e->m_helperAddMapping)(obf.c_str(), deobf.c_str());
         }
 
+        /// Get the stable (deobfuscated) full name for a bare short obfuscated name.
+        /// Returns nullptr if no mapping exists.
+        [[nodiscard]] static const char* GetStableNameByShort(const char* shortName) {
+            auto* e = GetExports();
+            if (!e || !e->m_helperGetStableNameByShort || !shortName) return nullptr;
+            return reinterpret_cast<const char*(IL2CPP_CALLTYPE)(const char*)>(
+                e->m_helperGetStableNameByShort)(shortName);
+        }
+
+        /// Convenience: get the stable name by short name as a std::string (empty if not found).
+        [[nodiscard]] static std::string GetStableNameByShortStr(std::string_view shortName) {
+            std::string s(shortName);
+            const char* result = GetStableNameByShort(s.c_str());
+            return result ? result : std::string{};
+        }
+
         /// Convenience: get the stable name as a std::string.
         [[nodiscard]] static std::string GetStableNameStr(std::string_view obfuscated) {
             std::string obf(obfuscated);

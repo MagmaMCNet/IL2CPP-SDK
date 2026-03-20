@@ -1,9 +1,5 @@
 #pragma once
 
-// ============================================================================
-//  VRC_Interactable - VRChat interactable base class
-// ============================================================================
-
 #include <IL2CPP.Module/include/il2cpp_module.hpp>
 #include <string>
 #include <string_view>

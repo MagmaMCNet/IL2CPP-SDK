@@ -5,13 +5,6 @@
 #include <string_view>
 #include <Windows.h>
 
-// ============================================================================
-//  IL2CPP.Module::System::String
-//
-//  Wraps an il2cppString (managed System.String). Provides conversion
-//  to/from std::string and std::wstring without exposing the raw struct.
-// ============================================================================
-
 namespace IL2CPP::Module::System {
 
     class String : public ManagedObject {
@@ -71,7 +64,7 @@ namespace IL2CPP::Module::System {
         }
     };
 
-    [[nodiscard]] inline String operator""il(const char* str, std::size_t) {
+    [[nodiscard]] inline String operator""_il(const char* str, std::size_t) {
         return String::create(str);
     }
 

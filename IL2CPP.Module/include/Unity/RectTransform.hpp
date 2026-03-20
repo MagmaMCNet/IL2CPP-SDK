@@ -3,19 +3,12 @@
 #include "../MethodHandler.hpp"
 #include <IL2CPP.Common/il2cpp_types.hpp>
 
-// ============================================================================
-//  IL2CPP.Module::Unity::RectTransform
-//
-//  Wrapper for UnityEngine.RectTransform using MethodHandler for safe invocation.
-// ============================================================================
-
 namespace IL2CPP::Module::Unity {
 
     class RectTransform : public Transform {
     public:
         using Transform::Transform;
 
-        // ---- anchoredPosition ----
         [[nodiscard]] Vector2 GetAnchoredPosition() const {
             static auto m = MethodHandler::resolve("UnityEngine.RectTransform", "get_anchoredPosition", 0);
             return MethodHandler::invoke<Vector2>(m, raw());
@@ -27,7 +20,6 @@ namespace IL2CPP::Module::Unity {
             MethodHandler::invoke(m, raw(), params);
         }
 
-        // ---- sizeDelta ----
         [[nodiscard]] Vector2 GetSizeDelta() const {
             static auto m = MethodHandler::resolve("UnityEngine.RectTransform", "get_sizeDelta", 0);
             return MethodHandler::invoke<Vector2>(m, raw());
@@ -39,7 +31,6 @@ namespace IL2CPP::Module::Unity {
             MethodHandler::invoke(m, raw(), params);
         }
 
-        // ---- anchorMin ----
         [[nodiscard]] Vector2 GetAnchorMin() const {
             static auto m = MethodHandler::resolve("UnityEngine.RectTransform", "get_anchorMin", 0);
             return MethodHandler::invoke<Vector2>(m, raw());
@@ -51,7 +42,6 @@ namespace IL2CPP::Module::Unity {
             MethodHandler::invoke(m, raw(), params);
         }
 
-        // ---- anchorMax ----
         [[nodiscard]] Vector2 GetAnchorMax() const {
             static auto m = MethodHandler::resolve("UnityEngine.RectTransform", "get_anchorMax", 0);
             return MethodHandler::invoke<Vector2>(m, raw());
@@ -63,7 +53,6 @@ namespace IL2CPP::Module::Unity {
             MethodHandler::invoke(m, raw(), params);
         }
 
-        // ---- pivot ----
         [[nodiscard]] Vector2 GetPivot() const {
             static auto m = MethodHandler::resolve("UnityEngine.RectTransform", "get_pivot", 0);
             return MethodHandler::invoke<Vector2>(m, raw());
@@ -75,7 +64,6 @@ namespace IL2CPP::Module::Unity {
             MethodHandler::invoke(m, raw(), params);
         }
 
-        // ---- offsetMin ----
         [[nodiscard]] Vector2 GetOffsetMin() const {
             static auto m = MethodHandler::resolve("UnityEngine.RectTransform", "get_offsetMin", 0);
             return MethodHandler::invoke<Vector2>(m, raw());
@@ -87,7 +75,6 @@ namespace IL2CPP::Module::Unity {
             MethodHandler::invoke(m, raw(), params);
         }
 
-        // ---- offsetMax ----
         [[nodiscard]] Vector2 GetOffsetMax() const {
             static auto m = MethodHandler::resolve("UnityEngine.RectTransform", "get_offsetMax", 0);
             return MethodHandler::invoke<Vector2>(m, raw());
@@ -99,7 +86,6 @@ namespace IL2CPP::Module::Unity {
             MethodHandler::invoke(m, raw(), params);
         }
 
-        // ---- rect (read-only) ----
         [[nodiscard]] Rect GetRect() const {
             static auto m = MethodHandler::resolve("UnityEngine.RectTransform", "get_rect", 0);
             return MethodHandler::invoke<Rect>(m, raw());

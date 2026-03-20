@@ -1,14 +1,5 @@
 #pragma once
 
-// ============================================================================
-//  VRChat.hpp - Master include for all VRChat class wrappers
-//
-//  Usage:
-//      #include <VRChat/VRChat.hpp>
-//      auto player = IL2CPP::VRChat::VRCPlayerApi::GetLocalPlayer();
-//      auto name = player.GetDisplayName();
-// ============================================================================
-
 #include <IL2CPP.Module/include/il2cpp_module.hpp>
 #include "Enums.hpp"
 #include "Callbacks.hpp"

@@ -1,12 +1,5 @@
 #pragma once
 
-// ============================================================================
-//  LocalizableString - VRC.Localization.LocalizableString wrapper
-//
-//  Value-type struct used for localized UI text. Wraps the boxed IL2CPP
-//  representation as a ManagedObject.
-// ============================================================================
-
 #include <IL2CPP.Module/include/il2cpp_module.hpp>
 #include <string>
 

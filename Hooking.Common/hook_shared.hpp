@@ -30,21 +30,23 @@ namespace Hooking {
     constexpr HookId invalid_hook_id{ invalid_id, invalid_id };
 
     struct HookInfo {
-        HookId      id;
-        HookType    type;
-        HookStatus  status;
         void*        target;
         void*        detour;
         void*        trampoline;
         char const*  name;
+        HookId       id;
         uint32_t     name_length;
+        HookType     type;
+        HookStatus   status;
+        uint8_t      _pad[2] = {};
     };
 
     struct ModuleInfo {
-        uint32_t     id;
         char const*  name;
+        uint32_t     id;
         uint32_t     name_length;
         uint32_t     hook_count;
+        uint32_t     _pad = 0;
     };
 
     struct UiRenderContext {
@@ -101,8 +103,6 @@ namespace Hooking {
     using fn_is_ui_ready           = bool(__cdecl*)();
 
     struct HookVtable {
-        uint32_t              version;
-
         fn_register_module    register_module;
         fn_unregister_module  unregister_module;
 
@@ -129,11 +129,10 @@ namespace Hooking {
         fn_register_ui_wndproc    register_ui_wndproc;
         fn_unregister_ui_wndproc  unregister_ui_wndproc;
         fn_is_ui_ready            is_ui_ready;
+        uint32_t                  version;
+        uint32_t                  _pad = 0;
     };
 
     constexpr uint32_t vtable_version = 1;
-    constexpr wchar_t const* shared_memory_prefix = L"Local\\UNIx_PID_";
-    constexpr wchar_t const* shared_memory_suffix = L"_Hooking";
 
-
-}
+} // namespace Hooking

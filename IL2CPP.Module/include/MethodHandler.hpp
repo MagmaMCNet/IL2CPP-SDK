@@ -5,18 +5,6 @@
 #include <string_view>
 #include <type_traits>
 
-// ============================================================================
-//  IL2CPP.Module::MethodHandler
-//
-//  Static class that resolves and invokes IL2CPP methods through Core's
-//  shared vtable. Core caches class + method info and catches exceptions
-//  internally, so Module gets a thin, safe API.
-//
-//  Usage:
-//      static auto m = MethodHandler::resolve("UnityEngine.Canvas", "get_renderMode", 0);
-//      int mode = MethodHandler::invoke<int>(m, canvas.raw());
-// ============================================================================
-
 namespace IL2CPP::Module {
 
     class MethodHandler {

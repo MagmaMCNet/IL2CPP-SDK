@@ -3,10 +3,6 @@
 #include "../MethodHandler.hpp"
 #include <IL2CPP.Common/il2cpp_types.hpp>
 
-// ============================================================================
-//  IL2CPP.Module::Unity::Camera
-// ============================================================================
-
 namespace IL2CPP::Module::Unity {
 
     class Camera : public Behaviour {
@@ -204,18 +200,6 @@ namespace IL2CPP::Module::Unity {
             return result;
         }
 
-        // ---- Legacy snake_case aliases (deprecated) ----
-        [[deprecated("Use GetMain()")]] [[nodiscard]] static Camera get_main() { return GetMain(); }
-        [[deprecated("Use GetCurrent()")]] [[nodiscard]] static Camera get_current() { return GetCurrent(); }
-        [[deprecated("Use WorldToScreenPoint()")]] [[nodiscard]] Vector3 world_to_screen_point(const Vector3& p) const { return WorldToScreenPoint(p); }
-        [[deprecated("Use GetWorldToCameraMatrix()")]] [[nodiscard]] Matrix4x4 get_world_to_camera_matrix() const { return GetWorldToCameraMatrix(); }
-        [[deprecated("Use GetProjectionMatrix()")]] [[nodiscard]] Matrix4x4 get_projection_matrix() const { return GetProjectionMatrix(); }
-        [[deprecated("Use GetFieldOfView()")]] [[nodiscard]] float get_field_of_view() const { return GetFieldOfView(); }
-        [[deprecated("Use SetFieldOfView()")]] void set_field_of_view(float f) { SetFieldOfView(f); }
-        [[deprecated("Use GetNearClipPlane()")]] [[nodiscard]] float get_near_clip_plane() const { return GetNearClipPlane(); }
-        [[deprecated("Use SetNearClipPlane()")]] void set_near_clip_plane(float n) { SetNearClipPlane(n); }
-        [[deprecated("Use GetFarClipPlane()")]] [[nodiscard]] float get_far_clip_plane() const { return GetFarClipPlane(); }
-        [[deprecated("Use SetFarClipPlane()")]] void set_far_clip_plane(float f) { SetFarClipPlane(f); }
     };
 
 } // namespace IL2CPP::Module::Unity

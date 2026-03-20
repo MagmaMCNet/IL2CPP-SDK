@@ -3,10 +3,6 @@
 #include "../MethodHandler.hpp"
 #include <IL2CPP.Common/il2cpp_shared.hpp>
 
-// ============================================================================
-//  IL2CPP.Module::Unity::MonoBehaviour
-// ============================================================================
-
 namespace IL2CPP::Module::Unity {
 
     class MonoBehaviour : public Behaviour {
@@ -43,12 +39,6 @@ namespace IL2CPP::Module::Unity {
             void* params[] = { str };
             return ManagedObject{ MethodHandler::invoke<void*>(m, raw(), params) };
         }
-
-        // ---- Legacy snake_case aliases (deprecated) ----
-        [[deprecated("Use Invoke()")]] void invoke(std::string_view m, float t) { Invoke(m, t); }
-        [[deprecated("Use CancelInvoke()")]] void cancel_invoke() { CancelInvoke(); }
-        [[deprecated("Use IsInvoking()")]] [[nodiscard]] bool is_invoking() const { return IsInvoking(); }
-        [[deprecated("Use StartCoroutine()")]] [[nodiscard]] ManagedObject start_coroutine(std::string_view m) { return StartCoroutine(m); }
     };
 
 } // namespace IL2CPP::Module::Unity

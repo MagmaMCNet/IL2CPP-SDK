@@ -65,8 +65,8 @@ namespace Bootstrap {
         void* Color_Trusted;
         void* Color_Nuisance;
 
-		int gameObject_nameplate;
-		int gameObject_avatar;
+        int gameObject_nameplate;
+        int gameObject_avatar;
     };
 
     struct LoadBalancingClientData {

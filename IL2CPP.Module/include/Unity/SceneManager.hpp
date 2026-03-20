@@ -24,7 +24,6 @@ namespace IL2CPP::Module::Unity {
         [[nodiscard]] std::string GetName() const {
             static auto m = MethodHandler::resolve("UnityEngine.SceneManagement.Scene", "get_name", 0);
             Scene s = m_scene;
-            void* params[] = { &s };
             // Scene is a value type, we need to box or use differently
             // Actually Scene.get_name is an instance method on value type, pass &scene as obj via boxing
             auto* e = GetExports();

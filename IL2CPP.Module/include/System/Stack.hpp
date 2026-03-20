@@ -1,17 +1,6 @@
 #pragma once
 #include "Array.hpp"
 
-// ============================================================================
-//  IL2CPP.Module::System::Stack<T>
-//
-//  Wraps System.Collections.Generic.Stack<T>.
-//
-//  Layout (after il2cppObject 0x10):
-//    T[]  _array    (+0x10)
-//    int  _size     (+0x18)
-//    int  _version  (+0x1C)
-// ============================================================================
-
 namespace IL2CPP::Module::System {
 
     template<typename T>

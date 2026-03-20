@@ -2,10 +2,6 @@
 #include <include/il2cpp_module.hpp>
 #include <include/System/String.hpp>
 
-// ============================================================================
-//  IL2CPP.Module - ManagedObject Implementation
-// ============================================================================
-
 namespace IL2CPP::Module {
 
     bool ManagedObject::valid() const noexcept {
@@ -44,7 +40,6 @@ namespace IL2CPP::Module {
         return klass.get_method(name, argc);
     }
 
-    // ---- Field discovery ----
 
     bool ManagedObject::has_field(std::string_view name) const {
         if (!valid()) return false;
@@ -125,7 +120,6 @@ namespace IL2CPP::Module {
         return result;
     }
 
-    // ---- Field iteration ----
 
     std::vector<Field> ManagedObject::get_fields() const {
         if (!valid()) return {};
@@ -158,7 +152,6 @@ namespace IL2CPP::Module {
         return result;
     }
 
-    // ---- Object utilities ----
 
     uint32_t ManagedObject::instance_size() const {
         if (!valid()) return 0;
@@ -184,7 +177,6 @@ namespace IL2CPP::Module {
         return myClass.is_subclass_of(klass);
     }
 
-    // ---- Method discovery ----
 
     bool ManagedObject::has_method(std::string_view name, int argc) const {
         if (!valid()) return false;
@@ -239,7 +231,6 @@ namespace IL2CPP::Module {
         return result;
     }
 
-    // ---- Boxing / Unboxing ----
 
     void* ManagedObject::unbox_ptr() const {
         if (!valid()) return nullptr;
@@ -254,7 +245,6 @@ namespace IL2CPP::Module {
         return ManagedObject{ boxed };
     }
 
-    // ---- String convenience helpers ----
 
     std::string ManagedObject::get_string_field(std::string_view name) const {
         if (!valid()) return "";

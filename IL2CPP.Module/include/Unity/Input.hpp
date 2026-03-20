@@ -4,10 +4,6 @@
 #include <IL2CPP.Common/il2cpp_shared.hpp>
 #include <string>
 
-// ============================================================================
-//  IL2CPP.Module::Unity::Input - Static utility class
-// ============================================================================
-
 namespace IL2CPP::Module {
     [[nodiscard]] IL2CPP::il2cpp_exports const* GetExports() noexcept;
 }
@@ -146,27 +142,6 @@ namespace IL2CPP::Module::Unity {
             static auto m = MethodHandler::resolve("UnityEngine.Input", "get_acceleration", 0);
             return MethodHandler::invoke<Vector3>(m, nullptr);
         }
-
-        // ---- Legacy snake_case aliases (deprecated) ----
-        [[deprecated("Use GetAxis()")]] [[nodiscard]] static float get_axis(std::string_view a) { return GetAxis(a); }
-        [[deprecated("Use GetAxisRaw()")]] [[nodiscard]] static float get_axis_raw(std::string_view a) { return GetAxisRaw(a); }
-        [[deprecated("Use GetKey()")]] [[nodiscard]] static bool get_key(KeyCode k) { return GetKey(k); }
-        [[deprecated("Use GetKeyDown()")]] [[nodiscard]] static bool get_key_down(KeyCode k) { return GetKeyDown(k); }
-        [[deprecated("Use GetKeyUp()")]] [[nodiscard]] static bool get_key_up(KeyCode k) { return GetKeyUp(k); }
-        [[deprecated("Use GetMouseButton()")]] [[nodiscard]] static bool get_mouse_button(int b) { return GetMouseButton(b); }
-        [[deprecated("Use GetMouseButtonDown()")]] [[nodiscard]] static bool get_mouse_button_down(int b) { return GetMouseButtonDown(b); }
-        [[deprecated("Use GetMouseButtonUp()")]] [[nodiscard]] static bool get_mouse_button_up(int b) { return GetMouseButtonUp(b); }
-        [[deprecated("Use GetAnyKey()")]] [[nodiscard]] static bool get_any_key() { return GetAnyKey(); }
-        [[deprecated("Use GetAnyKeyDown()")]] [[nodiscard]] static bool get_any_key_down() { return GetAnyKeyDown(); }
-        [[deprecated("Use GetMousePosition()")]] [[nodiscard]] static Vector3 get_mouse_position() { return GetMousePosition(); }
-        [[deprecated("Use GetMouseScrollDelta()")]] [[nodiscard]] static Vector2 get_mouse_scroll_delta() { return GetMouseScrollDelta(); }
-        [[deprecated("Use GetMousePresent()")]] [[nodiscard]] static bool get_mouse_present() { return GetMousePresent(); }
-        [[deprecated("Use GetButton()")]] [[nodiscard]] static bool get_button(std::string_view b) { return GetButton(b); }
-        [[deprecated("Use GetButtonDown()")]] [[nodiscard]] static bool get_button_down(std::string_view b) { return GetButtonDown(b); }
-        [[deprecated("Use GetButtonUp()")]] [[nodiscard]] static bool get_button_up(std::string_view b) { return GetButtonUp(b); }
-        [[deprecated("Use GetTouchCount()")]] [[nodiscard]] static int get_touch_count() { return GetTouchCount(); }
-        [[deprecated("Use IsTouchSupported()")]] [[nodiscard]] static bool is_touch_supported() { return IsTouchSupported(); }
-        [[deprecated("Use GetAcceleration()")]] [[nodiscard]] static Vector3 get_acceleration() { return GetAcceleration(); }
     };
 
 } // namespace IL2CPP::Module::Unity

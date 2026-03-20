@@ -1,8 +1,7 @@
 #include <include\logger_module.hpp>
+#include <SharedMemory.Common/shared_memory.hpp>
 #include <Windows.h>
 #include <atomic>
-#include <string>
-
 
 namespace Logger::Module {
 
@@ -10,7 +9,6 @@ namespace Logger::Module {
 
         struct ConnectionState {
             std::atomic<bool>   connected{ false };
-            HANDLE              shared_memory_handle = nullptr;
             LoggerVtable const* vtable = nullptr;
         };
 
@@ -23,29 +21,9 @@ namespace Logger::Module {
             return true;
         }
 
-        std::wstring memName = std::wstring(shared_memory_prefix) + 
-                               std::to_wstring(GetCurrentProcessId()) + 
-                               shared_memory_suffix;
-
-        g_conn.shared_memory_handle = OpenFileMappingW(FILE_MAP_READ, FALSE, memName.c_str());
-
-
-        if (!g_conn.shared_memory_handle) {
-            g_conn.connected.store(false, std::memory_order_release);
-            return false;
-        }
-
-        g_conn.vtable = static_cast<LoggerVtable const*>(
-            MapViewOfFile(g_conn.shared_memory_handle, FILE_MAP_READ, 0, 0, sizeof(LoggerVtable))
-            );
-
+        g_conn.vtable = SharedMemory::Resolve<LoggerVtable>("Logger.Vtable");
         if (!g_conn.vtable || g_conn.vtable->version != vtable_version) {
-            if (g_conn.vtable) {
-                UnmapViewOfFile(const_cast<LoggerVtable*>(g_conn.vtable));
-                g_conn.vtable = nullptr;
-            }
-            CloseHandle(g_conn.shared_memory_handle);
-            g_conn.shared_memory_handle = nullptr;
+            g_conn.vtable = nullptr;
             g_conn.connected.store(false, std::memory_order_release);
             return false;
         }
@@ -57,16 +35,7 @@ namespace Logger::Module {
         if (!g_conn.connected.exchange(false, std::memory_order_acq_rel)) {
             return;
         }
-
-        if (g_conn.vtable) {
-            UnmapViewOfFile(const_cast<LoggerVtable*>(g_conn.vtable));
-            g_conn.vtable = nullptr;
-        }
-
-        if (g_conn.shared_memory_handle) {
-            CloseHandle(g_conn.shared_memory_handle);
-            g_conn.shared_memory_handle = nullptr;
-        }
+        g_conn.vtable = nullptr;
     }
 
     bool is_connected() noexcept {
@@ -143,13 +112,13 @@ namespace Logger::Module {
         if (!valid()) return;
 
         LogEntry entry{
-            .lvl = lvl,
-            .id = { m_id, invalid_id },
             .message = message.data(),
-            .message_length = static_cast<uint32_t>(message.size()),
             .file = loc.file_name(),
+            .function = loc.function_name(),
+            .id = { m_id, invalid_id },
+            .message_length = static_cast<uint32_t>(message.size()),
             .line = loc.line(),
-            .function = loc.function_name()
+            .lvl = lvl,
         };
 
         g_conn.vtable->log(&entry);
@@ -226,13 +195,13 @@ namespace Logger::Module {
         if (!valid()) return;
 
         LogEntry entry{
-            .lvl = lvl,
-            .id = { m_module_id, m_submodule_id },
             .message = message.data(),
-            .message_length = static_cast<uint32_t>(message.size()),
             .file = loc.file_name(),
+            .function = loc.function_name(),
+            .id = { m_module_id, m_submodule_id },
+            .message_length = static_cast<uint32_t>(message.size()),
             .line = loc.line(),
-            .function = loc.function_name()
+            .lvl = lvl,
         };
 
         g_conn.vtable->log(&entry);
@@ -245,4 +214,4 @@ namespace Logger::Module {
     void Submodule::error(std::string_view msg, std::source_location loc) const { log(Level::error, msg, loc); }
     void Submodule::fatal(std::string_view msg, std::source_location loc) const { log(Level::fatal, msg, loc); }
 
-}
+} // namespace Logger::Module

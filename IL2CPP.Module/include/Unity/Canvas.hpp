@@ -3,19 +3,12 @@
 #include "../MethodHandler.hpp"
 #include <IL2CPP.Common/il2cpp_types.hpp>
 
-// ============================================================================
-//  IL2CPP.Module::Unity::Canvas
-//
-//  Wrapper for UnityEngine.Canvas using MethodHandler for safe invocation.
-// ============================================================================
-
 namespace IL2CPP::Module::Unity {
 
     class Canvas : public Behaviour {
     public:
         using Behaviour::Behaviour;
 
-        // ---- renderMode ----
         [[nodiscard]] int GetRenderMode() const {
             static auto m = MethodHandler::resolve("UnityEngine.Canvas", "get_renderMode", 0);
             return MethodHandler::invoke<int>(m, raw());
@@ -26,7 +19,6 @@ namespace IL2CPP::Module::Unity {
             MethodHandler::invoke(m, raw(), params);
         }
 
-        // ---- sortingOrder ----
         [[nodiscard]] int GetSortingOrder() const {
             static auto m = MethodHandler::resolve("UnityEngine.Canvas", "get_sortingOrder", 0);
             return MethodHandler::invoke<int>(m, raw());
@@ -37,7 +29,6 @@ namespace IL2CPP::Module::Unity {
             MethodHandler::invoke(m, raw(), params);
         }
 
-        // ---- scaleFactor ----
         [[nodiscard]] float GetScaleFactor() const {
             static auto m = MethodHandler::resolve("UnityEngine.Canvas", "get_scaleFactor", 0);
             return MethodHandler::invoke<float>(m, raw());
@@ -48,7 +39,6 @@ namespace IL2CPP::Module::Unity {
             MethodHandler::invoke(m, raw(), params);
         }
 
-        // ---- overrideSorting ----
         [[nodiscard]] bool GetOverrideSorting() const {
             static auto m = MethodHandler::resolve("UnityEngine.Canvas", "get_overrideSorting", 0);
             return MethodHandler::invoke<bool>(m, raw());
@@ -59,7 +49,6 @@ namespace IL2CPP::Module::Unity {
             MethodHandler::invoke(m, raw(), params);
         }
 
-        // ---- pixelPerfect ----
         [[nodiscard]] bool GetPixelPerfect() const {
             static auto m = MethodHandler::resolve("UnityEngine.Canvas", "get_pixelPerfect", 0);
             return MethodHandler::invoke<bool>(m, raw());
@@ -70,19 +59,16 @@ namespace IL2CPP::Module::Unity {
             MethodHandler::invoke(m, raw(), params);
         }
 
-        // ---- worldCamera (read-only, returns raw pointer) ----
         [[nodiscard]] void* GetWorldCamera() const {
             static auto m = MethodHandler::resolve("UnityEngine.Canvas", "get_worldCamera", 0);
             return MethodHandler::invoke<void*>(m, raw());
         }
 
-        // ---- rootCanvas (read-only) ----
         [[nodiscard]] Canvas GetRootCanvas() const {
             static auto m = MethodHandler::resolve("UnityEngine.Canvas", "get_rootCanvas", 0);
             return Canvas{ MethodHandler::invoke<void*>(m, raw()) };
         }
 
-        // ---- Static: ForceUpdateCanvases ----
         static void ForceUpdateCanvases() {
             static auto m = MethodHandler::resolve("UnityEngine.Canvas", "ForceUpdateCanvases", 0);
             MethodHandler::invoke(m, nullptr);

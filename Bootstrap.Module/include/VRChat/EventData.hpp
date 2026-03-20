@@ -1,9 +1,5 @@
 #pragma once
 
-// ============================================================================
-//  EventData - Photon event data wrapper
-// ============================================================================
-
 #include <IL2CPP.Module/include/il2cpp_module.hpp>
 #include <cstdint>
 

@@ -1,9 +1,8 @@
 #include <include/il2cpp_module.hpp>
 #include <IL2CPP.Common/il2cpp_unity_shared.hpp>
+#include <SharedMemory.Common/shared_memory.hpp>
 #include <Windows.h>
 #include <atomic>
-#include <string>
-
 
 namespace IL2CPP::Module {
 
@@ -11,13 +10,13 @@ namespace IL2CPP::Module {
 
         struct ConnectionState {
             std::atomic<bool>           connected{ false };
-            HANDLE                      shared_memory_handle = nullptr;
             IL2CPP::il2cpp_exports const*       exports = nullptr;
-            HANDLE                      unity_memory_handle = nullptr;
             unity_functions const*      unity = nullptr;
         };
 
         ConnectionState g_conn;
+
+        inline auto* E() { return g_conn.exports; }
 
     }
 
@@ -25,55 +24,16 @@ namespace IL2CPP::Module {
         if (g_conn.connected.exchange(true, std::memory_order_acq_rel))
             return true;
 
-        std::wstring memName = std::wstring(exports_shared_prefix) + 
-                               std::to_wstring(GetCurrentProcessId()) + 
-                               exports_shared_suffix;
-
-        g_conn.shared_memory_handle = OpenFileMappingW(
-            FILE_MAP_READ, FALSE, memName.c_str());
-
-
-        if (!g_conn.shared_memory_handle) {
-            g_conn.connected.store(false, std::memory_order_release);
-            return false;
-        }
-
-        g_conn.exports = static_cast<IL2CPP::il2cpp_exports const*>(
-            MapViewOfFile(g_conn.shared_memory_handle,
-                FILE_MAP_READ, 0, 0, sizeof(il2cpp_exports)));
-
+        g_conn.exports = SharedMemory::Resolve<IL2CPP::il2cpp_exports>("IL2CPP.Exports");
         if (!g_conn.exports || g_conn.exports->m_uVersion != exports_version) {
-            if (g_conn.exports) {
-                UnmapViewOfFile(const_cast<IL2CPP::il2cpp_exports*>(g_conn.exports));
-                g_conn.exports = nullptr;
-            }
-            CloseHandle(g_conn.shared_memory_handle);
-            g_conn.shared_memory_handle = nullptr;
+            g_conn.exports = nullptr;
             g_conn.connected.store(false, std::memory_order_release);
             return false;
         }
 
-        std::wstring unityMemName = std::wstring(unity_shared_prefix) + 
-                                    std::to_wstring(GetCurrentProcessId()) + 
-                                    unity_shared_suffix;
-
-        g_conn.unity_memory_handle = OpenFileMappingW(
-            FILE_MAP_READ, FALSE, unityMemName.c_str());
-
-
-        if (g_conn.unity_memory_handle) {
-            g_conn.unity = static_cast<unity_functions const*>(
-                MapViewOfFile(g_conn.unity_memory_handle,
-                    FILE_MAP_READ, 0, 0, sizeof(unity_functions)));
-
-            if (!g_conn.unity || g_conn.unity->m_uVersion != unity_version) {
-                if (g_conn.unity) {
-                    UnmapViewOfFile(const_cast<unity_functions*>(g_conn.unity));
-                    g_conn.unity = nullptr;
-                }
-                CloseHandle(g_conn.unity_memory_handle);
-                g_conn.unity_memory_handle = nullptr;
-            }
+        g_conn.unity = SharedMemory::Resolve<unity_functions>("IL2CPP.Unity");
+        if (g_conn.unity && g_conn.unity->m_uVersion != unity_version) {
+            g_conn.unity = nullptr;
         }
 
         return true;
@@ -82,24 +42,8 @@ namespace IL2CPP::Module {
     void Disconnect() {
         if (!g_conn.connected.exchange(false, std::memory_order_acq_rel))
             return;
-
-        if (g_conn.unity) {
-            UnmapViewOfFile(const_cast<unity_functions*>(g_conn.unity));
-            g_conn.unity = nullptr;
-        }
-        if (g_conn.unity_memory_handle) {
-            CloseHandle(g_conn.unity_memory_handle);
-            g_conn.unity_memory_handle = nullptr;
-        }
-
-        if (g_conn.exports) {
-            UnmapViewOfFile(const_cast<IL2CPP::il2cpp_exports*>(g_conn.exports));
-            g_conn.exports = nullptr;
-        }
-        if (g_conn.shared_memory_handle) {
-            CloseHandle(g_conn.shared_memory_handle);
-            g_conn.shared_memory_handle = nullptr;
-        }
+        g_conn.unity = nullptr;
+        g_conn.exports = nullptr;
     }
 
     [[nodiscard]] bool IsConnected() noexcept {
@@ -108,12 +52,6 @@ namespace IL2CPP::Module {
 
     [[nodiscard]] IL2CPP::il2cpp_exports const* GetExports() noexcept {
         return g_conn.exports;
-    }
-
-    namespace {
-        extern "C" inline IL2CPP::il2cpp_exports const* E() {
-            return g_conn.exports;
-        }
     }
 
     void* GetDomain() {
@@ -137,12 +75,7 @@ namespace IL2CPP::Module {
         reinterpret_cast<void(IL2CPP_CALLTYPE)(void*)>(E()->m_threadDetach)(thread);
     }
 
-    // ========================================================================
-    //  Class Lookup
-    // ========================================================================
-
     il2cppClass* FindClass(std::string_view fullName) {
-        // Use Core's helper function which has caching and deobfuscation
         if (!E() || !E()->m_helperFindClass) return nullptr;
         return static_cast<il2cppClass*>(
             reinterpret_cast<void*(IL2CPP_CALLTYPE)(const char*)>(E()->m_helperFindClass)(
@@ -177,10 +110,6 @@ namespace IL2CPP::Module {
         return reinterpret_cast<il2cppSystemType*(IL2CPP_CALLTYPE)(void*)>(E()->m_typeGetObject)(type);
     }
 
-    // ========================================================================
-    //  Field API
-    // ========================================================================
-
     il2cppFieldInfo* GetFields(il2cppClass* klass, void** iter) {
         if (!E() || !E()->m_classGetFields || !klass) return nullptr;
         return reinterpret_cast<il2cppFieldInfo*(IL2CPP_CALLTYPE)(void*, void**)>(
@@ -196,7 +125,6 @@ namespace IL2CPP::Module {
     int GetFieldOffset(il2cppClass* klass, const char* fieldName) {
         auto* field = GetFieldByName(klass, fieldName);
         if (!field) return -1;
-        // Access offset through the il2cppFieldInfo structure
         return *reinterpret_cast<int32_t*>(reinterpret_cast<char*>(field) + 0x18);
     }
 
@@ -220,10 +148,6 @@ namespace IL2CPP::Module {
         reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, void*, void*)>(E()->m_fieldSetValue)(obj, field, value);
     }
 
-    // ========================================================================
-    //  Method API
-    // ========================================================================
-
     il2cppMethodInfo* GetMethods(il2cppClass* klass, void** iter) {
         if (!E() || !E()->m_classGetMethods || !klass) return nullptr;
         return reinterpret_cast<il2cppMethodInfo*(IL2CPP_CALLTYPE)(void*, void**)>(
@@ -239,7 +163,6 @@ namespace IL2CPP::Module {
     void* GetMethodPointer(il2cppClass* klass, const char* name, int argc) {
         auto* method = GetMethodByName(klass, name, argc);
         if (!method) return nullptr;
-        // m_pMethodPointer is the first field of il2cppMethodInfo
         return *reinterpret_cast<void**>(method);
     }
 
@@ -251,13 +174,19 @@ namespace IL2CPP::Module {
 
     const char* GetMethodParamName(il2cppMethodInfo* method, uint32_t index) {
         if (!E() || !E()->m_methodGetParamName || !method) return nullptr;
-        return reinterpret_cast<const char*(IL2CPP_CALLTYPE)(void*, uint32_t)>(
+        const char* name = reinterpret_cast<const char*(IL2CPP_CALLTYPE)(void*, uint32_t)>(
             E()->m_methodGetParamName)(method, index);
+        if (name && *name) {
+            for (const unsigned char* p = reinterpret_cast<const unsigned char*>(name); *p; ++p) {
+                if (*p > 0x7E || *p < 0x20) {
+                    static thread_local char buf[32];
+                    snprintf(buf, sizeof(buf), "arg_%u", index);
+                    return buf;
+                }
+            }
+        }
+        return name;
     }
-
-    // ========================================================================
-    //  Property API
-    // ========================================================================
 
     il2cppPropertyInfo* GetProperties(il2cppClass* klass, void** iter) {
         if (!E() || !E()->m_classGetProperties || !klass) return nullptr;
@@ -270,10 +199,6 @@ namespace IL2CPP::Module {
         return reinterpret_cast<il2cppPropertyInfo*(IL2CPP_CALLTYPE)(void*, const char*)>(
             E()->m_classGetPropertyFromName)(klass, name);
     }
-
-    // ========================================================================
-    //  Object
-    // ========================================================================
 
     il2cppObject* NewObject(il2cppClass* klass) {
         if (!E() || !E()->m_objectNew || !klass) return nullptr;
@@ -291,28 +216,16 @@ namespace IL2CPP::Module {
             E()->m_runtimeInvoke)(method, obj, params, exc);
     }
 
-    // ========================================================================
-    //  String
-    // ========================================================================
-
     void* StringNew(const char* str) {
         if (!E() || !E()->m_stringNew || !str) return nullptr;
         return reinterpret_cast<void*(IL2CPP_CALLTYPE)(const char*)>(E()->m_stringNew)(str);
     }
-
-    // ========================================================================
-    //  ResolveCall
-    // ========================================================================
 
     void* ResolveCall(std::string_view fullPath, bool isExtern) {
         if (!E() || !E()->m_helperResolveCall) return nullptr;
         return reinterpret_cast<void*(IL2CPP_CALLTYPE)(const char*, bool)>(
             E()->m_helperResolveCall)(std::string(fullPath).c_str(), isExtern);
     }
-
-    // ========================================================================
-    //  Name Stabilization Queries
-    // ========================================================================
 
     const char* GetStableName(const char* obfuscatedName) {
         if (!E() || !E()->m_helperGetStableName || !obfuscatedName) return obfuscatedName;
@@ -326,21 +239,14 @@ namespace IL2CPP::Module {
             E()->m_helperGetOriginalName)(stableName);
     }
 
-    // ========================================================================
-    //  Convenience: Fetch Helpers
-    // ========================================================================
-
     size_t FetchFields(il2cppClass* klass, std::vector<il2cppFieldInfo*>& out) {
         out.clear();
         if (!klass) return 0;
 
         void* iter = nullptr;
-        size_t count = 0;
-        while (auto* field = GetFields(klass, &iter)) {
+        while (auto* field = GetFields(klass, &iter))
             out.emplace_back(field);
-            ++count;
-        }
-        return count;
+        return out.size();
     }
 
     size_t FetchMethods(il2cppClass* klass, std::vector<il2cppMethodInfo*>& out) {
@@ -348,12 +254,9 @@ namespace IL2CPP::Module {
         if (!klass) return 0;
 
         void* iter = nullptr;
-        size_t count = 0;
-        while (auto* method = GetMethods(klass, &iter)) {
+        while (auto* method = GetMethods(klass, &iter))
             out.emplace_back(method);
-            ++count;
-        }
-        return count;
+        return out.size();
     }
 
     size_t FetchClasses(std::vector<il2cppClass*>& out, std::string_view assemblyName) {
@@ -365,16 +268,13 @@ namespace IL2CPP::Module {
         auto** assemblies = GetAssemblies(&assemblyCount);
         if (!assemblies || assemblyCount == 0) return 0;
 
-        // Find the assembly's image
         for (size_t a = 0; a < assemblyCount; ++a) {
             auto* assembly = assemblies[a];
             if (!assembly) continue;
 
-            // Access image from assembly (first field)
             auto* image = *reinterpret_cast<il2cppImage**>(assembly);
             if (!image) continue;
 
-            // Compare assembly name (second field of il2cppImage = m_pNameNoExt)
             const char* imageName = *reinterpret_cast<const char**>(
                 reinterpret_cast<char*>(image) + sizeof(void*));
             if (!imageName || assemblyName != imageName) continue;
@@ -392,10 +292,6 @@ namespace IL2CPP::Module {
 
         return out.size();
     }
-
-    // ========================================================================
-    //  Unity Functions Access
-    // ========================================================================
 
     unity_functions const* GetUnityFunctions() noexcept {
         return g_conn.unity;

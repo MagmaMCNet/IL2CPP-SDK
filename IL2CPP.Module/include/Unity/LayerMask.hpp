@@ -4,13 +4,7 @@
 #include <IL2CPP.Common/il2cpp_shared.hpp>
 #include <string>
 #include <string_view>
-
-// ============================================================================
-//  IL2CPP.Module::Unity::LayerMaskUtils - Static utility class for layer operations
-//
-//  Note: IL2CPP::LayerMask struct is defined in il2cpp_types.hpp
-//  This class provides static utilities for layer name/index conversion.
-// ============================================================================
+#include <Windows.h>
 
 namespace IL2CPP::Module {
     [[nodiscard]] IL2CPP::il2cpp_exports const* GetExports() noexcept;
@@ -31,8 +25,11 @@ namespace IL2CPP::Module::Unity {
             int len = *reinterpret_cast<int*>(static_cast<char*>(str) + 0x10);
             if (len <= 0) return "";
             wchar_t* wstr = reinterpret_cast<wchar_t*>(static_cast<char*>(str) + 0x14);
-            std::wstring ws(wstr, len);
-            return std::string(ws.begin(), ws.end());
+            int bytes = WideCharToMultiByte(CP_UTF8, 0, wstr, len, nullptr, 0, nullptr, nullptr);
+            if (bytes <= 0) return "";
+            std::string out(static_cast<size_t>(bytes), '\0');
+            WideCharToMultiByte(CP_UTF8, 0, wstr, len, out.data(), bytes, nullptr, nullptr);
+            return out;
         }
 
         /// Convert a layer name to its index.
@@ -46,7 +43,6 @@ namespace IL2CPP::Module::Unity {
             return MethodHandler::invoke<int>(m, nullptr, params);
         }
 
-        // ---- Utility Methods ----
 
         [[nodiscard]] static LayerMask from_layer(int layer) {
             return LayerMask(1 << layer);

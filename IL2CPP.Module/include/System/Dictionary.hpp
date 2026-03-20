@@ -2,23 +2,6 @@
 #include "Array.hpp"
 #include <functional>
 
-// ============================================================================
-//  IL2CPP.Module::System::Dictionary<TKey, TValue>
-//
-//  Wraps il2cppDictionary<K,V>. Provides key/value lookup, iteration,
-//  and STL-friendly utilities.
-//
-//  Layout (after il2cppObject 0x10):
-//    il2cppArray<int>* buckets   (+0x10)
-//    il2cppArray<Entry>* entries (+0x18)
-//    int count                   (+0x20)
-//    int freeList                (+0x24)
-//    int freeCount               (+0x28)
-//    int version                 (+0x2C)
-//    void* comparer              (+0x30)
-//    ...
-// ============================================================================
-
 namespace IL2CPP::Module::System {
 
     template<typename TKey, typename TValue>

@@ -4,10 +4,6 @@
 #include "../MethodHandler.hpp"
 #include <vector>
 
-// ============================================================================
-//  IL2CPP.Module::Unity::Component
-// ============================================================================
-
 namespace IL2CPP::Module::Unity {
 
     class GameObject;
@@ -22,7 +18,6 @@ namespace IL2CPP::Module::Unity {
         /// Get the GameObject this component is attached to.
         [[nodiscard]] GameObject GetGameObject() const;
 
-        // ---- Single Component Accessors ----
 
         /// Get a component by System.Type.
         [[nodiscard]] Component GetComponent(Il2CppSystemType* systemType) const {
@@ -79,7 +74,6 @@ namespace IL2CPP::Module::Unity {
             return GetComponentInParent(reinterpret_cast<Il2CppSystemType*>(t.get_system_type_object()), includeInactive);
         }
 
-        // ---- Multiple Component Accessors ----
 
         /// Get all components of the specified type.
         /// @param systemType The System.Type object pointer (Il2CppSystemType*)
@@ -179,7 +173,6 @@ namespace IL2CPP::Module::Unity {
             return Object::FromArray<T>(array);
         }
 
-        // ---- TryGetComponent ----
 
         /// Try to get a component of the specified type.
         /// @param systemType The System.Type object pointer
@@ -205,19 +198,6 @@ namespace IL2CPP::Module::Unity {
             if (!t) return false;
             return TryGetComponent(reinterpret_cast<Il2CppSystemType*>(t.get_system_type_object()), out);
         }
-
-        // ---- Legacy snake_case aliases (deprecated) ----
-        [[deprecated("Use GetTransform()")]] [[nodiscard]] Transform get_transform() const;
-        [[deprecated("Use GetGameObject()")]] [[nodiscard]] GameObject get_game_object() const;
-        [[deprecated("Use GetComponent()")]] [[nodiscard]] Component get_component(Il2CppSystemType* t) const { return GetComponent(t); }
-        [[deprecated("Use GetComponent()")]] [[nodiscard]] Component get_component(Class k) const { return GetComponent(k); }
-        [[deprecated("Use GetComponentByName()")]] [[nodiscard]] Component get_component_by_name(std::string_view n) const { return GetComponentByName(n); }
-        [[deprecated("Use GetComponentInChildren()")]] [[nodiscard]] Component get_component_in_children(Il2CppSystemType* t, bool i = false) const { return GetComponentInChildren(t, i); }
-        [[deprecated("Use GetComponentInChildren()")]] [[nodiscard]] Component get_component_in_children(Class k, bool i = false) const { return GetComponentInChildren(k, i); }
-        [[deprecated("Use GetComponentInParent()")]] [[nodiscard]] Component get_component_in_parent(Il2CppSystemType* t, bool i = false) const { return GetComponentInParent(t, i); }
-        [[deprecated("Use GetComponentInParent()")]] [[nodiscard]] Component get_component_in_parent(Class k, bool i = false) const { return GetComponentInParent(k, i); }
-        [[deprecated("Use TryGetComponent()")]] [[nodiscard]] bool try_get_component(Il2CppSystemType* t, Component& o) const { return TryGetComponent(t, o); }
-        [[deprecated("Use TryGetComponent()")]] [[nodiscard]] bool try_get_component(Class k, Component& o) const { return TryGetComponent(k, o); }
     };
 
     // Type alias for backwards compatibility

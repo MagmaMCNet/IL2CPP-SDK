@@ -4,17 +4,13 @@
 #include <IL2CPP.Common/il2cpp_types.hpp>
 #include <IL2CPP.Common/il2cpp_shared.hpp>
 
-// ============================================================================
-//  IL2CPP.Module::Unity::Transform
-// ============================================================================
-
 namespace IL2CPP::Module::Unity {
 
     class Transform : public Component {
     public:
         using Component::Component;
 
-        // ---- Position ----
+
         [[nodiscard]] Vector3 GetPosition() const {
             static auto m = MethodHandler::resolve("UnityEngine.Transform", "get_position", 0);
             return MethodHandler::invoke<Vector3>(m, raw());
@@ -37,7 +33,7 @@ namespace IL2CPP::Module::Unity {
             MethodHandler::invoke(m, raw(), params);
         }
 
-        // ---- Rotation ----
+
         [[nodiscard]] Quaternion GetRotation() const {
             static auto m = MethodHandler::resolve("UnityEngine.Transform", "get_rotation", 0);
             return MethodHandler::invoke<Quaternion>(m, raw());
@@ -60,7 +56,7 @@ namespace IL2CPP::Module::Unity {
             MethodHandler::invoke(m, raw(), params);
         }
 
-        // ---- Scale ----
+
         [[nodiscard]] Vector3 GetLocalScale() const {
             static auto m = MethodHandler::resolve("UnityEngine.Transform", "get_localScale", 0);
             return MethodHandler::invoke<Vector3>(m, raw());
@@ -77,7 +73,7 @@ namespace IL2CPP::Module::Unity {
             return MethodHandler::invoke<Vector3>(m, raw());
         }
 
-        // ---- Directions ----
+
         [[nodiscard]] Vector3 GetForward() const {
             static auto m = MethodHandler::resolve("UnityEngine.Transform", "get_forward", 0);
             return MethodHandler::invoke<Vector3>(m, raw());
@@ -111,7 +107,7 @@ namespace IL2CPP::Module::Unity {
             MethodHandler::invoke(m, raw(), params);
         }
 
-        // ---- Hierarchy ----
+
         [[nodiscard]] Transform GetParent() const {
             static auto m = MethodHandler::resolve("UnityEngine.Transform", "get_parent", 0);
             return Transform{ MethodHandler::invoke<void*>(m, raw()) };
@@ -166,7 +162,7 @@ namespace IL2CPP::Module::Unity {
             return Transform{ MethodHandler::invoke<void*>(m, raw(), params) };
         }
 
-        // ---- Transform operations ----
+
         void SetPositionAndRotation(const Vector3& pos, const Quaternion& rot) {
             static auto m = MethodHandler::resolve("UnityEngine.Transform", "SetPositionAndRotation", 2);
             Vector3 p = pos;
@@ -204,7 +200,6 @@ namespace IL2CPP::Module::Unity {
             return MethodHandler::invoke<Vector3>(m, raw(), params);
         }
 
-        // ---- Rotation Methods ----
 
         /// Rotate around a point in world space.
         void RotateAround(const Vector3& point, const Vector3& axis, float angle) {
@@ -224,10 +219,10 @@ namespace IL2CPP::Module::Unity {
             MethodHandler::invoke(m, raw(), params);
         }
 
-        // ---- Utility Methods (client-side implementation) ----
 
         /// Make the transform look at a target position.
         void LookAt(const Vector3& worldPosition, const Vector3& worldUp = Vector3(0, 1, 0)) {
+            (void)worldUp; // TODO: incorporate worldUp into rotation calculation
             Vector3 dir = worldPosition - GetPosition();
             if (dir.SqrMagnitude() < 0.0001f) return;
             dir.NormalizeInPlace();
@@ -289,7 +284,7 @@ namespace IL2CPP::Module::Unity {
             }
         }
 
-        // ---- Matrices ----
+
         [[nodiscard]] Matrix4x4 GetWorldToLocalMatrix() const {
             static auto m = MethodHandler::resolve("UnityEngine.Transform", "get_worldToLocalMatrix", 0);
             return MethodHandler::invoke<Matrix4x4>(m, raw());
@@ -299,37 +294,8 @@ namespace IL2CPP::Module::Unity {
             static auto m = MethodHandler::resolve("UnityEngine.Transform", "get_localToWorldMatrix", 0);
             return MethodHandler::invoke<Matrix4x4>(m, raw());
         }
-
-        // ---- Legacy snake_case aliases (deprecated) ----
-        [[deprecated("Use GetPosition()")]] [[nodiscard]] Vector3 get_position() const { return GetPosition(); }
-        [[deprecated("Use SetPosition()")]] void set_position(const Vector3& p) { SetPosition(p); }
-        [[deprecated("Use GetLocalPosition()")]] [[nodiscard]] Vector3 get_local_position() const { return GetLocalPosition(); }
-        [[deprecated("Use SetLocalPosition()")]] void set_local_position(const Vector3& p) { SetLocalPosition(p); }
-        [[deprecated("Use GetRotation()")]] [[nodiscard]] Quaternion get_rotation() const { return GetRotation(); }
-        [[deprecated("Use SetRotation()")]] void set_rotation(const Quaternion& r) { SetRotation(r); }
-        [[deprecated("Use GetLocalRotation()")]] [[nodiscard]] Quaternion get_local_rotation() const { return GetLocalRotation(); }
-        [[deprecated("Use SetLocalRotation()")]] void set_local_rotation(const Quaternion& r) { SetLocalRotation(r); }
-        [[deprecated("Use GetLocalScale()")]] [[nodiscard]] Vector3 get_local_scale() const { return GetLocalScale(); }
-        [[deprecated("Use SetLocalScale()")]] void set_local_scale(const Vector3& s) { SetLocalScale(s); }
-        [[deprecated("Use GetLossyScale()")]] [[nodiscard]] Vector3 get_lossy_scale() const { return GetLossyScale(); }
-        [[deprecated("Use GetForward()")]] [[nodiscard]] Vector3 get_forward() const { return GetForward(); }
-        [[deprecated("Use SetForward()")]] void set_forward(const Vector3& f) { SetForward(f); }
-        [[deprecated("Use GetRight()")]] [[nodiscard]] Vector3 get_right() const { return GetRight(); }
-        [[deprecated("Use SetRight()")]] void set_right(const Vector3& r) { SetRight(r); }
-        [[deprecated("Use GetUp()")]] [[nodiscard]] Vector3 get_up() const { return GetUp(); }
-        [[deprecated("Use SetUp()")]] void set_up(const Vector3& u) { SetUp(u); }
-        [[deprecated("Use GetParent()")]] [[nodiscard]] Transform get_parent() const { return GetParent(); }
-        [[deprecated("Use SetParent()")]] void set_parent(Transform p, bool w = true) { SetParent(p, w); }
-        [[deprecated("Use GetRoot()")]] [[nodiscard]] Transform get_root() const { return GetRoot(); }
-        [[deprecated("Use GetChildCount()")]] [[nodiscard]] int get_child_count() const { return GetChildCount(); }
-        [[deprecated("Use GetChild()")]] [[nodiscard]] Transform get_child(int i) const { return GetChild(i); }
-        [[deprecated("Use GetHierarchyCount()")]] [[nodiscard]] int get_hierarchy_count() const { return GetHierarchyCount(); }
-        [[deprecated("Use IsChildOf()")]] [[nodiscard]] bool is_child_of(Transform p) const { return IsChildOf(p); }
-        [[deprecated("Use DetachChildren()")]] void detach_children() { DetachChildren(); }
-        [[deprecated("Use Find()")]] [[nodiscard]] Transform find(std::string_view n) const { return Find(n); }
     };
 
-    // ---- Deferred implementations requiring Transform ----
 
     inline Transform Component::GetTransform() const {
         static auto m = MethodHandler::resolve("UnityEngine.Component", "get_transform", 0);
@@ -346,12 +312,6 @@ namespace IL2CPP::Module::Unity {
         return Transform{ MethodHandler::invoke<void*>(m, raw()) };
     }
 
-    // ---- Legacy deferred implementations ----
-    inline Transform Component::get_transform() const { return GetTransform(); }
-    inline GameObject Component::get_game_object() const { return GetGameObject(); }
-    inline Transform GameObject::get_transform() const { return GetTransform(); }
-
-    // ---- Object deferred implementations ----
 
     inline Object Object::InstantiateWithParent(Transform parent, bool WorldPositionStays) const {
         static auto m = MethodHandler::resolve("UnityEngine.Object", "Internal_CloneSingleWithParent", 3);

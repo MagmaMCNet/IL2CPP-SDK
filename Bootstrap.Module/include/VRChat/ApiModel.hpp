@@ -1,9 +1,5 @@
 #pragma once
 
-// ============================================================================
-//  ApiModel - Base class for VRChat API model objects
-// ============================================================================
-
 #include <IL2CPP.Module/include/il2cpp_module.hpp>
 #include <string>
 

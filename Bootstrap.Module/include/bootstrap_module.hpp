@@ -1,23 +1,5 @@
 #pragma once
 
-// ============================================================================
-//  bootstrap_module.hpp - Public API for mod developers
-//
-//  Connect to Bootstrap shared memory, access Unity Console and Unity Explorer.
-//  VRChat class wrappers are in the VRChat/ subdirectory (IL2CPP::VRChat namespace).
-//
-//  Usage:
-//      Bootstrap::Module::Connect();
-//      Bootstrap::Module::BootstrapModule mod("MyMod");
-//      auto& console = Bootstrap::Module::UnityConsole::Get();
-//      console.set_enable_colors(true);
-//      uint32_t cid = console.register_callback(mod.id(), my_log_callback);
-//
-//      // VRChat classes:
-//      auto player = IL2CPP::VRChat::VRCPlayerApi::GetLocalPlayer();
-//      auto name = player.GetDisplayName();
-// ============================================================================
-
 #include <Bootstrap.Common/include/bootstrap_shared.hpp>
 #include <IL2CPP.Module/include/il2cpp_module.hpp>
 #include <string_view>
@@ -26,7 +8,6 @@
 #include <tuple>
 #include <vector>
 
-// VRChat class wrappers (IL2CPP::VRChat namespace)
 #include "VRChat/VRChat.hpp"
 
 namespace Bootstrap::Module {
@@ -127,7 +108,7 @@ namespace Bootstrap::Module {
         bool has_key(std::string_view key);
         void remove_key(std::string_view key);
 
-        // v12 additions
+        // Vectors and colors
         void set_vec2(std::string_view key, float x, float y);
         std::pair<float, float> get_vec2(std::string_view key, float def_x = 0, float def_y = 0);
         void set_vec3(std::string_view key, float x, float y, float z);
@@ -141,7 +122,7 @@ namespace Bootstrap::Module {
         std::vector<std::string> get_keys();
         void clear();
 
-        // v14: C++ native types — convenience wrappers
+        // Extended numeric types
         void set_double(std::string_view key, double value);
         double get_double(std::string_view key, double default_val = 0.0);
         void set_int64(std::string_view key, int64_t value);
@@ -219,7 +200,7 @@ namespace Bootstrap::Module {
         void set_page_badge(uint32_t module_id, uint32_t page_id, bool visible, std::string_view text,
                             std::nullptr_t no_color);
 
-        // v7 — enable/disable, visibility, sub-page nav, sprite utility
+        // Button state and sub-page navigation
         void set_button_enabled(uint32_t module_id, uint32_t button_id, bool enabled);
         void set_button_visible(uint32_t module_id, uint32_t button_id, bool visible);
         uint32_t get_subpage_nav_button(uint32_t module_id, uint32_t sub_page_id);
@@ -227,7 +208,7 @@ namespace Bootstrap::Module {
         void set_subpage_nav_icon(uint32_t module_id, uint32_t sub_page_id, int32_t sprite_id);
         void set_image_sprite(void* image_component, int32_t sprite_id);
 
-        // v8 — foldouts, settings toggles, enum selectors, sliders, separators
+        // Foldouts, settings toggles, enum selectors, sliders, separators
         uint32_t add_foldout(uint32_t module_id, uint32_t page_id, std::string_view title,
                              bool default_expanded = true, bool show_background = false,
                              bool auto_separators = false);
@@ -274,7 +255,7 @@ namespace Bootstrap::Module {
         void* get_local_player_api();
         void* get_local_vrc_player();
 
-        // v13: Player rank (bootstrap hooks get_tags to inject tags based on bio)
+        // Player rank
         Bootstrap::PlayerRank get_player_rank(void* player);
         Bootstrap::Color get_rank_color(Bootstrap::PlayerRank rank);
 
@@ -300,7 +281,7 @@ namespace Bootstrap::Module {
         void cancel(uint32_t tween_id);
         void cancel_all(uint32_t module_id);
 
-        // v10 additions
+        // Extended tweens with completion callbacks
         uint32_t tween_float(uint32_t module_id, float from, float to,
                              float duration_ms, int32_t ease_type = 0,
                              fn_tween_completion_callback on_complete = nullptr);
@@ -391,7 +372,6 @@ namespace Bootstrap::Module {
         KeyAuth() = default;
     };
 
-    // v12: WebSocket
     class WebSocket {
     public:
         static WebSocket& Get();
@@ -409,7 +389,6 @@ namespace Bootstrap::Module {
         WebSocket() = default;
     };
 
-    // v12: Sandboxed Filesystem
     class FileSystem {
     public:
         static FileSystem& Get();
@@ -430,7 +409,6 @@ namespace Bootstrap::Module {
         FileSystem() = default;
     };
 
-    // v12: Clipboard
     class Clipboard {
     public:
         static Clipboard& Get();

@@ -20,11 +20,6 @@ namespace IL2CPP::Module {
             return std::string(className) + "::" + memberName;
         }
 
-        inline bool isValidPointer(const void* ptr) noexcept {
-            uintptr_t val = reinterpret_cast<uintptr_t>(ptr);
-            return val > 0x10000 && val < 0x7FFFFFFFFFFF;
-        }
-
         inline const char* extract_member_name(const char* result) {
             const char* colonPos = std::strstr(result, "::");
             return colonPos ? colonPos + 2 : result;
@@ -152,9 +147,6 @@ namespace IL2CPP::Module {
         return reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*)>(E()->m_typeGetObject)(m_native);
     }
 
-    // ========================================================================
-    //  Field
-    // ========================================================================
 
     const char* Field::raw_name() const {
         if (!m_native) return "";
@@ -168,10 +160,10 @@ namespace IL2CPP::Module {
 
         // Try qualified lookup: deobfuscated name first, then stabilized
         void* parentClass = *reinterpret_cast<void**>(static_cast<char*>(m_native) + 2 * sizeof(void*));
-        if (isValidPointer(parentClass)) {
+        if (IsValid(parentClass)) {
             const char* rawClassName = *reinterpret_cast<const char**>(
                 static_cast<char*>(parentClass) + 2 * sizeof(void*));
-            if (isValidPointer(rawClassName)) {
+            if (IsValid(rawClassName)) {
                 const char* resolved = resolve_member_name(rawClassName, raw);
                 if (resolved) return resolved;
             }
@@ -281,9 +273,6 @@ namespace IL2CPP::Module {
         return reinterpret_cast<bool(IL2CPP_CALLTYPE)(void*, void*)>(E()->m_fieldHasAttribute)(m_native, attr_class);
     }
 
-    // ========================================================================
-    //  Method
-    // ========================================================================
 
     const char* Method::raw_name() const {
         if (!m_native) return "";
@@ -305,11 +294,11 @@ namespace IL2CPP::Module {
 #else
         void* parentClass = *reinterpret_cast<void**>(static_cast<char*>(m_native) + 3 * sizeof(void*));
 #endif
-        if (isValidPointer(parentClass)) {
+        if (IsValid(parentClass)) {
             const char* rawClassName = *reinterpret_cast<const char**>(
                 static_cast<char*>(parentClass) + 2 * sizeof(void*));
 
-            if (isValidPointer(rawClassName)) {
+            if (IsValid(rawClassName)) {
                 const char* resolved = resolve_member_name(rawClassName, raw);
                 if (resolved) return resolved;
             }
@@ -405,7 +394,17 @@ namespace IL2CPP::Module {
 
     const char* Method::get_param_name(uint32_t index) const {
         if (!m_native || !E() || !E()->m_methodGetParamName) return "";
-        return reinterpret_cast<const char*(IL2CPP_CALLTYPE)(void*, uint32_t)>(E()->m_methodGetParamName)(m_native, index);
+        const char* name = reinterpret_cast<const char*(IL2CPP_CALLTYPE)(void*, uint32_t)>(E()->m_methodGetParamName)(m_native, index);
+        if (name && *name) {
+            for (const unsigned char* p = reinterpret_cast<const unsigned char*>(name); *p; ++p) {
+                if (*p > 0x7E || *p < 0x20) {
+                    static thread_local char buf[32];
+                    snprintf(buf, sizeof(buf), "arg_%u", index);
+                    return buf;
+                }
+            }
+        }
+        return name ? name : "";
     }
 
     Type Method::return_type() const {
@@ -416,7 +415,7 @@ namespace IL2CPP::Module {
             void* retType = reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*)>(
                 E()->m_helperGetMethodReturnType)(m_native);
             // Validate the returned pointer
-            if (isValidPointer(retType)) {
+            if (IsValid(retType)) {
                 return Type{ retType };
             }
             return Type{};  // Return empty type if pointer is invalid
@@ -429,7 +428,7 @@ namespace IL2CPP::Module {
 #else
         retType = *reinterpret_cast<void**>(static_cast<char*>(m_native) + 4 * sizeof(void*));
 #endif
-        return isValidPointer(retType) ? Type{ retType } : Type{};
+        return IsValid(retType) ? Type{ retType } : Type{};
     }
 
     void* Method::invoke(void* obj, void** params, void** exc) const {
@@ -443,9 +442,6 @@ namespace IL2CPP::Module {
         return reinterpret_cast<bool(IL2CPP_CALLTYPE)(void*, void*)>(E()->m_methodHasAttribute)(m_native, attr_class);
     }
 
-    // ========================================================================
-    //  Property
-    // ========================================================================
 
     const char* Property::raw_name() const {
         if (!m_native) return "";
@@ -459,10 +455,10 @@ namespace IL2CPP::Module {
 
         // Get parent class for qualified lookup (with pointer validation)
         void* parentClass = *reinterpret_cast<void**>(m_native);
-        if (isValidPointer(parentClass)) {
+        if (IsValid(parentClass)) {
             const char* rawClassName = *reinterpret_cast<const char**>(
                 static_cast<char*>(parentClass) + 2 * sizeof(void*));
-            if (isValidPointer(rawClassName)) {
+            if (IsValid(rawClassName)) {
                 const char* resolved = resolve_member_name(rawClassName, raw);
                 if (resolved) return resolved;
             }
@@ -547,9 +543,6 @@ namespace IL2CPP::Module {
         return "private";
     }
 
-    // ========================================================================
-    //  Class
-    // ========================================================================
 
     const char* Class::raw_name() const {
         if (!m_native) return "";
@@ -807,9 +800,6 @@ namespace IL2CPP::Module {
         return ManagedObject{ reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*)>(E()->m_objectNew)(m_native) };
     }
 
-    // ========================================================================
-    //  Image
-    // ========================================================================
 
     const char* Image::name() const {
         if (!m_native) return "";
@@ -839,9 +829,6 @@ namespace IL2CPP::Module {
         return result;
     }
 
-    // ========================================================================
-    //  Assembly
-    // ========================================================================
 
     Image Assembly::get_image() const {
         if (!m_native) return Image{};

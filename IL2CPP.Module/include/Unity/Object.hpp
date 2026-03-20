@@ -10,12 +10,6 @@
 #include <vector>
 #include <Windows.h>
 
-// ============================================================================
-//  IL2CPP.Module::Unity::Object
-//
-//  High-level wrapper for UnityEngine.Object. Base class for all Unity types.
-// ============================================================================
-
 namespace IL2CPP::Module::Unity {
 
     class Transform;
@@ -109,7 +103,6 @@ namespace IL2CPP::Module::Unity {
             MethodHandler::invoke(m, nullptr, params);
         }
 
-        // ---- Static FindObjectOfType Methods ----
 
         /// Find an object of the specified type (first match).
         /// @param systemType The System.Type object pointer (Il2CppSystemType*)
@@ -141,7 +134,6 @@ namespace IL2CPP::Module::Unity {
             return FindObjectOfType(klass);
         }
 
-        // ---- Static FindObjectsOfType Methods ----
 
         /// Helper: convert raw IL2CPP array to std::vector of wrapped objects.
         template<typename T>
@@ -193,7 +185,6 @@ namespace IL2CPP::Module::Unity {
             return FindObjectsOfType(klass);
         }
 
-        // ---- Typed FindObjectsOfType (template helper) ----
 
         /// Find all objects and return as std::vector<T>.
         /// @tparam T The wrapper type (must derive from ManagedObject)
@@ -224,21 +215,11 @@ namespace IL2CPP::Module::Unity {
             return FindObjectsOfTypeAs<T>(klass);
         }
 
-        // ---- Instantiate with Parent ----
 
         /// Instantiate (clone) this object with a parent transform.
         /// @param parent The parent Transform for the cloned object.
         /// @return The cloned object.
         [[nodiscard]] Object InstantiateWithParent(Transform parent, bool worldPositionStays = false) const;
-
-        // ---- Legacy snake_case aliases (deprecated) ----
-        [[deprecated("Use IsValid()")]] [[nodiscard]] bool is_valid() const noexcept { return IsValid(); }
-        [[deprecated("Use Destroy()")]] void destroy(float delay = 0.f) { Destroy(delay); }
-        [[deprecated("Use DestroyImmediate()")]] void destroy_immediate() { DestroyImmediate(); }
-        [[deprecated("Use GetName()")]] [[nodiscard]] std::string get_name() const { return GetName(); }
-        [[deprecated("Use SetName()")]] void set_name(std::string_view name) { SetName(name); }
-        [[deprecated("Use Instantiate()")]] [[nodiscard]] Object instantiate() const { return Instantiate(); }
-        [[deprecated("Use DontDestroyOnLoad()")]] void dont_destroy_on_load() { DontDestroyOnLoad(); }
     };
 
     // Type alias for backwards compatibility
