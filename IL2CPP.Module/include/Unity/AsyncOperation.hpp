@@ -2,7 +2,6 @@
 #include "Object.hpp"
 #include "../Dispatcher.hpp"
 #include "../System/Delegate.hpp"
-#include <condition_variable>
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -21,27 +20,14 @@ namespace IL2CPP::Module::Unity {
             std::shared_ptr<ManagedRoot> operationRoot;
         };
 
+        using StatePtr = std::unique_ptr<void, void(*)(void*)>;
+
         struct Subscription {
             void* target = nullptr;
             std::shared_ptr<ManagedRoot> operationRoot;
             std::shared_ptr<ManagedRoot> actionRoot;
-            void(*cleanup)(void*) = nullptr;
+            StatePtr state{ nullptr, nullptr };
         };
-
-        template<typename Fn>
-        using CallbackMap = std::unordered_map<void*, std::unique_ptr<CallbackState<Fn>>>;
-
-        template<typename Fn>
-        static CallbackMap<Fn>& Callbacks() {
-            static CallbackMap<Fn> callbacks;
-            return callbacks;
-        }
-
-        template<typename Fn>
-        static std::mutex& CallbackMutex() {
-            static std::mutex mutex;
-            return mutex;
-        }
 
         static std::unordered_map<void*, Subscription>& Subscriptions() {
             static std::unordered_map<void*, Subscription> subscriptions;
@@ -64,23 +50,6 @@ namespace IL2CPP::Module::Unity {
         }
 
         template<typename Fn>
-        static std::unique_ptr<CallbackState<Fn>> TakeCallback(void* target) {
-            std::lock_guard lock(CallbackMutex<Fn>());
-            auto& callbacks = Callbacks<Fn>();
-            auto it = callbacks.find(target);
-            if (it == callbacks.end()) return {};
-            auto callback = std::move(it->second);
-            callbacks.erase(it);
-            return callback;
-        }
-
-        template<typename Fn>
-        static void CleanupCallback(void* target) {
-            auto state = TakeCallback<Fn>(target);
-            if (state) (void)state->operationRoot->Reset();
-        }
-
-        template<typename Fn>
         static void InvokeCallback(Fn& callback, AsyncOperation operation) {
             if constexpr (std::is_invocable_v<Fn&, AsyncOperation>) {
                 std::invoke(callback, operation);
@@ -94,9 +63,8 @@ namespace IL2CPP::Module::Unity {
         template<typename Fn>
         static void __fastcall CompletionThunk(void* target, void* operation, void*) noexcept {
             auto subscription = TakeSubscription(target);
-            (void)subscription;
-            auto state = TakeCallback<Fn>(target);
-            if (!state) return;
+            if (!subscription || !subscription->state) return;
+            auto* state = static_cast<CallbackState<Fn>*>(subscription->state.get());
             try {
                 InvokeCallback(state->callback, AsyncOperation{ operation });
             } catch (...) {
@@ -131,10 +99,11 @@ namespace IL2CPP::Module::Unity {
                     removed = exception == nullptr;
                 }
                 if (removed) {
-                    if (subscription.cleanup) subscription.cleanup(subscription.target);
+                    if (subscription.operationRoot) (void)subscription.operationRoot->Reset();
                 } else {
+                    void* target = subscription.target;
                     std::lock_guard lock(SubscriptionMutex());
-                    Subscriptions().emplace(subscription.target, std::move(subscription));
+                    Subscriptions().emplace(target, std::move(subscription));
                     success = false;
                 }
             }
@@ -148,8 +117,8 @@ namespace IL2CPP::Module::Unity {
             if (!add) return false;
 
             auto* exports = GetExports();
-            Class targetClass = Class::find(IL2CPP_STR("System.Object"));
-            Class delegateClass = add.get_param_type(0).get_class();
+            static Class targetClass = Class::find(IL2CPP_STR("System.Object"));
+            static Class delegateClass = add.get_param_type(0).get_class();
             if (!exports || !exports->m_objectNew || !targetClass || !delegateClass) return false;
 
             void* target = reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*)>(
@@ -157,28 +126,21 @@ namespace IL2CPP::Module::Unity {
             if (!target) return false;
 
             using Callback = std::decay_t<Fn>;
-            {
-                std::lock_guard lock(CallbackMutex<Callback>());
-                Callbacks<Callback>().emplace(target, std::make_unique<CallbackState<Callback>>(
-                    CallbackState<Callback>{ std::forward<Fn>(fn), operationRoot }));
-            }
+            StatePtr state{
+                new CallbackState<Callback>{ std::forward<Fn>(fn), operationRoot },
+                [](void* p) { delete static_cast<CallbackState<Callback>*>(p); }
+            };
 
             System::Delegate action = System::Delegate::CreateNative(
                 delegateClass, reinterpret_cast<void*>(&CompletionThunk<Callback>), target);
-            if (!action) {
-                TakeCallback<Callback>(target);
-                return false;
-            }
+            if (!action) return false;
 
             auto actionRoot = std::make_shared<ManagedRoot>();
-            if (!actionRoot->Reset(action.raw())) {
-                TakeCallback<Callback>(target);
-                return false;
-            }
+            if (!actionRoot->Reset(action.raw())) return false;
             {
                 std::lock_guard lock(SubscriptionMutex());
                 Subscriptions().emplace(target, Subscription{
-                    target, operationRoot, std::move(actionRoot), &CleanupCallback<Callback>
+                    target, operationRoot, std::move(actionRoot), std::move(state)
                 });
             }
 
@@ -187,7 +149,6 @@ namespace IL2CPP::Module::Unity {
             add.invoke(raw(), parameters, &exception);
             if (exception) {
                 TakeSubscription(target);
-                TakeCallback<Callback>(target);
                 return false;
             }
             return true;
@@ -247,34 +208,14 @@ namespace IL2CPP::Module::Unity {
             return accepted;
         }
 
+        /// <summary>Cancels every pending subscription. Never blocks: off the Unity main
+        /// thread the cancellation is queued and this returns as soon as it is accepted.</summary>
+        /// <returns>True if all subscriptions were cancelled, or the cancellation was queued.</returns>
         [[nodiscard]] static bool CancelAllSubscriptions() {
             if (Dispatcher::IsMainThread()) {
                 return CancelAllOnMain();
             }
-
-            struct WaitState {
-                std::mutex mutex;
-                std::condition_variable condition;
-                bool done = false;
-                bool success = false;
-            };
-            auto state = std::make_shared<WaitState>();
-            auto finish = [state](bool success) {
-                {
-                    std::lock_guard lock(state->mutex);
-                    state->done = true;
-                    state->success = success;
-                }
-                state->condition.notify_all();
-            };
-            bool accepted = Dispatcher::RunOnMain(
-                [finish] {
-                    finish(CancelAllOnMain());
-                }, [finish] { finish(false); });
-            if (!accepted) return false;
-            std::unique_lock lock(state->mutex);
-            state->condition.wait(lock, [&] { return state->done; });
-            return state->success;
+            return Dispatcher::RunOnMain([] { (void)CancelAllOnMain(); });
         }
     };
 

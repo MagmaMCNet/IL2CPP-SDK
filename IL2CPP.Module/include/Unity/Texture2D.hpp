@@ -89,11 +89,6 @@ namespace IL2CPP::Module::Unity {
             return {};
         }
 
-        void DontUnload() {
-            static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Object"), IL2CPP_STR("set_hideFlags"), 1);
-            if (m) { int flags = 32; void* p[] = { &flags }; MethodHandler::invoke(m, raw(), p); }
-        }
-
         [[nodiscard]] int GetWidth() const {
             static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Texture2D"), IL2CPP_STR("get_width"), 0);
             return MethodHandler::invoke<int>(m, raw());

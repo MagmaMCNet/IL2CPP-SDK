@@ -14,7 +14,7 @@ namespace IL2CPP::VRChat {
     bool Networking::IsNetworkSettled() {
         auto k = klass();
         if (!k) return false;
-        auto f = k.get_field("IsNetworkSettled");
+        static auto f = k.get_field("IsNetworkSettled");
         if (!f) return false;
         bool val = false;
         f.get_static_value(&val);
@@ -24,7 +24,7 @@ namespace IL2CPP::VRChat {
     bool Networking::IsMaster() {
         auto k = klass();
         if (!k) return false;
-        auto f = k.get_field("IsMaster");
+        static auto f = k.get_field("IsMaster");
         if (!f) return false;
         bool val = false;
         f.get_static_value(&val);
@@ -34,7 +34,7 @@ namespace IL2CPP::VRChat {
     bool Networking::IsClogged() {
         auto k = klass();
         if (!k) return false;
-        auto f = k.get_field("IsClogged");
+        static auto f = k.get_field("IsClogged");
         if (!f) return false;
         bool val = false;
         f.get_static_value(&val);
@@ -44,7 +44,7 @@ namespace IL2CPP::VRChat {
     bool Networking::IsInstanceOwner() {
         auto k = klass();
         if (!k) return false;
-        auto f = k.get_field("IsInstanceOwner");
+        static auto f = k.get_field("IsInstanceOwner");
         if (!f) return false;
         bool val = false;
         f.get_static_value(&val);
@@ -54,7 +54,7 @@ namespace IL2CPP::VRChat {
     VRCPlayerApi Networking::GetLocalPlayer() {
         auto k = klass();
         if (!k) return {};
-        auto f = k.get_field("LocalPlayer");
+        static auto f = k.get_field("LocalPlayer");
         if (!f) return {};
         void* val = nullptr;
         f.get_static_value(&val);
@@ -64,7 +64,7 @@ namespace IL2CPP::VRChat {
     VRCPlayerApi Networking::GetMaster() {
         auto k = klass();
         if (!k) return {};
-        auto f = k.get_field("Master");
+        static auto f = k.get_field("Master");
         if (!f) return {};
         void* val = nullptr;
         f.get_static_value(&val);

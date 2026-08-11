@@ -10,51 +10,13 @@
 namespace IL2CPP::Module::Unity {
 
     class Mesh : public Object {
-        // Il2CppArray inline-data offset — cached in g_layoutOffsets (see ManagedObject.hpp).
-        static int ArrayDataOffset() noexcept { return g_layoutOffsets.arrayData; }
-
-        static void* CreateVector3Array(const Vector3* data, size_t count) {
-            auto* e = GetExports();
-            if (!e || !data || count == 0) return nullptr;
-            void* v3Class = reinterpret_cast<void*(IL2CPP_CALLTYPE)(const char*)>(e->m_helperFindClass)(IL2CPP_STR("UnityEngine.Vector3"));
-            if (!v3Class) return nullptr;
-            void* arr = reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*, uintptr_t)>(e->m_arrayNew)(v3Class, count);
+        template<typename T>
+        static void* CreateArray(const char* elementTypeName, const T* data, size_t count) {
+            if (count && !data) return nullptr;
+            auto arr = System::Array<T>::Create(elementTypeName, count);
             if (!arr) return nullptr;
-            std::memcpy(static_cast<char*>(arr) + ArrayDataOffset(), data, count * sizeof(Vector3));
-            return arr;
-        }
-
-        static void* CreateVector2Array(const Vector2* data, size_t count) {
-            auto* e = GetExports();
-            if (!e || !data || count == 0) return nullptr;
-            void* v2Class = reinterpret_cast<void*(IL2CPP_CALLTYPE)(const char*)>(e->m_helperFindClass)(IL2CPP_STR("UnityEngine.Vector2"));
-            if (!v2Class) return nullptr;
-            void* arr = reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*, uintptr_t)>(e->m_arrayNew)(v2Class, count);
-            if (!arr) return nullptr;
-            std::memcpy(static_cast<char*>(arr) + ArrayDataOffset(), data, count * sizeof(Vector2));
-            return arr;
-        }
-
-        static void* CreateColor32Array(const Color32* data, size_t count) {
-            auto* e = GetExports();
-            if (!e || !data || count == 0) return nullptr;
-            void* c32Class = reinterpret_cast<void*(IL2CPP_CALLTYPE)(const char*)>(e->m_helperFindClass)(IL2CPP_STR("UnityEngine.Color32"));
-            if (!c32Class) return nullptr;
-            void* arr = reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*, uintptr_t)>(e->m_arrayNew)(c32Class, count);
-            if (!arr) return nullptr;
-            std::memcpy(static_cast<char*>(arr) + ArrayDataOffset(), data, count * sizeof(Color32));
-            return arr;
-        }
-
-        static void* CreateIntArray(const int* data, size_t count) {
-            auto* e = GetExports();
-            if (!e || !data || count == 0) return nullptr;
-            void* intClass = reinterpret_cast<void*(IL2CPP_CALLTYPE)(const char*)>(e->m_helperFindClass)(IL2CPP_STR("System.Int32"));
-            if (!intClass) return nullptr;
-            void* arr = reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*, uintptr_t)>(e->m_arrayNew)(intClass, count);
-            if (!arr) return nullptr;
-            std::memcpy(static_cast<char*>(arr) + ArrayDataOffset(), data, count * sizeof(int));
-            return arr;
+            if (count) std::memcpy(arr.data(), data, count * sizeof(T));
+            return arr.raw();
         }
 
     public:
@@ -74,7 +36,7 @@ namespace IL2CPP::Module::Unity {
         }
         void SetVertices(const std::vector<Vector3>& verts) {
             static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Mesh"), IL2CPP_STR("set_vertices"), 1);
-            void* arr = CreateVector3Array(verts.data(), verts.size());
+            void* arr = CreateArray(IL2CPP_STR("UnityEngine.Vector3"), verts.data(), verts.size());
             if (!arr) return;
             void* params[] = { arr };
             MethodHandler::invoke(m, raw(), params);
@@ -89,7 +51,7 @@ namespace IL2CPP::Module::Unity {
         }
         void SetNormals(const std::vector<Vector3>& normals) {
             static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Mesh"), IL2CPP_STR("set_normals"), 1);
-            void* arr = CreateVector3Array(normals.data(), normals.size());
+            void* arr = CreateArray(IL2CPP_STR("UnityEngine.Vector3"), normals.data(), normals.size());
             if (!arr) return;
             void* params[] = { arr };
             MethodHandler::invoke(m, raw(), params);
@@ -112,7 +74,7 @@ namespace IL2CPP::Module::Unity {
         }
         void SetUV(const std::vector<Vector2>& uv) {
             static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Mesh"), IL2CPP_STR("set_uv"), 1);
-            void* arr = CreateVector2Array(uv.data(), uv.size());
+            void* arr = CreateArray(IL2CPP_STR("UnityEngine.Vector2"), uv.data(), uv.size());
             if (!arr) return;
             void* params[] = { arr };
             MethodHandler::invoke(m, raw(), params);
@@ -127,7 +89,7 @@ namespace IL2CPP::Module::Unity {
         }
         void SetUV2(const std::vector<Vector2>& uv2) {
             static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Mesh"), IL2CPP_STR("set_uv2"), 1);
-            void* arr = CreateVector2Array(uv2.data(), uv2.size());
+            void* arr = CreateArray(IL2CPP_STR("UnityEngine.Vector2"), uv2.data(), uv2.size());
             if (!arr) return;
             void* params[] = { arr };
             MethodHandler::invoke(m, raw(), params);
@@ -142,7 +104,7 @@ namespace IL2CPP::Module::Unity {
         }
         void SetColors32(const std::vector<Color32>& colors) {
             static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Mesh"), IL2CPP_STR("set_colors32"), 1);
-            void* arr = CreateColor32Array(colors.data(), colors.size());
+            void* arr = CreateArray(IL2CPP_STR("UnityEngine.Color32"), colors.data(), colors.size());
             if (!arr) return;
             void* params[] = { arr };
             MethodHandler::invoke(m, raw(), params);
@@ -157,7 +119,7 @@ namespace IL2CPP::Module::Unity {
         }
         void SetTriangles(const std::vector<int>& triangles) {
             static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Mesh"), IL2CPP_STR("set_triangles"), 1);
-            void* arr = CreateIntArray(triangles.data(), triangles.size());
+            void* arr = CreateArray(IL2CPP_STR("System.Int32"), triangles.data(), triangles.size());
             if (!arr) return;
             void* params[] = { arr };
             MethodHandler::invoke(m, raw(), params);

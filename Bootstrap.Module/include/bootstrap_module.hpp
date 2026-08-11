@@ -37,9 +37,6 @@ namespace Bootstrap::Module {
     private:
         uint32_t m_id = invalid_id;
         std::string m_name;
-
-        friend class UnityConsole;
-        friend class UnityExplorer;
     };
 
     class UnityConsole {
@@ -236,8 +233,7 @@ namespace Bootstrap::Module {
         QuickMenu() = default;
     };
 
-    /// <summary>Handle to a menu button. Value type carrying {module_id, id}.</summary>
-    /// <remarks>Contextually converts to false when the underlying add failed (id == invalid_id).</remarks>
+    /// <summary>Handle to a menu button. Value type carrying {module_id, id}. Contextually converts to false when the underlying add failed (id == invalid_id).</summary>
     class Button {
     public:
         uint32_t module_id = 0;
@@ -269,8 +265,7 @@ namespace Bootstrap::Module {
 
         /// <summary>Current on/off state.</summary>
         [[nodiscard]] bool state() const;
-        /// <summary>Set the state.</summary>
-        /// <remarks>Drives the native control, so it re-fires this toggle's own callback.</remarks>
+        /// <summary>Set the state. Drives the native control, so it re-fires this toggle's own callback.</summary>
         Toggle& set(bool state);
     };
 
@@ -283,8 +278,7 @@ namespace Bootstrap::Module {
 
         /// <summary>Current value.</summary>
         [[nodiscard]] float value() const;
-        /// <summary>Set the value.</summary>
-        /// <remarks>Drives the native control, so it re-fires this slider's own callback.</remarks>
+        /// <summary>Set the value. Drives the native control, so it re-fires this slider's own callback.</summary>
         Slider& set(float value);
     };
 
@@ -297,7 +291,7 @@ namespace Bootstrap::Module {
 
         /// <summary>Current selected option index.</summary>
         [[nodiscard]] int32_t index() const;
-        /// <summary>Set the selected option index.</summary>
+        /// <summary>Set the selected option index. Drives the native control, so it re-fires this selector's own callback.</summary>
         EnumSelector& set(int32_t index);
     };
 
@@ -389,21 +383,7 @@ namespace Bootstrap::Module {
         void remove();
     };
 
-    /// <summary>Module-bound QuickMenu facade. Binds module_id once, returns typed handles, takes std::function callbacks.</summary>
-    /// <remarks>
-    /// All calls must run on the Unity main thread. Prefer building inside on_ready.
-    /// <example>
-    /// <code>
-    /// Menu menu(mod.id());
-    /// menu.on_ready([&]{
-    ///     auto p = menu.page("Net").icon(sprite);
-    ///     p.button("Rejoin", []{ rejoin(); });
-    ///     auto f = p.foldout("Tuning");
-    ///     f.slider("Rate", 0, 100, 30, [](float v){ set_rate(v); }, "rate");
-    /// });
-    /// </code>
-    /// </example>
-    /// </remarks>
+    /// <summary>Module-bound QuickMenu facade. Binds module_id once, returns typed handles, takes std::function callbacks. All calls must run on the Unity main thread.</summary>
     class Menu {
     public:
         /// <summary>Bind the facade to a module id (e.g. BootstrapModule::id()).</summary>

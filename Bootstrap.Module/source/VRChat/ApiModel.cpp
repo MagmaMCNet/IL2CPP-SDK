@@ -7,6 +7,7 @@ namespace IL2CPP::VRChat {
     using IL2CPP::Module::MethodHandler;
 
     std::string ApiModel::GetId() {
+        if (!valid()) return "";
         static auto m = MethodHandler::resolve("VRC.Core.ApiModel", "get_id", 0);
         void* str = MethodHandler::invoke<void*>(m, raw());
         return str ? IL2CPP::Module::System::String(str).to_string() : "";

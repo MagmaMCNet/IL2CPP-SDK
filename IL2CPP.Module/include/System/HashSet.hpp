@@ -100,10 +100,10 @@ namespace IL2CPP::Module::System {
         /// <summary>Convert to std::vector.</summary>
         [[nodiscard]] std::vector<T> to_vector() const {
             if (!valid()) return {};
-            std::vector<T> result;
-            result.reserve(read<int>(kCountOffset));
             auto [data, limit] = get_slots_view();
-            if (!data) return result;
+            if (!data) return {};
+            std::vector<T> result;
+            result.reserve(static_cast<size_t>(limit));
             for (int i = 0; i < limit; ++i) {
                 if (data[i].hashCode >= 0)
                     result.push_back(data[i].value);

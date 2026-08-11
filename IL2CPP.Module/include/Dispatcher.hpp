@@ -144,7 +144,8 @@ namespace IL2CPP::Module {
 
     class ManagedRoot {
         mutable std::mutex m_mutex;
-        uint32_t m_handle = 0;
+        // Pointer-sized: Unity 2022+ il2cpp hands back a GC handle pointer.
+        uintptr_t m_handle = 0;
 
     public:
         ManagedRoot() = default;
@@ -157,21 +158,21 @@ namespace IL2CPP::Module {
 
         [[nodiscard]] bool Reset(void* object = nullptr) {
             auto* exports = GetExports();
-            uint32_t replacement = 0;
+            uintptr_t replacement = 0;
             if (object) {
                 if (!exports || !exports->m_gcHandleNew) return false;
-                replacement = reinterpret_cast<uint32_t(IL2CPP_CALLTYPE)(void*, uint8_t)>(
+                replacement = reinterpret_cast<uintptr_t(IL2CPP_CALLTYPE)(void*, uint8_t)>(
                     exports->m_gcHandleNew)(object, uint8_t{0});
                 if (!replacement) return false;
             }
 
-            uint32_t previous = 0;
+            uintptr_t previous = 0;
             {
                 std::lock_guard lock(m_mutex);
                 previous = std::exchange(m_handle, replacement);
             }
             if (previous && exports && exports->m_gcHandleFree) {
-                reinterpret_cast<void(IL2CPP_CALLTYPE)(uint32_t)>(
+                reinterpret_cast<void(IL2CPP_CALLTYPE)(uintptr_t)>(
                     exports->m_gcHandleFree)(previous);
             }
             return true;
@@ -182,7 +183,7 @@ namespace IL2CPP::Module {
             if (!exports || !exports->m_gcHandleGetTarget) return nullptr;
             std::lock_guard lock(m_mutex);
             if (!m_handle) return nullptr;
-            return reinterpret_cast<void*(IL2CPP_CALLTYPE)(uint32_t)>(
+            return reinterpret_cast<void*(IL2CPP_CALLTYPE)(uintptr_t)>(
                 exports->m_gcHandleGetTarget)(m_handle);
         }
     };

@@ -55,18 +55,17 @@ namespace IL2CPP::Module::System {
         /// <summary>Try to get a value by key. Returns nullptr if not found.</summary>
         [[nodiscard]] TValue* try_get_value(TKey key) {
             if (!valid()) return nullptr;
-            void* bArr = read<void*>(kBucketsOffset);
             void* eArr = read<void*>(kEntriesOffset);
-            if (!IsValidPointer(bArr) || !IsValidPointer(eArr)) return nullptr;
+            if (!IsValidPointer(eArr)) return nullptr;
 
-            auto bSize = *reinterpret_cast<uintptr_t*>(static_cast<char*>(bArr) + Array<int>::MaxLengthOffset());
-            if (bSize == 0) return nullptr;
+            int cnt = read<int>(kCountOffset);
+            int cap = static_cast<int>(*reinterpret_cast<uintptr_t*>(
+                static_cast<char*>(eArr) + Array<Entry>::MaxLengthOffset()));
+            int limit = (cnt < cap) ? cnt : cap;
+            Entry* ent = reinterpret_cast<Entry*>(
+                static_cast<char*>(eArr) + Array<Entry>::ValuesOffset());
 
-            int* buck = reinterpret_cast<int*>(static_cast<char*>(bArr) + Array<int>::ValuesOffset());
-            Entry* ent = reinterpret_cast<Entry*>(static_cast<char*>(eArr) + Array<Entry>::ValuesOffset());
-
-            int bucketIdx = (std::hash<TKey>{}(key) & 0x7FFFFFFF) % static_cast<int>(bSize);
-            for (int i = buck[bucketIdx] - 1; i >= 0; i = ent[i].next) {
+            for (int i = 0; i < limit; ++i) {
                 if (ent[i].hashCode >= 0 && ent[i].key == key)
                     return &ent[i].value;
             }

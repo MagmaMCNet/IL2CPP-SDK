@@ -10,6 +10,7 @@
 namespace SharedMemory {
 
     inline constexpr uint32_t kMagic    = 0x554E4978;
+    inline constexpr uint32_t kBusy     = 0x554E4977;
     inline constexpr uint32_t kVersion  = 1;
     inline constexpr uint32_t kCapacity = 32;
 
@@ -78,11 +79,25 @@ namespace SharedMemory {
             if (!VirtualProtect(dos, 0x10, PAGE_READWRITE, &oldProtect))
                 return false;
 
+            // Only the caller that actually made the page writable restores it.
+            auto restore = [&] {
+                if (oldProtect != PAGE_READWRITE) {
+                    DWORD tmp = 0;
+                    VirtualProtect(dos, 0x10, oldProtect, &tmp);
+                }
+            };
+
             auto* sentinel = reinterpret_cast<volatile LONG*>(dos + 0x0C);
             LONG original = *sentinel;
 
-            if (static_cast<uint32_t>(original) == kMagic) {
-                VirtualProtect(dos, 0x10, oldProtect, &oldProtect);
+            if (static_cast<uint32_t>(original) == kMagic ||
+                static_cast<uint32_t>(original) == kBusy) {
+                restore();
+                return false;
+            }
+
+            if (InterlockedCompareExchange(sentinel, static_cast<LONG>(kBusy), original) != original) {
+                restore();
                 return false;
             }
 
@@ -91,13 +106,8 @@ namespace SharedMemory {
             memcpy(dos + 0x02, &encoded, 8);
             memcpy(dos + 0x0A, &crc, 2);
 
-            LONG prev = InterlockedCompareExchange(sentinel, static_cast<LONG>(kMagic), original);
-
-            VirtualProtect(dos, 0x10, oldProtect, &oldProtect);
-
-            if (prev != original) {
-                return false;
-            }
+            InterlockedExchange(sentinel, static_cast<LONG>(kMagic));
+            restore();
             return true;
         }
 
@@ -152,7 +162,12 @@ namespace SharedMemory {
 
         if (!detail::write_dos_header(ga_base, reg, key)) {
             VirtualFree(reg, 0, MEM_RELEASE);
-            return detail::read_dos_header(ga_base, key);
+            for (int i = 0; i < 100; ++i) {
+                if (Registry* other = detail::read_dos_header(ga_base, key))
+                    return other;
+                Sleep(1);
+            }
+            return nullptr;
         }
 
         return reg;
@@ -240,8 +255,9 @@ namespace SharedMemory {
 
         for (uint32_t i = 0; i < reg->count; ++i) {
             if (strncmp(reg->entries[i].name, name, 63) == 0) {
+                // Zeroed in place, never unmapped: consumers cache the raw pointer.
                 if (reg->entries[i].pointer) {
-                    VirtualFree(reg->entries[i].pointer, 0, MEM_RELEASE);
+                    memset(reg->entries[i].pointer, 0, reg->entries[i].size);
                 }
                 for (uint32_t j = i; j + 1 < reg->count; ++j) {
                     reg->entries[j] = reg->entries[j + 1];

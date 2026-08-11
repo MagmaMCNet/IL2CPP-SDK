@@ -1,4 +1,5 @@
 #pragma once
+#include <cstddef>
 #include <cstdint>
 #include <string_view>
 
@@ -133,5 +134,11 @@ namespace Hooking {
     };
 
     constexpr uint32_t vtable_version = 1;
+
+    static_assert(sizeof(HookVtable) == 184 && offsetof(HookVtable, version) == 176,
+                  "HookVtable layout changed: bump vtable_version and resync the UNIx.ClientBase copy");
+    static_assert(sizeof(HookInfo) == 48, "HookInfo layout changed: resync the UNIx.ClientBase copy");
+    static_assert(sizeof(ModuleInfo) == 24, "ModuleInfo layout changed: resync the UNIx.ClientBase copy");
+    static_assert(sizeof(UiRenderContext) == 40, "UiRenderContext layout changed: resync the UNIx.ClientBase copy");
 
 } // namespace Hooking

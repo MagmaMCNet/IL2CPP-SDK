@@ -157,7 +157,19 @@ namespace IL2CPP {
     struct Rect { float fX = 0, fY = 0, fWidth = 0, fHeight = 0; constexpr Rect() = default; constexpr Rect(float a, float b, float c, float d) : fX(a), fY(b), fWidth(c), fHeight(d) {} };
     struct RectInt { int x = 0, y = 0, width = 0, height = 0; constexpr RectInt() = default; constexpr RectInt(int a, int b, int c, int d) : x(a), y(b), width(c), height(d) {} };
 
-    struct RaycastHit { Vector3 point; Vector3 normal; uint32_t FaceID; float distance; Vector2 uv; int collider; };
+    struct RaycastHit { Vector3 point; Vector3 normal; uint32_t FaceID = 0; float distance = 0.f; Vector2 uv; int collider = 0; };
+
+    struct Ray2D { Vector2 origin, direction; constexpr Ray2D() : direction(0, 1) {} constexpr Ray2D(const Vector2& o, const Vector2& d) : origin(o), direction(d) {} [[nodiscard]] std::string ToString() const { return "Ray2D(origin=" + origin.ToString() + ", direction=" + direction.ToString() + ")"; } };
+
+    struct Pose { Vector3 position; Quaternion rotation; constexpr Pose() = default; constexpr Pose(const Vector3& p, const Quaternion& r) : position(p), rotation(r) {} [[nodiscard]] std::string ToString() const { return "Pose(position=" + position.ToString() + ", rotation=" + rotation.ToString() + ")"; } };
+
+    // UnityEngine.Resolution. Unity 2022 widened the refresh rate to a double
+    // (RefreshRate.value); the dumped ResolutionStruct is { int, int, double }.
+    struct Resolution { int width = 0, height = 0; double refreshRate = 0.0; constexpr Resolution() = default; constexpr Resolution(int w, int h, double r) : width(w), height(h), refreshRate(r) {} };
+
+    struct RectOffset { int left = 0, right = 0, top = 0, bottom = 0; constexpr RectOffset() = default; constexpr RectOffset(int l, int r, int t, int b) : left(l), right(r), top(t), bottom(b) {} [[nodiscard]] constexpr int horizontal() const { return left + right; } [[nodiscard]] constexpr int vertical() const { return top + bottom; } };
+
+    struct BoneWeight { float weight0 = 0, weight1 = 0, weight2 = 0, weight3 = 0; int boneIndex0 = 0, boneIndex1 = 0, boneIndex2 = 0, boneIndex3 = 0; };
 
     struct Color { float r = 0, g = 0, b = 0, a = 0; constexpr Color() = default; constexpr Color(float fr, float fg, float fb, float fa = 1.f) : r(fr), g(fg), b(fb), a(fa) {} [[nodiscard]] std::string ToString() const { return "Color(" + fmtf(r) + ", " + fmtf(g) + ", " + fmtf(b) + ", " + fmtf(a) + ")"; } };
     struct Color32 { uint8_t r = 0, g = 0, b = 0, a = 0; constexpr Color32() = default; constexpr Color32(uint8_t cr, uint8_t cg, uint8_t cb, uint8_t ca) : r(cr), g(cg), b(cb), a(ca) {} };

@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <type_traits>
 #include "vrc_types.hpp"
 #include "sdk_version.hpp"
 
@@ -96,6 +97,7 @@ namespace Bootstrap {
     using fn_config_set_float  = void(__cdecl*)(uint32_t module_id, char const* key, uint32_t key_len, float value);
     using fn_config_get_float  = float(__cdecl*)(uint32_t module_id, char const* key, uint32_t key_len, float default_val);
     using fn_config_set_string = void(__cdecl*)(uint32_t module_id, char const* key, uint32_t key_len, char const* val, uint32_t val_len);
+    /// <returns>Bytes written to out_buf, truncated to buf_size - 1 and NUL-terminated. 0 means absent or empty; truncation is not reported.</returns>
     using fn_config_get_string = uint32_t(__cdecl*)(uint32_t module_id, char const* key, uint32_t key_len, char* out_buf, uint32_t buf_size);
     using fn_config_set_bool   = void(__cdecl*)(uint32_t module_id, char const* key, uint32_t key_len, bool value);
     using fn_config_get_bool   = bool(__cdecl*)(uint32_t module_id, char const* key, uint32_t key_len, bool default_val);
@@ -116,9 +118,11 @@ namespace Bootstrap {
     using fn_config_get_color  = void(__cdecl*)(uint32_t module_id, char const* key, uint32_t key_len,
                                     float* out_r, float* out_g, float* out_b, float* out_a,
                                     float def_r, float def_g, float def_b, float def_a);
+    /// <returns>Bytes written to out_buf, truncated to buf_size - 1 and NUL-terminated. 0 means none; truncation is not reported.</returns>
     using fn_config_get_keys   = uint32_t(__cdecl*)(uint32_t module_id, char* out_buf, uint32_t buf_size);
     using fn_config_clear      = void(__cdecl*)(uint32_t module_id);
     using fn_config_set_json   = void(__cdecl*)(uint32_t module_id, char const* key, uint32_t key_len, char const* json, uint32_t json_len);
+    /// <returns>Bytes written to out_buf, truncated to buf_size - 1 and NUL-terminated. 0 means absent or empty; truncation is not reported.</returns>
     using fn_config_get_json   = uint32_t(__cdecl*)(uint32_t module_id, char const* key, uint32_t key_len, char* out_buf, uint32_t buf_size);
 
     using fn_message_callback    = void(__cdecl*)(uint32_t sender_module_id,
@@ -307,28 +311,34 @@ namespace Bootstrap {
     // WebSocket typedefs removed — slots kept as reserved for ABI
 
     using fn_fs_write_file  = bool(__cdecl*)(uint32_t module_id, char const* path, uint32_t path_len, uint8_t const* data, uint32_t data_len);
+    /// <returns>Bytes written to out_buf, truncated to buf_size - 1 and NUL-terminated. 0 means missing, empty or sandbox-denied; truncation is not reported.</returns>
     using fn_fs_read_file   = uint32_t(__cdecl*)(uint32_t module_id, char const* path, uint32_t path_len, char* out_buf, uint32_t buf_size);
     using fn_fs_file_exists = bool(__cdecl*)(uint32_t module_id, char const* path, uint32_t path_len);
     using fn_fs_delete_file = bool(__cdecl*)(uint32_t module_id, char const* path, uint32_t path_len);
     using fn_fs_create_dir  = bool(__cdecl*)(uint32_t module_id, char const* path, uint32_t path_len);
     using fn_fs_delete_dir  = bool(__cdecl*)(uint32_t module_id, char const* path, uint32_t path_len);
+    /// <returns>Bytes written to out_buf, truncated to buf_size - 1 and NUL-terminated. 0 means empty or sandbox-denied; truncation is not reported.</returns>
     using fn_fs_list_dir    = uint32_t(__cdecl*)(uint32_t module_id, char const* path, uint32_t path_len, char* out_buf, uint32_t buf_size);
+    /// <returns>File size in bytes. 0 means empty, missing or sandbox-denied — use fs_file_exists to distinguish.</returns>
     using fn_fs_file_size   = uint64_t(__cdecl*)(uint32_t module_id, char const* path, uint32_t path_len);
     using fn_fs_append_file = bool(__cdecl*)(uint32_t module_id, char const* path, uint32_t path_len, uint8_t const* data, uint32_t data_len);
 
     using fn_clipboard_set = bool(__cdecl*)(char const* text, uint32_t text_len);
+    /// <returns>Bytes written to out_buf, truncated to buf_size - 1 and NUL-terminated. 0 means empty or unavailable; truncation is not reported.</returns>
     using fn_clipboard_get = uint32_t(__cdecl*)(char* out_buf, uint32_t buf_size);
 
+    /// <summary>Rank in VRChat's display vocabulary, as used by the VRCPlayer rank colour fields.</summary>
     enum class PlayerRank : uint8_t {
         Visitor = 0, NewUser, User, Known, Trusted, Administrator, Troll
     };
 
+    /// <summary>The same ladder in the API tag vocabulary. VRChat's tag names sit one step off its display names.</summary>
     enum class ApiPlayerRank : uint8_t {
         Visitor = 0, Basic, Known, Trusted, Veteran, Administrator, Troll
     };
 
     struct Color {
-        float r, g, b, a;
+        float r = 0.f, g = 0.f, b = 0.f, a = 1.f;
     };
 
     using fn_get_player_rank = uint8_t(__cdecl*)(void* player);
@@ -578,7 +588,9 @@ namespace Bootstrap {
         fn_np_set_plate_background_enabled np_set_plate_background_enabled;
 
         uint32_t version;
-        uint32_t _reserved = 0;
+        uint32_t _reserved;
     };
+
+    static_assert(std::is_trivial_v<BootstrapVtable> && sizeof(BootstrapVtable) == 1088);
 
 } // namespace Bootstrap

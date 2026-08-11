@@ -40,9 +40,15 @@ namespace IL2CPP::Module {
     [[nodiscard]] ThreadAttachment EnsureThreadAttached();
     void ReleaseThreadAttachment(ThreadAttachment attachment);
 
-    [[nodiscard]] uint32_t GCHandleNew(il2cppObject* object, bool pinned = false);
-    [[nodiscard]] il2cppObject* GCHandleGetTarget(uint32_t handle);
-    void GCHandleFree(uint32_t handle);
+    // Handle width is pointer-sized: Unity 2022+ il2cpp returns a GC handle
+    // pointer, not the classic 32-bit index. Truncating drops the high half of
+    // any handle allocated above 4 GB.
+    using GCHandle = uintptr_t;
+    static_assert(sizeof(GCHandle) == sizeof(void*), "GC handles must stay pointer-sized");
+
+    [[nodiscard]] GCHandle GCHandleNew(il2cppObject* object, bool pinned = false);
+    [[nodiscard]] il2cppObject* GCHandleGetTarget(GCHandle handle);
+    void GCHandleFree(GCHandle handle);
 
     [[nodiscard]] il2cppClass* FindClass(std::string_view fullName);
     [[nodiscard]] il2cppClass* GetClassFromName(il2cppImage* image, const char* ns, const char* name);

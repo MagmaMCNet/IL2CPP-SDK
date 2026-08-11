@@ -170,7 +170,7 @@ namespace IL2CPP::Module {
         if (!valid() || count < 0) return result;
         auto methods = get_class_internal().get_methods();
         for (auto& m : methods) {
-            if (m.param_count() == static_cast<uint8_t>(count)) {
+            if (static_cast<int>(m.param_count()) == count) {
                 result.push_back(m);
             }
         }
@@ -215,8 +215,16 @@ namespace IL2CPP::Module {
 
     void ManagedObject::set_string_field(std::string_view name, std::string_view value) {
         if (!valid()) return;
+        Field f = get_class_internal().get_field(name);
+        if (!f) return;
+        int off = f.offset();
+        if (off < 0) return;
+
         auto str = System::String::create(value);
-        set_field(name, str.raw());
+        auto** slot = reinterpret_cast<void**>(static_cast<char*>(m_native) + off);
+        if (!SetReferenceWithWriteBarrier(static_cast<il2cppObject*>(m_native), slot, str.raw())) {
+            *slot = str.raw();
+        }
     }
 
     void ManagedObject::set_string_property(std::string_view name, std::string_view value) {

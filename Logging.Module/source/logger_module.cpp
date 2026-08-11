@@ -2,6 +2,7 @@
 #include <SharedMemory.Common/shared_memory.hpp>
 #include <windows.h>
 #include <atomic>
+#include <mutex>
 
 namespace Logger::Module {
 
@@ -14,24 +15,33 @@ namespace Logger::Module {
 
         ConnectionState g_conn;
 
+        std::mutex& ConnectMutex() noexcept {
+            static std::mutex m;
+            return m;
+        }
+
     }
 
     bool Connect() {
-        if (g_conn.connected.exchange(true, std::memory_order_acq_rel)) {
+        std::lock_guard lock(ConnectMutex());
+        if (g_conn.connected.load(std::memory_order_acquire) && g_conn.vtable) {
             return true;
         }
 
-        g_conn.vtable = SharedMemory::Resolve<LoggerVtable>("Logger.Vtable");
-        if (!g_conn.vtable || g_conn.vtable->version != vtable_version) {
+        auto const* vtable = SharedMemory::Resolve<LoggerVtable>("Logger.Vtable");
+        if (!vtable || vtable->version != vtable_version) {
             g_conn.vtable = nullptr;
             g_conn.connected.store(false, std::memory_order_release);
             return false;
         }
 
+        g_conn.vtable = vtable;
+        g_conn.connected.store(true, std::memory_order_release);
         return true;
     }
 
     void Disconnect() {
+        std::lock_guard lock(ConnectMutex());
         if (!g_conn.connected.exchange(false, std::memory_order_acq_rel)) {
             return;
         }

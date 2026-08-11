@@ -5,9 +5,9 @@
 #define UNIX_SDK_MINOR 0
 #define UNIX_SDK_PATCH 0
 
-#define _UNIX_STR(x) #x
-#define _UNIX_XSTR(x) _UNIX_STR(x)
-#define UNIX_SDK_MAJOR_STR _UNIX_XSTR(UNIX_SDK_MAJOR)
+#define UNIX_STR_(x) #x
+#define UNIX_XSTR_(x) UNIX_STR_(x)
+#define UNIX_SDK_MAJOR_STR UNIX_XSTR_(UNIX_SDK_MAJOR)
 
 namespace Bootstrap {
 

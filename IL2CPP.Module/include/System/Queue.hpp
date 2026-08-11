@@ -51,6 +51,7 @@ namespace IL2CPP::Module::System {
             int sz = count();
             int h = head();
             int cap = static_cast<int>(arr.size());
+            if (sz <= 0 || cap <= 0) return {};
             std::vector<T> result;
             result.reserve(sz);
             T* data = arr.data();

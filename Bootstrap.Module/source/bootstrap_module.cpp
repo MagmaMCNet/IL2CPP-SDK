@@ -6,10 +6,11 @@
 #include <algorithm>
 #include <atomic>
 #include <charconv>
+#include <mutex>
 #include <unordered_map>
 #include <cwchar>
-#include <sstream>
 #include <string>
+#include <utility>
 
 namespace Bootstrap::Module {
 
@@ -22,35 +23,48 @@ namespace Bootstrap::Module {
 
         ConnectionState g_conn;
 
+        void reset_menu_layer();
+
     }
 
     Bootstrap::BootstrapVtable const* get_vtable() noexcept {
         return g_conn.vtable;
     }
 
+    static std::mutex& ConnectMutex() noexcept {
+        static std::mutex m;
+        return m;
+    }
+
     bool Connect() {
-        if (g_conn.connected.exchange(true, std::memory_order_acq_rel))
+        std::lock_guard lock(ConnectMutex());
+        if (g_conn.connected.load(std::memory_order_acquire) && g_conn.vtable)
             return true;
 
-        g_conn.vtable = SharedMemory::Resolve<Bootstrap::BootstrapVtable>("Bootstrap.Vtable");
-        if (!g_conn.vtable || g_conn.vtable->version != Bootstrap::vtable_version) {
+        auto* vtable = SharedMemory::Resolve<Bootstrap::BootstrapVtable>("Bootstrap.Vtable");
+        if (!vtable || vtable->version != Bootstrap::vtable_version) {
             g_conn.vtable = nullptr;
             g_conn.connected.store(false, std::memory_order_release);
             return false;
         }
 
+        g_conn.vtable = vtable;
         (void)IL2CPP::Module::Connect();
+        g_conn.connected.store(true, std::memory_order_release);
         return true;
     }
 
     bool Disconnect() {
-        if (!g_conn.connected.exchange(false, std::memory_order_acq_rel))
+        std::lock_guard lock(ConnectMutex());
+        if (!g_conn.connected.load(std::memory_order_acquire))
             return true;
 
-        if (!IL2CPP::Module::Disconnect()) {
-            g_conn.connected.store(true, std::memory_order_release);
+        if (!IL2CPP::Module::Disconnect())
             return false;
-        }
+
+        reset_menu_layer();
+
+        g_conn.connected.store(false, std::memory_order_release);
         g_conn.vtable = nullptr;
         return true;
     }
@@ -263,7 +277,8 @@ namespace Bootstrap::Module {
         char buf[4096];
         uint32_t len = g_conn.vtable->config_get_string(m_module_id, key.data(),
             static_cast<uint32_t>(key.size()), buf, sizeof(buf));
-        if (len == 0) return std::string(default_val);
+        if (len > sizeof(buf)) len = sizeof(buf);
+        if (len == 0) return has_key(key) ? std::string{} : std::string(default_val);
         return std::string(buf, len);
     }
 
@@ -361,7 +376,7 @@ namespace Bootstrap::Module {
         char buf[4096];
         uint32_t len = g_conn.vtable->config_get_json(m_module_id, key.data(),
             static_cast<uint32_t>(key.size()), buf, sizeof(buf));
-        if (len == 0) return {};
+        if (len == 0 || len > sizeof(buf)) return {};
         return std::string(buf, len);
     }
 
@@ -369,6 +384,7 @@ namespace Bootstrap::Module {
         if (!is_connected()) return {};
         char buf[8192];
         uint32_t len = g_conn.vtable->config_get_keys(m_module_id, buf, sizeof(buf));
+        if (len > sizeof(buf)) len = sizeof(buf);
         if (len == 0) return {};
 
         std::vector<std::string> keys;
@@ -405,7 +421,17 @@ namespace Bootstrap::Module {
                 case '\n': out += "\\n";  break;
                 case '\r': out += "\\r";  break;
                 case '\t': out += "\\t";  break;
-                default:   out += c;      break;
+                default:
+                    if (static_cast<unsigned char>(c) < 0x20) {
+                        static constexpr char kHex[] = "0123456789abcdef";
+                        out += "\\u00";
+                        out += kHex[(static_cast<unsigned char>(c) >> 4) & 0xF];
+                        out += kHex[static_cast<unsigned char>(c) & 0xF];
+                    }
+                    else {
+                        out += c;
+                    }
+                    break;
                 }
             }
             out += '"';
@@ -483,8 +509,8 @@ namespace Bootstrap::Module {
 
     void ModuleConfig::set_double(std::string_view key, double value) {
         char buf[64];
-        auto [ptr, ec] = std::to_chars(buf, buf + sizeof(buf), value);
-        if (ec == std::errc()) set_string(key, std::string_view(buf, ptr - buf));
+        char* ptr = std::to_chars(buf, buf + sizeof(buf), value).ptr;
+        set_string(key, std::string_view(buf, ptr - buf));
     }
 
     double ModuleConfig::get_double(std::string_view key, double default_val) {
@@ -497,8 +523,8 @@ namespace Bootstrap::Module {
 
     void ModuleConfig::set_int64(std::string_view key, int64_t value) {
         char buf[32];
-        auto [ptr, ec] = std::to_chars(buf, buf + sizeof(buf), value);
-        if (ec == std::errc()) set_string(key, std::string_view(buf, ptr - buf));
+        char* ptr = std::to_chars(buf, buf + sizeof(buf), value).ptr;
+        set_string(key, std::string_view(buf, ptr - buf));
     }
 
     int64_t ModuleConfig::get_int64(std::string_view key, int64_t default_val) {
@@ -518,14 +544,17 @@ namespace Bootstrap::Module {
     }
 
     void ModuleConfig::set_int_array(std::string_view key, std::vector<int32_t> const& values) {
-        std::ostringstream os;
-        os << '[';
+        std::string json;
+        json.reserve(values.size() * 12 + 2);
+        json += '[';
         for (size_t i = 0; i < values.size(); ++i) {
-            if (i) os << ',';
-            os << values[i];
+            if (i) json += ',';
+            char buf[16];
+            char* ptr = std::to_chars(buf, buf + sizeof(buf), values[i]).ptr;
+            json.append(buf, ptr - buf);
         }
-        os << ']';
-        set_json(key, os.str());
+        json += ']';
+        set_json(key, json);
     }
 
     std::vector<int32_t> ModuleConfig::get_int_array(std::string_view key) {
@@ -536,23 +565,24 @@ namespace Bootstrap::Module {
         result.reserve(elems.size());
         for (auto e : elems) {
             int32_t val = 0;
-            std::from_chars(e.data(), e.data() + e.size(), val);
-            result.push_back(val);
+            auto [ptr, ec] = std::from_chars(e.data(), e.data() + e.size(), val);
+            if (ec == std::errc()) result.push_back(val);
         }
         return result;
     }
 
     void ModuleConfig::set_float_array(std::string_view key, std::vector<float> const& values) {
-        std::ostringstream os;
-        os << '[';
+        std::string json;
+        json.reserve(values.size() * 16 + 2);
+        json += '[';
         for (size_t i = 0; i < values.size(); ++i) {
-            if (i) os << ',';
+            if (i) json += ',';
             char buf[32];
-            auto [ptr, ec] = std::to_chars(buf, buf + sizeof(buf), values[i]);
-            os.write(buf, ptr - buf);
+            char* ptr = std::to_chars(buf, buf + sizeof(buf), values[i]).ptr;
+            json.append(buf, ptr - buf);
         }
-        os << ']';
-        set_json(key, os.str());
+        json += ']';
+        set_json(key, json);
     }
 
     std::vector<float> ModuleConfig::get_float_array(std::string_view key) {
@@ -563,8 +593,8 @@ namespace Bootstrap::Module {
         result.reserve(elems.size());
         for (auto e : elems) {
             float val = 0.f;
-            std::from_chars(e.data(), e.data() + e.size(), val);
-            result.push_back(val);
+            auto [ptr, ec] = std::from_chars(e.data(), e.data() + e.size(), val);
+            if (ec == std::errc()) result.push_back(val);
         }
         return result;
     }
@@ -610,16 +640,17 @@ namespace Bootstrap::Module {
     }
 
     void ModuleConfig::set_double_array(std::string_view key, std::vector<double> const& values) {
-        std::ostringstream os;
-        os << '[';
+        std::string json;
+        json.reserve(values.size() * 24 + 2);
+        json += '[';
         for (size_t i = 0; i < values.size(); ++i) {
-            if (i) os << ',';
+            if (i) json += ',';
             char buf[64];
-            auto [ptr, ec] = std::to_chars(buf, buf + sizeof(buf), values[i]);
-            os.write(buf, ptr - buf);
+            char* ptr = std::to_chars(buf, buf + sizeof(buf), values[i]).ptr;
+            json.append(buf, ptr - buf);
         }
-        os << ']';
-        set_json(key, os.str());
+        json += ']';
+        set_json(key, json);
     }
 
     std::vector<double> ModuleConfig::get_double_array(std::string_view key) {
@@ -630,8 +661,8 @@ namespace Bootstrap::Module {
         result.reserve(elems.size());
         for (auto e : elems) {
             double val = 0.0;
-            std::from_chars(e.data(), e.data() + e.size(), val);
-            result.push_back(val);
+            auto [ptr, ec] = std::from_chars(e.data(), e.data() + e.size(), val);
+            if (ec == std::errc()) result.push_back(val);
         }
         return result;
     }
@@ -1000,11 +1031,26 @@ namespace Bootstrap::Module {
         std::vector<std::function<void()>> g_onReady;
         bool g_onReadyFired = false;
         bool g_onReadyRegistered = false;
+        uint32_t g_onReadyModuleId = Bootstrap::invalid_id;
+        uint32_t g_onReadyCallbackId = Bootstrap::invalid_id;
 
         void __cdecl onready_tramp() {
             g_onReadyFired = true;
-            auto copy = g_onReady;
-            for (auto& f : copy) if (f) f();
+            for (auto& f : std::exchange(g_onReady, {})) if (f) f();
+        }
+
+        void reset_menu_layer() {
+            if (g_onReadyCallbackId != Bootstrap::invalid_id && is_connected())
+                g_conn.vtable->unregister_menu_event(g_onReadyModuleId, g_onReadyCallbackId);
+            g_onReadyModuleId = Bootstrap::invalid_id;
+            g_onReadyCallbackId = Bootstrap::invalid_id;
+            g_onReady.clear();
+            g_onReadyFired = false;
+            g_onReadyRegistered = false;
+            g_btnFns.clear();
+            g_toggleFns.clear();
+            g_sliderFns.clear();
+            g_enumFns.clear();
         }
     }
 
@@ -1039,7 +1085,13 @@ namespace Bootstrap::Module {
                            std::function<void(bool)> on_change, std::string_view config_key, bool sub_indicator) {
         uint32_t tid = QuickMenu::Get().add_settings_toggle(module_id, id, text, default_state,
                                                             &toggle_tramp, config_key, sub_indicator);
-        if (tid != invalid_id && on_change) g_toggleFns[tid] = std::move(on_change);
+        if (tid != invalid_id && on_change) {
+            auto& fn = g_toggleFns[tid] = std::move(on_change);
+            if (!config_key.empty()) {
+                bool restored = QuickMenu::Get().get_toggle_state(module_id, tid);
+                if (restored != default_state) fn(restored);
+            }
+        }
         return Toggle{ module_id, tid };
     }
 
@@ -1048,7 +1100,13 @@ namespace Bootstrap::Module {
                            std::string_view format_str, bool sub_indicator, float power) {
         uint32_t sid = QuickMenu::Get().add_slider(module_id, id, label, min_val, max_val, default_val,
                                                    &slider_tramp, config_key, format_str, sub_indicator, power);
-        if (sid != invalid_id && on_change) g_sliderFns[sid] = std::move(on_change);
+        if (sid != invalid_id && on_change) {
+            auto& fn = g_sliderFns[sid] = std::move(on_change);
+            if (!config_key.empty()) {
+                float restored = QuickMenu::Get().get_slider_value(module_id, sid);
+                if (restored != default_val) fn(restored);
+            }
+        }
         return Slider{ module_id, sid };
     }
 
@@ -1057,7 +1115,13 @@ namespace Bootstrap::Module {
                                         std::string_view config_key, bool sub_indicator) {
         uint32_t eid = QuickMenu::Get().add_enum_selector(module_id, id, label, options, option_count,
                                                           default_index, &enum_tramp, config_key, sub_indicator);
-        if (eid != invalid_id && on_change) g_enumFns[eid] = std::move(on_change);
+        if (eid != invalid_id && on_change) {
+            auto& fn = g_enumFns[eid] = std::move(on_change);
+            if (!config_key.empty()) {
+                int32_t restored = QuickMenu::Get().get_enum_index(module_id, eid);
+                if (restored != default_index) fn(restored);
+            }
+        }
         return EnumSelector{ module_id, eid };
     }
 
@@ -1076,7 +1140,13 @@ namespace Bootstrap::Module {
     Toggle PageRef::toggle(std::string_view text, bool default_state,
                            std::function<void(bool)> on_change, std::string_view config_key) {
         uint32_t tid = QuickMenu::Get().add_toggle(module_id, id, text, default_state, &toggle_tramp, config_key);
-        if (tid != invalid_id && on_change) g_toggleFns[tid] = std::move(on_change);
+        if (tid != invalid_id && on_change) {
+            auto& fn = g_toggleFns[tid] = std::move(on_change);
+            if (!config_key.empty()) {
+                bool restored = QuickMenu::Get().get_toggle_state(module_id, tid);
+                if (restored != default_state) fn(restored);
+            }
+        }
         return Toggle{ module_id, tid };
     }
 
@@ -1112,9 +1182,10 @@ namespace Bootstrap::Module {
         if (!build) return;
         if (g_onReadyFired) { build(); return; }
         g_onReady.push_back(std::move(build));
-        if (!g_onReadyRegistered && is_connected() && g_conn.vtable->register_menu_event) {
+        if (!g_onReadyRegistered && is_connected()) {
             g_onReadyRegistered = true;
-            g_conn.vtable->register_menu_event(m_module_id, MenuEvent::QuickMenuSetup, &onready_tramp);
+            g_onReadyModuleId = m_module_id;
+            g_onReadyCallbackId = g_conn.vtable->register_menu_event(m_module_id, MenuEvent::QuickMenuSetup, &onready_tramp);
         }
     }
 
@@ -1452,24 +1523,15 @@ namespace Bootstrap::Module {
 
     std::string FileSystem::read_file(uint32_t module_id, std::string_view path) {
         if (!is_connected()) return {};
-        // First get size to allocate appropriately
+        constexpr uint64_t kMaxSingleRead = 16ull * 1024ull * 1024ull;
         uint64_t sz = g_conn.vtable->fs_file_size(module_id,
             path.data(), static_cast<uint32_t>(path.size()));
-        if (sz == 0) {
-            // Might still be a valid empty file or not exist — try a small read
-            char buf[4096];
-            uint32_t len = g_conn.vtable->fs_read_file(module_id,
-                path.data(), static_cast<uint32_t>(path.size()), buf, sizeof(buf));
-            if (len == 0) return {};
-            return std::string(buf, len);
-        }
-        // Cap at reasonable size for a single read
-        uint32_t read_size = static_cast<uint32_t>((std::min)(sz, static_cast<uint64_t>(16u * 1024u * 1024u)));
+        uint32_t read_size = static_cast<uint32_t>((std::min)(sz, kMaxSingleRead));
         std::string result(read_size, '\0');
         uint32_t len = g_conn.vtable->fs_read_file(module_id,
             path.data(), static_cast<uint32_t>(path.size()),
             result.data(), read_size);
-        result.resize(len);
+        result.resize((std::min)(len, read_size));
         return result;
     }
 

@@ -84,6 +84,7 @@ namespace IL2CPP::VRChat {
     }
 
     std::string UdonBehaviour::GetInteractionText() {
+        if (!valid()) return "";
         static auto m = MethodHandler::resolve("VRC.Udon.UdonBehaviour", "get_InteractionText", 0);
         void* str = MethodHandler::invoke<void*>(m, raw());
         return str ? IL2CPP::Module::System::String(str).to_string() : "";

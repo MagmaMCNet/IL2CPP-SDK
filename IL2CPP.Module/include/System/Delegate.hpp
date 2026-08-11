@@ -21,8 +21,8 @@ namespace IL2CPP::Module::System {
 
 
         [[nodiscard]] void* GetTarget() const {
-            static auto m = MethodHandler::resolve(IL2CPP_STR("System.Delegate"), IL2CPP_STR("get_Target"), 0);
-            return MethodHandler::invoke<void*>(m, raw());
+            if (!valid()) return nullptr;
+            return read<void*>(OffTarget());
         }
 
         [[nodiscard]] void* GetMethodPtr() const {
@@ -224,13 +224,6 @@ namespace IL2CPP::Module::System {
             if (fn) fn(GetTarget(), arg, nullptr);
         }
 
-        /// Create from a native C++ function.
-        /// Your fn signature: void(__fastcall*)(void* target, T arg, void* method)
-        template<typename Fn>
-        [[nodiscard]] static Action1 CreateNative(Fn fn, void* context = nullptr) {
-            Delegate d = Delegate::CreateNative("System.Action`1", reinterpret_cast<void*>(fn), context);
-            return Action1{ d.raw() };
-        }
     };
 
 
@@ -245,11 +238,6 @@ namespace IL2CPP::Module::System {
             if (fn) fn(GetTarget(), a1, a2, nullptr);
         }
 
-        template<typename Fn>
-        [[nodiscard]] static Action2 CreateNative(Fn fn, void* context = nullptr) {
-            Delegate d = Delegate::CreateNative("System.Action`2", reinterpret_cast<void*>(fn), context);
-            return Action2{ d.raw() };
-        }
     };
 
 
@@ -266,11 +254,6 @@ namespace IL2CPP::Module::System {
             return fn(GetTarget(), nullptr);
         }
 
-        template<typename Fn>
-        [[nodiscard]] static Func CreateNative(Fn fn, void* context = nullptr) {
-            Delegate d = Delegate::CreateNative("System.Func`1", reinterpret_cast<void*>(fn), context);
-            return Func{ d.raw() };
-        }
     };
 
 
@@ -287,11 +270,6 @@ namespace IL2CPP::Module::System {
             return fn(GetTarget(), arg, nullptr);
         }
 
-        template<typename Fn>
-        [[nodiscard]] static Func1 CreateNative(Fn fn, void* context = nullptr) {
-            Delegate d = Delegate::CreateNative("System.Func`2", reinterpret_cast<void*>(fn), context);
-            return Func1{ d.raw() };
-        }
     };
 
 } // namespace IL2CPP::Module::System

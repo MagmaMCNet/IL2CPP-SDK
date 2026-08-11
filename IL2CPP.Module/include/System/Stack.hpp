@@ -37,6 +37,7 @@ namespace IL2CPP::Module::System {
             auto arr = internal_array();
             if (!arr) return {};
             int sz = count();
+            if (sz <= 0) return {};
             std::vector<T> result;
             result.reserve(sz);
             const T* data = arr.data();

@@ -1,6 +1,7 @@
 #pragma once
 #include "Object.hpp"
 #include "../MethodHandler.hpp"
+#include "../System/Array.hpp"
 #include <IL2CPP.Common/il2cpp_shared.hpp>
 #include <cstring>
 #include <string>
@@ -53,28 +54,22 @@ namespace IL2CPP::Module::Unity {
 
         bool SetData(const float* data, size_t sampleCount, int offsetSamples = 0) {
             static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.AudioClip"), IL2CPP_STR("SetData"), 2);
-            auto* e = GetExports();
-            if (!e || !data || sampleCount == 0) return false;
-            void* floatClass = reinterpret_cast<void*(IL2CPP_CALLTYPE)(const char*)>(e->m_helperFindClass)(IL2CPP_STR("System.Single"));
-            if (!floatClass) return false;
-            void* arr = reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*, uintptr_t)>(e->m_arrayNew)(floatClass, sampleCount);
+            if (!data || sampleCount == 0) return false;
+            auto arr = System::Array<float>::Create(IL2CPP_STR("System.Single"), sampleCount);
             if (!arr) return false;
-            std::memcpy(static_cast<char*>(arr) + 0x20, data, sampleCount * sizeof(float));
-            void* params[] = { arr, &offsetSamples };
+            std::memcpy(arr.data(), data, sampleCount * sizeof(float));
+            void* params[] = { arr.raw(), &offsetSamples };
             return MethodHandler::invoke<bool>(m, raw(), params);
         }
 
         bool GetData(float* outData, size_t sampleCount, int offsetSamples = 0) const {
             static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.AudioClip"), IL2CPP_STR("GetData"), 2);
-            auto* e = GetExports();
-            if (!e || !outData || sampleCount == 0) return false;
-            void* floatClass = reinterpret_cast<void*(IL2CPP_CALLTYPE)(const char*)>(e->m_helperFindClass)(IL2CPP_STR("System.Single"));
-            if (!floatClass) return false;
-            void* arr = reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*, uintptr_t)>(e->m_arrayNew)(floatClass, sampleCount);
+            if (!outData || sampleCount == 0) return false;
+            auto arr = System::Array<float>::Create(IL2CPP_STR("System.Single"), sampleCount);
             if (!arr) return false;
-            void* params[] = { arr, &offsetSamples };
+            void* params[] = { arr.raw(), &offsetSamples };
             bool ok = MethodHandler::invoke<bool>(m, raw(), params);
-            if (ok) std::memcpy(outData, static_cast<char*>(arr) + 0x20, sampleCount * sizeof(float));
+            if (ok) std::memcpy(outData, arr.data(), sampleCount * sizeof(float));
             return ok;
         }
 

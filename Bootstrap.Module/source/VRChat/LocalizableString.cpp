@@ -7,12 +7,14 @@ namespace IL2CPP::VRChat {
     using IL2CPP::Module::MethodHandler;
 
     std::string LocalizableString::GetKey() {
+        if (!valid()) return "";
         static auto m = MethodHandler::resolve("VRC.Localization.LocalizableString", "get_Key", 0);
         void* str = MethodHandler::invoke<void*>(m, raw());
         return str ? IL2CPP::Module::System::String(str).to_string() : "";
     }
 
     std::string LocalizableString::GetFallbackText() {
+        if (!valid()) return "";
         static auto m = MethodHandler::resolve("VRC.Localization.LocalizableString", "get_FallbackText", 0);
         void* str = MethodHandler::invoke<void*>(m, raw());
         return str ? IL2CPP::Module::System::String(str).to_string() : "";
@@ -37,6 +39,7 @@ namespace IL2CPP::VRChat {
     }
 
     std::string LocalizableString::ToString() {
+        if (!valid()) return "";
         static auto m = MethodHandler::resolve("VRC.Localization.LocalizableString", "ToString", 0);
         void* str = MethodHandler::invoke<void*>(m, raw());
         return str ? IL2CPP::Module::System::String(str).to_string() : "";
@@ -62,7 +65,7 @@ namespace IL2CPP::VRChat {
     LocalizableString LocalizableString::Localize(std::string_view text) {
         static auto m = MethodHandler::resolve("VRC.Localization.LocalizableStringExtensions", "Localize", 4);
         auto str = IL2CPP::Module::System::String::create(text);
-        void* params[1] = { str.raw() };
+        void* params[4] = { str.raw(), nullptr, nullptr, nullptr };
         void* result = MethodHandler::invoke<void*>(m, nullptr, params);
         return LocalizableString{ result };
     }
@@ -71,7 +74,7 @@ namespace IL2CPP::VRChat {
         static auto m = MethodHandler::resolve("VRC.Localization.LocalizableStringExtensions", "LocalizeWithFallback", 5);
         auto keyStr = IL2CPP::Module::System::String::create(key);
         auto fallbackStr = IL2CPP::Module::System::String::create(fallback);
-        void* params[2] = { keyStr.raw(), fallbackStr.raw() };
+        void* params[5] = { keyStr.raw(), fallbackStr.raw(), nullptr, nullptr, nullptr };
         void* result = MethodHandler::invoke<void*>(m, nullptr, params);
         return LocalizableString{ result };
     }

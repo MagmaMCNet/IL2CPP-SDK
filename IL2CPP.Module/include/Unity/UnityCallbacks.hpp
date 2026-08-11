@@ -41,12 +41,6 @@ namespace IL2CPP::Module::Unity {
             Register(reinterpret_cast<void*>(Fn), event);
         }
 
-        /// <summary>Register a callback function (template version for lambdas/functors).</summary>
-        template <typename Fn>
-        static void Register(Fn fn, UnityEvent event = UnityEvent::Update) {
-            Register(reinterpret_cast<void*>(+fn), event);
-        }
-
         /// <summary>Register a callback function (explicit function pointer version).</summary>
         template <typename R, typename... Args>
         static void Register(R(*fn)(Args...), UnityEvent event = UnityEvent::Update) {

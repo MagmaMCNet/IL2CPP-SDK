@@ -36,6 +36,18 @@ namespace Bootstrap {
         int gameObject_groupInfo;
         int gameObject_avatarProgress;
         int gameObject_friendIcon;
+
+        // Rewritten nameplate contents. The child GameObjects moved behind a UI
+        // fragment, so on those builds the gameObject_* offsets above stay 0 and
+        // these are filled instead -- and the other way round on older builds.
+        // Appended, never reordered: this struct is shared ABI.
+        int fragment;
+        int content;
+        int icons;
+        int gameObject_root;
+        int positioner;
+        int rectTransform;
+        int vrcPlayer;
     };
 
     struct PlayerData {
@@ -45,6 +57,12 @@ namespace Bootstrap {
         int VRCPlayer;
         int APIUser;
         int USpeaker;
+
+        // Builds that expose LocalPlayer as a static property instead of a field
+        // leave Singleton null and fill these in: native code pointer + the
+        // MethodInfo* the thunk takes as its only argument.
+        void* get_LocalPlayer;
+        void* get_LocalPlayerMethod;
     };
 
     struct VRCPlayerData {
@@ -70,6 +88,16 @@ namespace Bootstrap {
 
         int gameObject_nameplate;
         int gameObject_avatar;
+
+        int Animator;   // appended, never reordered: shared ABI
+
+        // String property getters as il2cppMethodInfo* -- feed straight to
+        // MethodHandler::invoke, no per-call name lookup (the names are
+        // obfuscated anyway). Null when the property did not resolve.
+        void* get_username;
+        void* get_displayName;
+        void* get_userId;
+        void* get_pronouns;
     };
 
     struct LoadBalancingClientData {

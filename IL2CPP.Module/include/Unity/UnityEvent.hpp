@@ -38,31 +38,6 @@ namespace IL2CPP::Module::Unity::Events {
         }
     };
 
-    /// UnityEngine.Events.UnityAction`1<T> — the void(T) listener delegate.
-    template<typename T>
-    class UnityAction1 : public System::Delegate {
-    public:
-        using System::Delegate::Delegate;
-        UnityAction1() = default;
-
-        explicit UnityAction1(const System::Delegate& d) : System::Delegate(d.raw()) {}
-
-        /// Signature: void(__fastcall*)(void* target, T arg, void* method)
-        template<typename Fn>
-        [[nodiscard]] static UnityAction1 CreateNative(Fn fn, void* context = nullptr) {
-            System::Delegate d = System::Delegate::CreateNative(
-                IL2CPP_STR("UnityEngine.Events.UnityAction`1"), reinterpret_cast<void*>(fn), context);
-            return UnityAction1{ d.raw() };
-        }
-
-        void InvokeDirect(T arg) {
-            if (!valid()) return;
-            auto fn = reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, T, void*)>(GetInvokeImpl());
-            if (fn) fn(GetTarget(), arg, nullptr);
-        }
-    };
-
-
     /// UnityEngine.Events.UnityEvent — the parameterless event on things like Button.onClick.
     /// Wrap the raw pointer from get_onClick / get_onValueChanged etc.
     class UnityEvent : public ManagedObject {
@@ -97,45 +72,6 @@ namespace IL2CPP::Module::Unity::Events {
         template<typename Fn>
         UnityAction AddNativeListener(Fn fn, void* context = nullptr) {
             UnityAction a = UnityAction::CreateNative(fn, context);
-            if (a) AddListener(a);
-            return a;
-        }
-    };
-
-    /// UnityEngine.Events.UnityEvent`1<T> — the one-argument event (Toggle bool, Slider float, ...).
-    template<typename T>
-    class UnityEvent1 : public ManagedObject {
-    public:
-        using ManagedObject::ManagedObject;
-
-        void AddListener(const System::Delegate& call) {
-            static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Events.UnityEvent`1"), IL2CPP_STR("AddListener"), 1);
-            void* p[] = { call.raw() };
-            MethodHandler::invoke(m, raw(), p);
-        }
-
-        void RemoveListener(const System::Delegate& call) {
-            static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Events.UnityEvent`1"), IL2CPP_STR("RemoveListener"), 1);
-            void* p[] = { call.raw() };
-            MethodHandler::invoke(m, raw(), p);
-        }
-
-        void Invoke(T arg) {
-            static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Events.UnityEvent`1"), IL2CPP_STR("Invoke"), 1);
-            void* p[1];
-            if constexpr (std::is_pointer_v<T>) p[0] = reinterpret_cast<void*>(arg);
-            else p[0] = &arg;
-            MethodHandler::invoke(m, raw(), p);
-        }
-
-        void RemoveAllListeners() {
-            static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Events.UnityEvent`1"), IL2CPP_STR("RemoveAllListeners"), 0);
-            MethodHandler::invoke(m, raw());
-        }
-
-        template<typename Fn>
-        UnityAction1<T> AddNativeListener(Fn fn, void* context = nullptr) {
-            UnityAction1<T> a = UnityAction1<T>::CreateNative(fn, context);
             if (a) AddListener(a);
             return a;
         }

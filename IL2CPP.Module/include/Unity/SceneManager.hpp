@@ -59,11 +59,10 @@ namespace IL2CPP::Module::Unity {
         }
 
         [[nodiscard]] std::vector<Object> GetRootGameObjects() const {
-            static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.SceneManagement.Scene"), IL2CPP_STR("GetRootGameObjectsInternal"), 1);
             static auto m2 = MethodHandler::resolve(IL2CPP_STR("UnityEngine.SceneManagement.Scene"), IL2CPP_STR("GetRootGameObjects"), 0);
             auto* e = GetExports();
             if (!e) return {};
-            void* sceneClass = reinterpret_cast<void*(IL2CPP_CALLTYPE)(const char*)>(e->m_helperFindClass)(IL2CPP_STR("UnityEngine.SceneManagement.Scene"));
+            static void* sceneClass = reinterpret_cast<void*(IL2CPP_CALLTYPE)(const char*)>(e->m_helperFindClass)(IL2CPP_STR("UnityEngine.SceneManagement.Scene"));
             if (!sceneClass) return {};
             Scene s = m_scene;
             void* boxed = reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*, void*)>(e->m_valueBox)(sceneClass, &s);
@@ -116,15 +115,12 @@ namespace IL2CPP::Module::Unity {
             return SceneWrapper{ MethodHandler::invoke<Scene>(m, nullptr, params) };
         }
 
-        static void LoadScene(int sceneBuildIndex, LoadSceneMode mode = LoadSceneMode::Single) {
-            static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.SceneManagement.SceneManager"), IL2CPP_STR("LoadScene"), 2);
-            int modeInt = static_cast<int>(mode);
-            void* params[] = { &sceneBuildIndex, &modeInt };
-            MethodHandler::invoke(m, nullptr, params);
-        }
-
+        /// <summary>Load a scene by name. No-op unless the resolved LoadScene overload takes a string.</summary>
         static void LoadScene(std::string_view sceneName, LoadSceneMode mode = LoadSceneMode::Single) {
             static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.SceneManagement.SceneManager"), IL2CPP_STR("LoadScene"), 2);
+            if (!m) return;
+            constexpr int kElementTypeString = 0x0e;
+            if (m.get_param_type(0).type_enum() != kElementTypeString) return;
             auto* e = GetExports();
             if (!e || !e->m_stringNew) return;
             void* str = reinterpret_cast<void*(IL2CPP_CALLTYPE)(const char*)>(e->m_stringNew)(std::string(sceneName).c_str());

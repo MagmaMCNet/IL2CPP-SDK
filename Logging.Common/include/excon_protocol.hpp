@@ -477,6 +477,10 @@ enum class ArgType : std::uint8_t {
     Path   = 7
 };
 
+[[nodiscard]] constexpr bool IsValid(ArgType type) noexcept {
+    return static_cast<std::uint8_t>(type) <= static_cast<std::uint8_t>(ArgType::Path);
+}
+
 struct ArgSchema {
     std::string name;
     std::uint8_t type{};
@@ -526,20 +530,26 @@ struct CommandSchemaResponse {
     CommandSchemaResponse decoded;
     std::uint32_t cmd_count{};
     if (!reader.ReadCount(cmd_count)) return false;
-    decoded.commands.resize(cmd_count);
-    for (auto& cmd : decoded.commands) {
+    for (std::uint32_t ci = 0; ci < cmd_count; ++ci) {
+        CommandSchema cmd;
         std::uint32_t arg_count{};
         if (!reader.ReadString(cmd.name) || !reader.ReadString(cmd.help) ||
             !reader.ReadCount(arg_count)) return false;
-        cmd.args.resize(arg_count);
-        for (auto& a : cmd.args) {
+        for (std::uint32_t ai = 0; ai < arg_count; ++ai) {
+            ArgSchema a;
             std::uint32_t enum_count{};
             if (!reader.ReadString(a.name) || !reader.ReadU8(a.type) ||
                 !reader.ReadU8(a.required) || !reader.ReadString(a.help) ||
                 !reader.ReadCount(enum_count)) return false;
-            a.enum_values.resize(enum_count);
-            for (auto& v : a.enum_values) if (!reader.ReadString(v)) return false;
+            if (!IsValid(static_cast<ArgType>(a.type))) return false;
+            for (std::uint32_t ei = 0; ei < enum_count; ++ei) {
+                std::string v;
+                if (!reader.ReadString(v)) return false;
+                a.enum_values.push_back(std::move(v));
+            }
+            cmd.args.push_back(std::move(a));
         }
+        decoded.commands.push_back(std::move(cmd));
     }
     if (!reader.AtEnd()) return false;
     value = std::move(decoded);

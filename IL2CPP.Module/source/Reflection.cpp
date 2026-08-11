@@ -15,6 +15,20 @@ namespace IL2CPP::Module {
             return GetExports();
         }
 
+        // The stable-name helpers both return garbage pointers (0xFFFFFFFF....)
+        // and AV inside their own bodies on obfuscated classes.
+        const char* SafeStableName(void* helper, void* arg) noexcept {
+            __try {
+                const char* result = reinterpret_cast<const char*(IL2CPP_CALLTYPE)(void*)>(helper)(arg);
+                if (!IsValid(result)) return nullptr;
+                volatile char probe = *result;
+                (void)probe;
+                return result;
+            } __except(EXCEPTION_EXECUTE_HANDLER) {
+                return nullptr;
+            }
+        }
+
         inline std::string build_member_key(const char* className, const char* memberName) {
             if (!className || !memberName) return memberName ? memberName : "";
             return std::string(className) + "::" + memberName;
@@ -72,9 +86,8 @@ namespace IL2CPP::Module {
         if (!m_native || !E()) return "";
 
         if (E()->m_helperGetTypeStableNamespace) {
-            const char* result = reinterpret_cast<const char*(IL2CPP_CALLTYPE)(void*)>(
-                E()->m_helperGetTypeStableNamespace)(m_native);
-            return result ? result : "";
+            const char* result = SafeStableName(E()->m_helperGetTypeStableNamespace, m_native);
+            if (result) return result;
         }
 
         Class klass = get_class();
@@ -93,8 +106,7 @@ namespace IL2CPP::Module {
         if (!m_native || !E()) return "";
 
         if (E()->m_helperGetTypeStableFullName) {
-            const char* result = reinterpret_cast<const char*(IL2CPP_CALLTYPE)(void*)>(
-                E()->m_helperGetTypeStableFullName)(m_native);
+            const char* result = SafeStableName(E()->m_helperGetTypeStableFullName, m_native);
             if (result && *result) return result;
         }
 
@@ -159,8 +171,7 @@ namespace IL2CPP::Module {
         if (!m_native || !E()) return "";
 
         if (E()->m_helperGetTypeStableName) {
-            const char* result = reinterpret_cast<const char*(IL2CPP_CALLTYPE)(void*)>(
-                E()->m_helperGetTypeStableName)(m_native);
+            const char* result = SafeStableName(E()->m_helperGetTypeStableName, m_native);
             return (result && *result) ? result : "";
         }
 
@@ -202,7 +213,8 @@ namespace IL2CPP::Module {
 
     const char* Field::raw_name() const {
         if (!m_native) return "";
-        return reinterpret_cast<il2cppFieldInfo*>(m_native)->name();
+        const char* n = reinterpret_cast<il2cppFieldInfo*>(m_native)->name();
+        return n ? n : "";
     }
 
     // SEH-protected pointer read — m_native can be an arbitrary pointer when
@@ -569,7 +581,8 @@ namespace IL2CPP::Module {
 
     const char* Property::raw_name() const {
         if (!m_native) return "";
-        return reinterpret_cast<il2cppPropertyInfo*>(m_native)->get_name();
+        const char* n = reinterpret_cast<il2cppPropertyInfo*>(m_native)->get_name();
+        return n ? n : "";
     }
 
     // PropertyInfo's parent-klass offset is not discovered (and is not at offset 0
@@ -748,21 +761,8 @@ namespace IL2CPP::Module {
         if (!m_native) return "";
 
         if (E() && E()->m_helperGetClassStableName) {
-            // Wrap BOTH the helper call and the dereference in SEH — the
-            // helper has been observed to (a) return a garbage pointer like
-            // 0xFFFFFFFF........ that crashes on deref, and (b) AV inside
-            // its own body when given certain obfuscated classes. Either
-            // way, fall back to the direct struct read.
-            const char* result = nullptr;
-            __try {
-                result = reinterpret_cast<const char*(IL2CPP_CALLTYPE)(void*)>(
-                    E()->m_helperGetClassStableName)(m_native);
-                auto p = reinterpret_cast<uintptr_t>(result);
-                if (p >= 0x10000 && p < 0x7FFFFFFFFFFFull && *result)
-                    return result;
-            } __except(EXCEPTION_EXECUTE_HANDLER) {
-                // Fall through to raw_name() below.
-            }
+            const char* result = SafeStableName(E()->m_helperGetClassStableName, m_native);
+            if (result && *result) return result;
         }
 
         return raw_name();
@@ -778,16 +778,8 @@ namespace IL2CPP::Module {
         if (!m_native) return "";
 
         if (E() && E()->m_helperGetClassStableNamespace) {
-            const char* result = nullptr;
-            __try {
-                result = reinterpret_cast<const char*(IL2CPP_CALLTYPE)(void*)>(
-                    E()->m_helperGetClassStableNamespace)(m_native);
-                auto p = reinterpret_cast<uintptr_t>(result);
-                if (p >= 0x10000 && p < 0x7FFFFFFFFFFFull)
-                    return result;
-            } __except(EXCEPTION_EXECUTE_HANDLER) {
-                // Fall through.
-            }
+            const char* result = SafeStableName(E()->m_helperGetClassStableNamespace, m_native);
+            if (result) return result;
         }
 
         const char* raw = raw_ns();
@@ -799,8 +791,7 @@ namespace IL2CPP::Module {
         if (!m_native) return "";
         
         if (E() && E()->m_helperGetClassStableFullName) {
-            const char* result = reinterpret_cast<const char*(IL2CPP_CALLTYPE)(void*)>(
-                E()->m_helperGetClassStableFullName)(m_native);
+            const char* result = SafeStableName(E()->m_helperGetClassStableFullName, m_native);
             if (result && *result) return result;
         }
 
@@ -883,15 +874,14 @@ namespace IL2CPP::Module {
     Field Class::get_field(std::string_view fname) const {
         if (!m_native || !E() || !E()->m_classGetFieldFromName) return Field{};
 
+        auto* klass = static_cast<il2cppClass*>(m_native);
         std::string nameStr(fname);
-        void* result = reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*, const char*)>(
-            E()->m_classGetFieldFromName)(m_native, nameStr.c_str());
+        void* result = Module::GetFieldByName(klass, nameStr.c_str());
         if (result) return Field{ result };
 
         const char* original = Deobfuscation::GetOriginalName(nameStr.c_str());
         if (original && original != nameStr.c_str() && std::strcmp(original, nameStr.c_str()) != 0) {
-            result = reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*, const char*)>(
-                E()->m_classGetFieldFromName)(m_native, original);
+            result = Module::GetFieldByName(klass, original);
             if (result) return Field{ result };
         }
 
@@ -900,8 +890,7 @@ namespace IL2CPP::Module {
         std::string qualifiedKey = build_member_key(stableName, nameStr.c_str());
         original = Deobfuscation::GetOriginalName(qualifiedKey.c_str());
         if (original && original != qualifiedKey.c_str() && std::strcmp(original, qualifiedKey.c_str()) != 0) {
-            result = reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*, const char*)>(
-                E()->m_classGetFieldFromName)(m_native, extract_member_name(original));
+            result = Module::GetFieldByName(klass, extract_member_name(original));
         }
 
         return Field{ result };
@@ -1164,6 +1153,7 @@ namespace IL2CPP::Module {
     std::vector<Class> Image::get_classes() const {
         std::vector<Class> result;
         uint32_t count = class_count();
+        if (count > 1000000) return result;
         result.reserve(count);
         for (uint32_t i = 0; i < count; ++i) {
             auto klass = get_class(i);
@@ -1196,7 +1186,7 @@ namespace IL2CPP::Module {
         void** assemblies = reinterpret_cast<void**(IL2CPP_CALLTYPE)(void*, size_t*)>(
             E()->m_domainGetAssemblies)(domain, &count);
 
-        if (!assemblies || count == 0) return result;
+        if (!assemblies || count == 0 || count > 1000000) return result;
 
         result.reserve(count);
         for (size_t i = 0; i < count; ++i) {

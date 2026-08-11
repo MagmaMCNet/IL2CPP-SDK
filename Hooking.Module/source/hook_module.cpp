@@ -2,6 +2,7 @@
 #include <SharedMemory.Common/shared_memory.hpp>
 #include <windows.h>
 #include <atomic>
+#include <mutex>
 
 namespace Hooking::Module {
 
@@ -14,6 +15,11 @@ namespace Hooking::Module {
 
         ConnectionState g_conn;
 
+        std::mutex& ConnectMutex() noexcept {
+            static std::mutex m;
+            return m;
+        }
+
     }
 
     HookVtable const* get_connection_vtable() noexcept {
@@ -21,23 +27,25 @@ namespace Hooking::Module {
     }
 
     bool Connect() {
-        if (g_conn.connected.exchange(true, std::memory_order_acq_rel))
+        std::lock_guard lock(ConnectMutex());
+        if (g_conn.connected.load(std::memory_order_acquire) && g_conn.vtable)
             return true;
 
-        g_conn.vtable = SharedMemory::Resolve<HookVtable>("Hooking.Vtable");
-        if (!g_conn.vtable || g_conn.vtable->version != vtable_version) {
+        auto const* vtable = SharedMemory::Resolve<HookVtable>("Hooking.Vtable");
+        if (!vtable || vtable->version != vtable_version) {
             g_conn.vtable = nullptr;
             g_conn.connected.store(false, std::memory_order_release);
             return false;
         }
 
+        g_conn.vtable = vtable;
+        g_conn.connected.store(true, std::memory_order_release);
         return true;
     }
 
     void Disconnect() {
-        if (!g_conn.connected.exchange(false, std::memory_order_acq_rel))
-            return;
-        g_conn.vtable = nullptr;
+        std::lock_guard lock(ConnectMutex());
+        g_conn.connected.store(false, std::memory_order_release);
     }
 
     bool IsConnected() noexcept {
@@ -53,7 +61,7 @@ namespace Hooking::Module {
     }
 
     HookModule::~HookModule() {
-        if (m_id != invalid_id && IsConnected()) {
+        if (m_id != invalid_id && g_conn.vtable) {
             g_conn.vtable->unregister_module(m_id);
         }
     }
@@ -65,7 +73,7 @@ namespace Hooking::Module {
 
     HookModule& HookModule::operator=(HookModule&& other) noexcept {
         if (this != &other) {
-            if (m_id != invalid_id && IsConnected()) {
+            if (m_id != invalid_id && g_conn.vtable) {
                 g_conn.vtable->unregister_module(m_id);
             }
             m_id   = std::exchange(other.m_id, invalid_id);

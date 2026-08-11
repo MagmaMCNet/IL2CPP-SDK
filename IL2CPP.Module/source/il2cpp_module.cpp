@@ -5,6 +5,7 @@
 #include <atomic>
 #include <climits>
 #include <cstring>
+#include <mutex>
 
 namespace IL2CPP::Module {
 
@@ -20,13 +21,19 @@ namespace IL2CPP::Module {
 
         inline auto* E() { return g_conn.exports; }
 
+        // Stack overflow must unwind: the guard page is not reset by a handler.
+        inline int ForeignCallFilter(unsigned long code) noexcept {
+            return code == EXCEPTION_STACK_OVERFLOW ? EXCEPTION_CONTINUE_SEARCH
+                                                    : EXCEPTION_EXECUTE_HANDLER;
+        }
+
         static il2cppClass* SafeGetParent(il2cppClass* klass) noexcept {
             if (!klass || !E()) return nullptr;
             if (E()->m_offClassParent >= 0) {
                 __try {
                     auto* parent = *reinterpret_cast<il2cppClass**>(
                         reinterpret_cast<char*>(klass) + E()->m_offClassParent);
-                    return parent;
+                    return parent == klass ? nullptr : parent;
                 } __except(1) {
                     return nullptr;
                 }
@@ -35,7 +42,7 @@ namespace IL2CPP::Module {
             __try {
                 return reinterpret_cast<il2cppClass*(IL2CPP_CALLTYPE)(void*)>(
                     E()->m_classGetParent)(klass);
-            } __except(1) {
+            } __except(ForeignCallFilter(GetExceptionCode())) {
                 return nullptr;
             }
         }
@@ -49,13 +56,25 @@ namespace IL2CPP::Module {
             }
         }
 
+        static il2cppPropertyInfo* SafeGetPropertyFromName(
+            void* rawFn, il2cppClass* klass, const char* name) noexcept
+        {
+            __try {
+                auto* prop = reinterpret_cast<il2cppPropertyInfo*(IL2CPP_CALLTYPE)(void*, const char*)>(
+                    rawFn)(klass, name);
+                return IsValid(prop) ? prop : nullptr;
+            } __except(1) {
+                return nullptr;
+            }
+        }
+
         static il2cppPropertyInfo* FindPropertyByIteration(
             il2cppClass* klass, const char* name) noexcept
         {
             if (!E() || !E()->m_classGetProperties || !klass || !name) return nullptr;
 
             auto* current = klass;
-            while (current) {
+            for (int depth = 0; current && depth < 64; ++depth) {
                 void* iter = nullptr;
                 __try {
                     while (auto* prop = reinterpret_cast<il2cppPropertyInfo*(IL2CPP_CALLTYPE)(void*, void**)>(
@@ -67,7 +86,7 @@ namespace IL2CPP::Module {
                         if (SafeCStringEquals(propName, name))
                             return prop;
                     }
-                } __except(1) {
+                } __except(ForeignCallFilter(GetExceptionCode())) {
                     // Skip this class level and continue walking parents.
                 }
 
@@ -100,7 +119,7 @@ namespace IL2CPP::Module {
             __try {
                 reinterpret_cast<InitFn>(rawFn)(klass);
                 return true;
-            } __except(1) {
+            } __except(ForeignCallFilter(GetExceptionCode())) {
                 return false;
             }
         }
@@ -130,43 +149,54 @@ namespace IL2CPP::Module {
         if (e->m_offObjectCachedPtr    >= 0) o.objectCachedPtr    = e->m_offObjectCachedPtr;
     }
 
+    std::mutex& ConnectMutex() noexcept {
+        static std::mutex m;
+        return m;
+    }
+
     bool Connect() {
-        if (g_conn.connected.exchange(true, std::memory_order_acq_rel))
+        std::lock_guard lock(ConnectMutex());
+        if (g_conn.connected.load(std::memory_order_acquire) && g_conn.exports)
             return true;
 
-        g_conn.exports = SharedMemory::Resolve<IL2CPP::il2cpp_exports>("IL2CPP.Exports");
+        auto* exports = SharedMemory::Resolve<IL2CPP::il2cpp_exports>("IL2CPP.Exports");
         uint32_t version = 0;
-        if (g_conn.exports) {
-            auto& versionStorage = const_cast<uint32_t&>(g_conn.exports->m_uVersion);
+        if (exports) {
+            auto& versionStorage = const_cast<uint32_t&>(exports->m_uVersion);
             version = std::atomic_ref<uint32_t>(versionStorage).load(std::memory_order_acquire);
         }
-        if (!g_conn.exports || version != exports_version || g_conn.exports->m_uSize != exports_size) {
+        if (!exports || version != exports_version || exports->m_uSize != exports_size) {
             g_conn.exports = nullptr;
             g_conn.connected.store(false, std::memory_order_release);
             return false;
         }
 
-        IL2CPP::g_structOffsets = g_conn.exports;
+        g_conn.exports = exports;
         InitLayoutOffsets();
+        std::atomic_ref<const IL2CPP::il2cpp_exports*>(IL2CPP::g_structOffsets)
+            .store(exports, std::memory_order_release);
 
         g_conn.unity = SharedMemory::Resolve<unity_functions>("IL2CPP.Unity");
         if (g_conn.unity && g_conn.unity->m_uVersion != unity_version) {
             g_conn.unity = nullptr;
         }
 
+        g_conn.connected.store(true, std::memory_order_release);
         return true;
     }
 
     bool Disconnect() {
-        if (!g_conn.connected.exchange(false, std::memory_order_acq_rel))
+        std::lock_guard lock(ConnectMutex());
+        if (!g_conn.connected.load(std::memory_order_acquire))
             return true;
-        if (!Unity::AsyncOperation::CancelAllSubscriptions()) {
-            g_conn.connected.store(true, std::memory_order_release);
-            return false;
-        }
+        if (Dispatcher::IsMainThread())
+            (void)Unity::AsyncOperation::CancelAllSubscriptions();
+
+        g_conn.connected.store(false, std::memory_order_release);
         g_conn.unity = nullptr;
         g_conn.exports = nullptr;
-        IL2CPP::g_structOffsets = nullptr;   // keep GetExports() (inline, reads this) consistent
+        std::atomic_ref<const IL2CPP::il2cpp_exports*>(IL2CPP::g_structOffsets)
+            .store(nullptr, std::memory_order_release);
         return true;
     }
 
@@ -216,21 +246,21 @@ namespace IL2CPP::Module {
             ThreadDetach(attachment.thread);
     }
 
-    uint32_t GCHandleNew(il2cppObject* object, bool pinned) {
+    GCHandle GCHandleNew(il2cppObject* object, bool pinned) {
         if (!E() || !E()->m_gcHandleNew || !object) return 0;
-        return reinterpret_cast<uint32_t(IL2CPP_CALLTYPE)(void*, uint8_t)>(
+        return reinterpret_cast<GCHandle(IL2CPP_CALLTYPE)(void*, uint8_t)>(
             E()->m_gcHandleNew)(object, pinned ? uint8_t{1} : uint8_t{0});
     }
 
-    il2cppObject* GCHandleGetTarget(uint32_t handle) {
+    il2cppObject* GCHandleGetTarget(GCHandle handle) {
         if (!E() || !E()->m_gcHandleGetTarget || handle == 0) return nullptr;
-        return reinterpret_cast<il2cppObject*(IL2CPP_CALLTYPE)(uint32_t)>(
+        return reinterpret_cast<il2cppObject*(IL2CPP_CALLTYPE)(GCHandle)>(
             E()->m_gcHandleGetTarget)(handle);
     }
 
-    void GCHandleFree(uint32_t handle) {
+    void GCHandleFree(GCHandle handle) {
         if (!E() || !E()->m_gcHandleFree || handle == 0) return;
-        reinterpret_cast<void(IL2CPP_CALLTYPE)(uint32_t)>(E()->m_gcHandleFree)(handle);
+        reinterpret_cast<void(IL2CPP_CALLTYPE)(GCHandle)>(E()->m_gcHandleFree)(handle);
     }
 
     il2cppClass* FindClass(std::string_view fullName) {
@@ -263,7 +293,7 @@ namespace IL2CPP::Module {
         __try {
             return reinterpret_cast<il2cppClass*(IL2CPP_CALLTYPE)(void*)>(
                 E()->m_classFromSystemType)(type);
-        } __except(1) {
+        } __except(ForeignCallFilter(GetExceptionCode())) {
             return nullptr;
         }
     }
@@ -309,7 +339,7 @@ namespace IL2CPP::Module {
         __try {
             return reinterpret_cast<il2cppClass*(IL2CPP_CALLTYPE)(void*, void**)>(
                 E()->m_classGetInterfaces)(klass, iter);
-        } __except(1) {
+        } __except(ForeignCallFilter(GetExceptionCode())) {
             return nullptr;
         }
     }
@@ -336,6 +366,7 @@ namespace IL2CPP::Module {
 
     il2cppFieldInfo* GetFieldByName(il2cppClass* klass, const char* name) {
         if (!E() || !E()->m_classGetFieldFromName || !klass || !name) return nullptr;
+        EnsureClassInitializedForFields(klass);
         return reinterpret_cast<il2cppFieldInfo*(IL2CPP_CALLTYPE)(void*, const char*)>(
             E()->m_classGetFieldFromName)(klass, name);
     }
@@ -353,7 +384,7 @@ namespace IL2CPP::Module {
         if (!E() || !E()->m_fieldStaticGetValue || !field || !outValue) return;
         __try {
             reinterpret_cast<void(IL2CPP_CALLTYPE)(void*, void*)>(E()->m_fieldStaticGetValue)(field, outValue);
-        } __except(1) { }
+        } __except(ForeignCallFilter(GetExceptionCode())) { }
     }
 
     void SetStaticFieldValue(il2cppFieldInfo* field, void* value) {
@@ -451,6 +482,10 @@ namespace IL2CPP::Module {
 
     il2cppPropertyInfo* GetPropertyByName(il2cppClass* klass, const char* name) {
         if (!E() || !klass || !name) return nullptr;
+        if (E()->m_classGetPropertyFromName) {
+            if (auto* prop = SafeGetPropertyFromName(E()->m_classGetPropertyFromName, klass, name))
+                return prop;
+        }
         return FindPropertyByIteration(klass, name);
     }
 
@@ -488,7 +523,7 @@ namespace IL2CPP::Module {
         __try {
             return reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*, void**)>(
                 E()->m_classGetEvents)(klass, iter);
-        } __except(1) {
+        } __except(ForeignCallFilter(GetExceptionCode())) {
             return nullptr;
         }
     }

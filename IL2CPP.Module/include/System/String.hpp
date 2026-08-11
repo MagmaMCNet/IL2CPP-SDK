@@ -10,14 +10,16 @@ namespace IL2CPP::Module::System {
     class String : public ManagedObject {
         static constexpr int kLengthOffset = 0x10;
         static constexpr int kCharsOffset  = 0x14;
+        static constexpr int kMaxLength    = 0x800000;
 
     public:
         using ManagedObject::ManagedObject;
 
-        /// <summary>Get the string length (char count).</summary>
+        /// <summary>Get the string length (char count), or 0 if the object is not a plausible String.</summary>
         [[nodiscard]] int length() const {
             if (!valid()) return 0;
-            return read<int>(kLengthOffset);
+            const int len = read<int>(kLengthOffset);
+            return (len < 0 || len > kMaxLength) ? 0 : len;
         }
 
         /// <summary>Get a pointer to the internal wide character buffer.</summary>
@@ -28,22 +30,22 @@ namespace IL2CPP::Module::System {
 
         /// <summary>Convert to std::wstring.</summary>
         [[nodiscard]] std::wstring to_wstring() const {
-            if (!valid()) return L"";
-            int len = read<int>(kLengthOffset);
+            const int len = length();
             if (len <= 0) return L"";
             return std::wstring(ptr_at<const wchar_t>(kCharsOffset), len);
         }
 
         /// <summary>Convert to std::string (UTF-8).</summary>
         [[nodiscard]] std::string to_string() const {
-            if (!valid()) return {};
-            int len = read<int>(kLengthOffset);
+            const int len = length();
             if (len <= 0) return {};
             const wchar_t* wc = ptr_at<const wchar_t>(kCharsOffset);
-            int utf8Len = WideCharToMultiByte(CP_UTF8, 0, wc, len, nullptr, 0, nullptr, nullptr);
+            const int utf8Len = WideCharToMultiByte(CP_UTF8, 0, wc, len, nullptr, 0, nullptr, nullptr);
             if (utf8Len <= 0) return {};
-            std::string out(static_cast<size_t>(utf8Len), '\0');
-            WideCharToMultiByte(CP_UTF8, 0, wc, len, out.data(), utf8Len, nullptr, nullptr);
+            std::string out;
+            out.resize_and_overwrite(static_cast<size_t>(utf8Len), [&](char* p, size_t n) {
+                return static_cast<size_t>(WideCharToMultiByte(CP_UTF8, 0, wc, len, p, static_cast<int>(n), nullptr, nullptr));
+            });
             return out;
         }
 

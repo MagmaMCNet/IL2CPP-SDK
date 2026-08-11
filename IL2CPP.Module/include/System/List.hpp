@@ -24,10 +24,13 @@ namespace IL2CPP::Module::System {
             return Array<T>{ read<void*>(kItemsOffset) };
         }
 
-        /// <summary>Get the list count (logical size, not capacity).</summary>
+        /// <summary>Get the list count (logical size, not capacity), clamped to the backing array.</summary>
         [[nodiscard]] int count() const {
             if (!valid()) return 0;
-            return read<int>(kSizeOffset);
+            int sz = read<int>(kSizeOffset);
+            if (sz <= 0) return 0;
+            uintptr_t cap = items().size();
+            return cap < static_cast<uintptr_t>(sz) ? static_cast<int>(cap) : sz;
         }
 
         [[nodiscard]] bool empty() const { return count() == 0; }
@@ -38,23 +41,19 @@ namespace IL2CPP::Module::System {
 
         /// <summary>Safe access.</summary>
         [[nodiscard]] T* try_at(uintptr_t i) {
-            if (!valid()) return nullptr;
-            int cnt = read<int>(kSizeOffset);
-            if (i >= static_cast<uintptr_t>(cnt)) return nullptr;
+            if (i >= static_cast<uintptr_t>(count())) return nullptr;
             T* d = items_data();
             return d ? &d[i] : nullptr;
         }
 
         /// <summary>Get as std::span over the logical count.</summary>
         [[nodiscard]] std::span<T> as_span() {
-            if (!valid()) return {};
-            T* d = items_data();
-            return d ? std::span<T>{ d, static_cast<size_t>(read<int>(kSizeOffset)) } : std::span<T>{};
+            T* d = count() ? items_data() : nullptr;
+            return d ? std::span<T>{ d, static_cast<size_t>(count()) } : std::span<T>{};
         }
         [[nodiscard]] std::span<const T> as_span() const {
-            if (!valid()) return {};
-            T* d = items_data();
-            return d ? std::span<const T>{ d, static_cast<size_t>(read<int>(kSizeOffset)) } : std::span<const T>{};
+            const T* d = count() ? items_data() : nullptr;
+            return d ? std::span<const T>{ d, static_cast<size_t>(count()) } : std::span<const T>{};
         }
 
 
@@ -63,27 +62,23 @@ namespace IL2CPP::Module::System {
             return items_data();
         }
         [[nodiscard]] T* end() {
-            if (!valid()) return nullptr;
-            T* d = items_data();
-            return d ? d + read<int>(kSizeOffset) : nullptr;
+            T* d = begin();
+            return d ? d + count() : nullptr;
         }
         [[nodiscard]] const T* begin() const {
             if (!valid()) return nullptr;
             return items_data();
         }
         [[nodiscard]] const T* end() const {
-            if (!valid()) return nullptr;
-            T* d = items_data();
-            return d ? d + read<int>(kSizeOffset) : nullptr;
+            const T* d = begin();
+            return d ? d + count() : nullptr;
         }
 
         /// <summary>Convert to std::vector.</summary>
         [[nodiscard]] std::vector<T> to_vector() const {
-            if (!valid()) return {};
-            T* d = items_data();
+            const T* d = begin();
             if (!d) return {};
-            int cnt = read<int>(kSizeOffset);
-            return { d, d + cnt };
+            return std::vector<T>(d, d + count());
         }
     };
 

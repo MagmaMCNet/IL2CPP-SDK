@@ -135,13 +135,19 @@ namespace IL2CPP::Module::Unity {
             return MethodHandler::invoke<bool>(m, raw());
         }
 
-        [[nodiscard]] bool GetIsNetworkError() const {
-            static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Networking.UnityWebRequest"), IL2CPP_STR("get_isNetworkError"), 0);
-            return MethodHandler::invoke<bool>(m, raw());
-        }
-        [[nodiscard]] bool GetIsHttpError() const {
-            static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Networking.UnityWebRequest"), IL2CPP_STR("get_isHttpError"), 0);
-            return MethodHandler::invoke<bool>(m, raw());
+        enum class Result : int {
+            InProgress = 0,
+            Success = 1,
+            ConnectionError = 2,
+            ProtocolError = 3,
+            DataProcessingError = 4
+        };
+
+        /// <summary>Reads UnityWebRequest.result.</summary>
+        /// <returns>The request outcome, or InProgress if the property could not be resolved.</returns>
+        [[nodiscard]] Result GetResult() const {
+            static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Networking.UnityWebRequest"), IL2CPP_STR("get_result"), 0);
+            return static_cast<Result>(MethodHandler::invoke<int>(m, raw()));
         }
 
         [[nodiscard]] float GetDownloadProgress() const {

@@ -188,15 +188,16 @@ namespace IL2CPP::Module::Unity {
 
         [[nodiscard]] Matrix4x4 GetViewMatrix() const { return GetWorldToCameraMatrix(); }
 
+        /// <summary>Projection * view, in Unity's column-major storage (m[column][row]).</summary>
         [[nodiscard]] Matrix4x4 GetViewProjectionMatrix() const {
             Matrix4x4 view = GetWorldToCameraMatrix();
             Matrix4x4 proj = GetProjectionMatrix();
             Matrix4x4 result;
-            for (int i = 0; i < 4; i++)
-                for (int j = 0; j < 4; j++) {
-                    result[i][j] = 0.f;
+            for (int c = 0; c < 4; c++)
+                for (int r = 0; r < 4; r++) {
+                    result[c][r] = 0.f;
                     for (int k = 0; k < 4; k++)
-                        result[i][j] += proj[i][k] * view[k][j];
+                        result[c][r] += proj[k][r] * view[c][k];
                 }
             return result;
         }

@@ -87,7 +87,7 @@ namespace IL2CPP::Module::System {
         /// <summary>Convert to std::vector.</summary>
         [[nodiscard]] std::vector<T> to_vector() const {
             if (!valid()) return {};
-            return { begin(), end() };
+            return std::vector<T>(begin(), end());
         }
 
         /// <summary>Filter elements by predicate.</summary>
@@ -124,11 +124,11 @@ namespace IL2CPP::Module::System {
         /// <summary>Check if contains a value.</summary>
         [[nodiscard]] bool contains(const T& value) const { return std::ranges::find(*this, value) != end(); }
 
-        static Array<T> Create(std::string_view elementTypeName, uintptr_t length) {
+        static Array<T> Create(const char* elementTypeName, uintptr_t length) {
             auto* e = GetExports();
-            if (!e) return {};
+            if (!e || !elementTypeName) return {};
             void* klass = reinterpret_cast<void*(IL2CPP_CALLTYPE)(const char*)>(
-                e->m_helperFindClass)(std::string(elementTypeName).c_str());
+                e->m_helperFindClass)(elementTypeName);
             if (!klass) return {};
             void* arr = reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*, uintptr_t)>(
                 e->m_arrayNew)(klass, length);

@@ -10,6 +10,12 @@ namespace IL2CPP::VRChat {
     using IL2CPP::Module::MethodHandler;
 
     namespace {
+        std::string invoke_string_getter(const IL2CPP::Module::Method& method, void* instance) {
+            if (!instance) return "";
+            void* str = MethodHandler::invoke<void*>(method, instance);
+            return str ? IL2CPP::Module::System::String(str).to_string() : "";
+        }
+
         std::vector<std::string> collect_string_list(IL2CPP::Module::ManagedObject obj, const IL2CPP::Module::Method& method) {
             std::vector<std::string> result;
             if (!obj) return result;
@@ -17,6 +23,7 @@ namespace IL2CPP::VRChat {
             if (!listPtr) return result;
             IL2CPP::Module::System::List<void*> list(listPtr);
             int cnt = list.count();
+            if (cnt > 0) result.reserve(static_cast<size_t>(cnt));
             for (int i = 0; i < cnt; ++i) {
                 auto* elemPtr = list.try_at(static_cast<uintptr_t>(i));
                 if (elemPtr && *elemPtr) {
@@ -29,26 +36,22 @@ namespace IL2CPP::VRChat {
 
     std::string APIUser::GetDisplayName() {
         static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_displayName", 0);
-        void* str = MethodHandler::invoke<void*>(m, raw());
-        return str ? IL2CPP::Module::System::String(str).to_string() : "";
+        return invoke_string_getter(m, raw());
     }
 
     std::string APIUser::GetUsername() {
         static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_username", 0);
-        void* str = MethodHandler::invoke<void*>(m, raw());
-        return str ? IL2CPP::Module::System::String(str).to_string() : "";
+        return invoke_string_getter(m, raw());
     }
 
     std::string APIUser::GetPronouns() {
         static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_pronouns", 0);
-        void* str = MethodHandler::invoke<void*>(m, raw());
-        return str ? IL2CPP::Module::System::String(str).to_string() : "";
+        return invoke_string_getter(m, raw());
     }
 
     std::string APIUser::GetBio() {
         static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_bio", 0);
-        void* str = MethodHandler::invoke<void*>(m, raw());
-        return str ? IL2CPP::Module::System::String(str).to_string() : "";
+        return invoke_string_getter(m, raw());
     }
 
     std::vector<std::string> APIUser::GetBioLinks() {
@@ -58,14 +61,12 @@ namespace IL2CPP::VRChat {
 
     std::string APIUser::GetStatus() {
         static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_status", 0);
-        void* str = MethodHandler::invoke<void*>(m, raw());
-        return str ? IL2CPP::Module::System::String(str).to_string() : "";
+        return invoke_string_getter(m, raw());
     }
 
     std::string APIUser::GetStatusDescription() {
         static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_statusDescription", 0);
-        void* str = MethodHandler::invoke<void*>(m, raw());
-        return str ? IL2CPP::Module::System::String(str).to_string() : "";
+        return invoke_string_getter(m, raw());
     }
 
     std::vector<std::string> APIUser::GetTags() {
@@ -75,38 +76,32 @@ namespace IL2CPP::VRChat {
 
     std::string APIUser::GetNote() {
         static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_note", 0);
-        void* str = MethodHandler::invoke<void*>(m, raw());
-        return str ? IL2CPP::Module::System::String(str).to_string() : "";
+        return invoke_string_getter(m, raw());
     }
 
     std::string APIUser::GetUserLanguageCode() {
         static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_userLanguageCode", 0);
-        void* str = MethodHandler::invoke<void*>(m, raw());
-        return str ? IL2CPP::Module::System::String(str).to_string() : "";
+        return invoke_string_getter(m, raw());
     }
 
     std::string APIUser::GetAvatarId() {
         static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_avatarId", 0);
-        void* str = MethodHandler::invoke<void*>(m, raw());
-        return str ? IL2CPP::Module::System::String(str).to_string() : "";
+        return invoke_string_getter(m, raw());
     }
 
     std::string APIUser::GetFallbackId() {
         static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_fallbackId", 0);
-        void* str = MethodHandler::invoke<void*>(m, raw());
-        return str ? IL2CPP::Module::System::String(str).to_string() : "";
+        return invoke_string_getter(m, raw());
     }
 
     std::string APIUser::GetCurrentAvatarImageUrl() {
         static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_currentAvatarImageUrl", 0);
-        void* str = MethodHandler::invoke<void*>(m, raw());
-        return str ? IL2CPP::Module::System::String(str).to_string() : "";
+        return invoke_string_getter(m, raw());
     }
 
     std::string APIUser::GetCurrentAvatarThumbnailImageUrl() {
         static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_currentAvatarThumbnailImageUrl", 0);
-        void* str = MethodHandler::invoke<void*>(m, raw());
-        return str ? IL2CPP::Module::System::String(str).to_string() : "";
+        return invoke_string_getter(m, raw());
     }
 
     std::vector<std::string> APIUser::GetCurrentAvatarTags() {
@@ -122,26 +117,22 @@ namespace IL2CPP::VRChat {
 
     std::string APIUser::GetUserIcon() {
         static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_userIcon", 0);
-        void* str = MethodHandler::invoke<void*>(m, raw());
-        return str ? IL2CPP::Module::System::String(str).to_string() : "";
+        return invoke_string_getter(m, raw());
     }
 
     std::string APIUser::GetProfilePicOverride() {
         static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_profilePicOverride", 0);
-        void* str = MethodHandler::invoke<void*>(m, raw());
-        return str ? IL2CPP::Module::System::String(str).to_string() : "";
+        return invoke_string_getter(m, raw());
     }
 
     std::string APIUser::GetIconUrl() {
         static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_iconUrl", 0);
-        void* str = MethodHandler::invoke<void*>(m, raw());
-        return str ? IL2CPP::Module::System::String(str).to_string() : "";
+        return invoke_string_getter(m, raw());
     }
 
     std::string APIUser::GetThumbnailUrl() {
         static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_thumbnailUrl", 0);
-        void* str = MethodHandler::invoke<void*>(m, raw());
-        return str ? IL2CPP::Module::System::String(str).to_string() : "";
+        return invoke_string_getter(m, raw());
     }
 
     bool APIUser::GetIsFriend() {
@@ -152,8 +143,7 @@ namespace IL2CPP::VRChat {
 
     std::string APIUser::GetLocation() {
         static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_location", 0);
-        void* str = MethodHandler::invoke<void*>(m, raw());
-        return str ? IL2CPP::Module::System::String(str).to_string() : "";
+        return invoke_string_getter(m, raw());
     }
 
     std::vector<ApiBadge> APIUser::GetBadges() {
@@ -164,6 +154,7 @@ namespace IL2CPP::VRChat {
         if (!listPtr) return result;
         IL2CPP::Module::System::List<void*> list(listPtr);
         int cnt = list.count();
+        if (cnt > 0) result.reserve(static_cast<size_t>(cnt));
         for (int i = 0; i < cnt; ++i) {
             auto* elemPtr = list.try_at(static_cast<uintptr_t>(i));
             if (elemPtr && *elemPtr) {
@@ -193,14 +184,12 @@ namespace IL2CPP::VRChat {
 
     std::string APIUser::GetLastPlatform() {
         static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_last_platform", 0);
-        void* str = MethodHandler::invoke<void*>(m, raw());
-        return str ? IL2CPP::Module::System::String(str).to_string() : "";
+        return invoke_string_getter(m, raw());
     }
 
     std::string APIUser::GetPlatform() {
         static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_platform", 0);
-        void* str = MethodHandler::invoke<void*>(m, raw());
-        return str ? IL2CPP::Module::System::String(str).to_string() : "";
+        return invoke_string_getter(m, raw());
     }
 
     PlayerRank APIUser::GetPlayerRank() {
