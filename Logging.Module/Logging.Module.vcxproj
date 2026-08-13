@@ -85,6 +85,7 @@
       <UseFullPaths>false</UseFullPaths>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+      <AdditionalOptions>/d1trimfile:N:\VisualStudio\VRChat\UNIx\UNIxLoader\ %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

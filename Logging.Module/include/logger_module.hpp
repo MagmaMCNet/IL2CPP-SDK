@@ -30,7 +30,7 @@ namespace Logger::Module {
 
         [[nodiscard]] bool is_enabled(Level lvl) const noexcept;
 
-        void log(Level lvl, std::string_view message, std::source_location loc = std::source_location::current()) const;
+        void log(Level lvl, std::string_view message, std::source_location loc = LOGGER_DEFAULT_LOC) const;
 
         template<typename... Args>
         void log(Level lvl, std::string_view _fmt, Args&&... args) const {
@@ -38,12 +38,12 @@ namespace Logger::Module {
             log(lvl, std::vformat(_fmt, std::make_format_args(args...)));
         }
 
-        void trace(std::string_view msg, std::source_location loc = std::source_location::current()) const;
-        void debug(std::string_view msg, std::source_location loc = std::source_location::current()) const;
-        void info(std::string_view msg, std::source_location loc = std::source_location::current()) const;
-        void warn(std::string_view msg, std::source_location loc = std::source_location::current()) const;
-        void error(std::string_view msg, std::source_location loc = std::source_location::current()) const;
-        void fatal(std::string_view msg, std::source_location loc = std::source_location::current()) const;
+        void trace(std::string_view msg, std::source_location loc = LOGGER_DEFAULT_LOC) const;
+        void debug(std::string_view msg, std::source_location loc = LOGGER_DEFAULT_LOC) const;
+        void info(std::string_view msg, std::source_location loc = LOGGER_DEFAULT_LOC) const;
+        void warn(std::string_view msg, std::source_location loc = LOGGER_DEFAULT_LOC) const;
+        void error(std::string_view msg, std::source_location loc = LOGGER_DEFAULT_LOC) const;
+        void fatal(std::string_view msg, std::source_location loc = LOGGER_DEFAULT_LOC) const;
 
         template<typename... Args>
         void trace(std::string_view _fmt, Args&&... args) const {
@@ -108,7 +108,7 @@ namespace Logger::Module {
 
         [[nodiscard]] bool is_enabled(Level lvl) const noexcept;
 
-        void log(Level lvl, std::string_view message, std::source_location loc = std::source_location::current()) const;
+        void log(Level lvl, std::string_view message, std::source_location loc = LOGGER_DEFAULT_LOC) const;
 
         template<typename... Args>
         void log(Level lvl, std::string_view _fmt, Args&&... args) const {
@@ -116,12 +116,12 @@ namespace Logger::Module {
             log(lvl, std::vformat(_fmt, std::make_format_args(args...)));
         }
 
-        void trace(std::string_view msg, std::source_location loc = std::source_location::current()) const;
-        void debug(std::string_view msg, std::source_location loc = std::source_location::current()) const;
-        void info(std::string_view msg, std::source_location loc = std::source_location::current()) const;
-        void warn(std::string_view msg, std::source_location loc = std::source_location::current()) const;
-        void error(std::string_view msg, std::source_location loc = std::source_location::current()) const;
-        void fatal(std::string_view msg, std::source_location loc = std::source_location::current()) const;
+        void trace(std::string_view msg, std::source_location loc = LOGGER_DEFAULT_LOC) const;
+        void debug(std::string_view msg, std::source_location loc = LOGGER_DEFAULT_LOC) const;
+        void info(std::string_view msg, std::source_location loc = LOGGER_DEFAULT_LOC) const;
+        void warn(std::string_view msg, std::source_location loc = LOGGER_DEFAULT_LOC) const;
+        void error(std::string_view msg, std::source_location loc = LOGGER_DEFAULT_LOC) const;
+        void fatal(std::string_view msg, std::source_location loc = LOGGER_DEFAULT_LOC) const;
 
         template<typename... Args>
         void trace(std::string_view _fmt, Args&&... args) const {

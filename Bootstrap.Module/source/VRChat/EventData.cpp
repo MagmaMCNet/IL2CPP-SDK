@@ -19,7 +19,7 @@ namespace IL2CPP::VRChat {
 
     int EventData::GetSender() {
         if (!valid()) return 0;
-        return get_field<int>("Sender");
+        return get_field<int>("sender");
     }
 
     uint8_t EventData::GetCustomDataKey() {
@@ -29,7 +29,7 @@ namespace IL2CPP::VRChat {
 
     void* EventData::GetCustomData() {
         if (!valid()) return nullptr;
-        return get_field<void*>("CustomData");
+        return get_field<void*>("customData");
     }
 
 } // namespace IL2CPP::VRChat

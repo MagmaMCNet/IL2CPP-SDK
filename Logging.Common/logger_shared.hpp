@@ -1,5 +1,26 @@
 #pragma once
 #include <cstdint>
+#include <source_location>
+
+// LOGGER_SOURCE_LOCATION — compile-time toggle for the defaulted
+// std::source_location::current() on every logging entry point. Each such default
+// bakes the caller's __FUNCSIG__ and absolute path into .rdata, so release builds
+// pass an empty location instead and Config::show_source_location prints nothing.
+// Define LOGGER_SOURCE_LOCATION=1 in project preprocessor settings to restore it.
+// Default: enabled in _DEBUG, stripped otherwise.
+#ifndef LOGGER_SOURCE_LOCATION
+#  ifdef _DEBUG
+#    define LOGGER_SOURCE_LOCATION 1
+#  else
+#    define LOGGER_SOURCE_LOCATION 0
+#  endif
+#endif
+
+#if LOGGER_SOURCE_LOCATION
+#  define LOGGER_DEFAULT_LOC ::std::source_location::current()
+#else
+#  define LOGGER_DEFAULT_LOC ::std::source_location{}
+#endif
 
 // UNIX_DEV_LOGS — compile-time toggle for developer-mode log call sites.
 // Intended for internal .Core modules only; mods and external consumers keep
