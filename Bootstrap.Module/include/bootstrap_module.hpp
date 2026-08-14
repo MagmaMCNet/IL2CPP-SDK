@@ -487,6 +487,10 @@ namespace Bootstrap::Module {
                                 float x, float y, float z);
         void set_plate_background_enabled(uint32_t module_id, void* player, std::string_view plate_id,
                                           bool enabled);
+        /// <summary>Gets the plate's row GameObject.</summary>
+        /// <returns>The native GameObject pointer, or null if the plate is unknown.</returns>
+        void* get_plate_object(uint32_t module_id, void* player, std::string_view plate_id);
+        void set_plate_width(uint32_t module_id, void* player, std::string_view plate_id, float width);
 
     private:
         NameplateService() = default;

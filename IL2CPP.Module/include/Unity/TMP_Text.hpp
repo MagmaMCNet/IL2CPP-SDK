@@ -81,6 +81,36 @@ namespace IL2CPP::Module::Unity {
             MethodHandler::invoke(m, raw(), params);
         }
 
+        [[nodiscard]] float GetFontSizeMin() const {
+            static auto m = MethodHandler::resolve(IL2CPP_STR("TMPro.TMP_Text"), IL2CPP_STR("get_fontSizeMin"), 0);
+            return MethodHandler::invoke<float>(m, raw());
+        }
+        void SetFontSizeMin(float value) {
+            static auto m = MethodHandler::resolve(IL2CPP_STR("TMPro.TMP_Text"), IL2CPP_STR("set_fontSizeMin"), 1);
+            void* params[] = { &value };
+            MethodHandler::invoke(m, raw(), params);
+        }
+
+        [[nodiscard]] float GetFontSizeMax() const {
+            static auto m = MethodHandler::resolve(IL2CPP_STR("TMPro.TMP_Text"), IL2CPP_STR("get_fontSizeMax"), 0);
+            return MethodHandler::invoke<float>(m, raw());
+        }
+        void SetFontSizeMax(float value) {
+            static auto m = MethodHandler::resolve(IL2CPP_STR("TMPro.TMP_Text"), IL2CPP_STR("set_fontSizeMax"), 1);
+            void* params[] = { &value };
+            MethodHandler::invoke(m, raw(), params);
+        }
+
+        [[nodiscard]] bool GetEnableAutoSizing() const {
+            static auto m = MethodHandler::resolve(IL2CPP_STR("TMPro.TMP_Text"), IL2CPP_STR("get_enableAutoSizing"), 0);
+            return MethodHandler::invoke<bool>(m, raw());
+        }
+        void SetEnableAutoSizing(bool value) {
+            static auto m = MethodHandler::resolve(IL2CPP_STR("TMPro.TMP_Text"), IL2CPP_STR("set_enableAutoSizing"), 1);
+            void* params[] = { &value };
+            MethodHandler::invoke(m, raw(), params);
+        }
+
         [[nodiscard]] bool GetRichText() const {
             static auto m = MethodHandler::resolve(IL2CPP_STR("TMPro.TMP_Text"), IL2CPP_STR("get_richText"), 0);
             return MethodHandler::invoke<bool>(m, raw());

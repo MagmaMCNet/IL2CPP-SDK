@@ -1341,7 +1341,7 @@ namespace Bootstrap::Module {
         float pos_x, float pos_y, float pos_z,
         std::string_view label, std::string_view tag) {
         if (!is_connected() || !player) return {};
-        char buf[16]{};
+        char buf[64]{};
         uint32_t written = g_conn.vtable->np_create_plate(module_id, player,
             pos_x, pos_y, pos_z,
             label.data(), static_cast<uint32_t>(label.size()),
@@ -1400,6 +1400,20 @@ namespace Bootstrap::Module {
         if (!is_connected() || !player) return;
         g_conn.vtable->np_set_plate_background_enabled(module_id, player,
             plate_id.data(), static_cast<uint32_t>(plate_id.size()), enabled);
+    }
+
+    void* NameplateService::get_plate_object(uint32_t module_id, void* player,
+        std::string_view plate_id) {
+        if (!is_connected() || !player) return nullptr;
+        return g_conn.vtable->np_get_plate_object(module_id, player,
+            plate_id.data(), static_cast<uint32_t>(plate_id.size()));
+    }
+
+    void NameplateService::set_plate_width(uint32_t module_id, void* player,
+        std::string_view plate_id, float width) {
+        if (!is_connected() || !player) return;
+        g_conn.vtable->np_set_plate_width(module_id, player,
+            plate_id.data(), static_cast<uint32_t>(plate_id.size()), width);
     }
 
     // ClientUsage
