@@ -29,6 +29,19 @@ namespace IL2CPP::Module::Unity {
             MethodHandler::invoke(m, raw(), params);
         }
 
+        /// <summary>Get the shared material array (Material[]).</summary>
+        [[nodiscard]] void* GetSharedMaterials() const {
+            static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Renderer"), IL2CPP_STR("get_sharedMaterials"), 0);
+            return MethodHandler::invoke<void*>(m, raw());
+        }
+
+        /// <summary>Replace the shared material array (Material[]).</summary>
+        void SetSharedMaterials(void* materials) {
+            static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Renderer"), IL2CPP_STR("set_sharedMaterials"), 1);
+            void* params[] = { materials };
+            MethodHandler::invoke<void>(m, raw(), params);
+        }
+
         [[nodiscard]] void* GetSharedMaterial() const {
             static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Renderer"), IL2CPP_STR("get_sharedMaterial"), 0);
             return MethodHandler::invoke<void*>(m, raw());
@@ -87,6 +100,16 @@ namespace IL2CPP::Module::Unity {
         }
         void SetReceiveShadows(bool value) {
             static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Renderer"), IL2CPP_STR("set_receiveShadows"), 1);
+            void* params[] = { &value };
+            MethodHandler::invoke(m, raw(), params);
+        }
+
+        [[nodiscard]] bool GetAllowOcclusionWhenDynamic() const {
+            static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Renderer"), IL2CPP_STR("get_allowOcclusionWhenDynamic"), 0);
+            return MethodHandler::invoke<bool>(m, raw());
+        }
+        void SetAllowOcclusionWhenDynamic(bool value) {
+            static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Renderer"), IL2CPP_STR("set_allowOcclusionWhenDynamic"), 1);
             void* params[] = { &value };
             MethodHandler::invoke(m, raw(), params);
         }

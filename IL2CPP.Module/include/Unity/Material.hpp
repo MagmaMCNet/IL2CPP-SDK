@@ -18,6 +18,33 @@ namespace IL2CPP::Module::Unity {
             return Object::New<Material>(IL2CPP_STR("UnityEngine.Material"), params, 1);
         }
 
+        /// <summary>Create a Material bound to a shader, bypassing constructor overload ambiguity.</summary>
+        /// <param name="shader">The UnityEngine.Shader to bind.</param>
+        /// <returns>The new material, or an empty Material on failure.</returns>
+        [[nodiscard]] static Material FromShader(void* shader, const char** why = nullptr) {
+            if (!shader) { if (why) *why = "shader argument null"; return {}; }
+
+            Class klass = Class::find("UnityEngine.Material");
+            if (!klass) { if (why) *why = "Material class not found"; return {}; }
+
+            // Material declares .ctor(Shader), .ctor(Material) and .ctor(String);
+            // resolving by argument count can bind the wrong one and leave the
+            // native side uninitialised. CreateWithShader is what .ctor(Shader)
+            // calls and its name is unambiguous.
+            Material material{ klass.new_object().raw() };
+            if (!material) { if (why) *why = "new_object failed"; return {}; }
+
+            static auto m = MethodHandler::resolve(
+                IL2CPP_STR("UnityEngine.Material"), IL2CPP_STR("CreateWithShader"), 2);
+            if (!m) { if (why) *why = "CreateWithShader unresolved"; return {}; }
+
+            void* params[] = { material.raw(), shader };
+            MethodHandler::invoke<void>(m, nullptr, params);
+
+            if (!material.GetShader()) { if (why) *why = "shader null after CreateWithShader"; return {}; }
+            return material;
+        }
+
         /// <summary>Create a Material by shader name (e.g. "Standard", "Sprites/Default").</summary>
         [[nodiscard]] static Material New(std::string_view shaderName) {
             static auto find = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Shader"), IL2CPP_STR("Find"), 1);

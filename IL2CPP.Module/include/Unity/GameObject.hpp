@@ -92,6 +92,13 @@ namespace IL2CPP::Module::Unity {
             return GetComponent(reinterpret_cast<Il2CppSystemType*>(t.get_system_type_object()));
         }
 
+        /// <summary>Get every component of a named type on this object and its descendants.</summary>
+        [[nodiscard]] std::vector<Component> GetComponentsInChildrenByName(std::string_view name, bool includeInactive = true) const {
+            Class klass = Class::find(name);
+            if (!klass) return {};
+            return GetComponentsInChildren(klass, includeInactive);
+        }
+
         /// <summary>Get a component by name.</summary>
         [[nodiscard]] Component GetComponentByName(std::string_view name) const {
             Class klass = Class::find(name);

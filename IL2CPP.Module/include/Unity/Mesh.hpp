@@ -2,6 +2,7 @@
 #include "Object.hpp"
 #include "../MethodHandler.hpp"
 #include "../System/Array.hpp"
+#include "../System/String.hpp"
 #include <IL2CPP.Common/il2cpp_types.hpp>
 #include <IL2CPP.Common/il2cpp_shared.hpp>
 #include <cstring>
@@ -133,6 +134,22 @@ namespace IL2CPP::Module::Unity {
             static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Mesh"), IL2CPP_STR("set_subMeshCount"), 1);
             void* params[] = { &count };
             MethodHandler::invoke(m, raw(), params);
+        }
+
+        [[nodiscard]] int GetBlendShapeCount() const {
+            static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Mesh"), IL2CPP_STR("get_blendShapeCount"), 0);
+            return MethodHandler::invoke<int>(m, raw());
+        }
+
+        /// <summary>Get the name of a blend shape.</summary>
+        /// <param name="index">Blend shape index, below GetBlendShapeCount().</param>
+        /// <returns>The shape name, or an empty string when the index is out of range.</returns>
+        [[nodiscard]] std::string GetBlendShapeName(int index) const {
+            static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Mesh"), IL2CPP_STR("GetBlendShapeName"), 1);
+            void* params[] = { &index };
+            void* str = MethodHandler::invoke<void*>(m, raw(), params);
+            if (!str) return "";
+            return System::String{ str }.to_string();
         }
 
         [[nodiscard]] Bounds GetBounds() const {

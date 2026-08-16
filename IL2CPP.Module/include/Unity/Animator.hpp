@@ -76,9 +76,33 @@ namespace IL2CPP::Module::Unity {
             return MethodHandler::invoke<bool>(m, raw());
         }
 
+        /// <summary>The factor HumanPose positions are expressed in, not the transform scale.</summary>
+        [[nodiscard]] float GetHumanScale() const {
+            static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Animator"), IL2CPP_STR("get_humanScale"), 0);
+            return MethodHandler::invoke<float>(m, raw());
+        }
+
         [[nodiscard]] bool GetIsHuman() const {
             static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Animator"), IL2CPP_STR("get_isHuman"), 0);
             return MethodHandler::invoke<bool>(m, raw());
+        }
+
+        /// <summary>Whether the rig is a humanoid avatar that can be posed.</summary>
+        [[nodiscard]] bool IsHuman() const {
+            static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Animator"), IL2CPP_STR("get_isHuman"), 0);
+            return MethodHandler::invoke<bool>(m, raw());
+        }
+
+        [[nodiscard]] int GetParameterCount() const {
+            static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Animator"), IL2CPP_STR("get_parameterCount"), 0);
+            return MethodHandler::invoke<int>(m, raw());
+        }
+
+        /// <summary>Get parameter metadata by index (UnityEngine.AnimatorControllerParameter).</summary>
+        [[nodiscard]] ManagedObject GetParameter(int index) const {
+            static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Animator"), IL2CPP_STR("GetParameter"), 1);
+            void* params[] = { &index };
+            return ManagedObject{ MethodHandler::invoke<void*>(m, raw(), params) };
         }
 
         void SetFloat(std::string_view name, float value) {
