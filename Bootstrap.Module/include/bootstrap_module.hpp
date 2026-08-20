@@ -490,7 +490,14 @@ namespace Bootstrap::Module {
         /// <summary>Gets the plate's row GameObject.</summary>
         /// <returns>The native GameObject pointer, or null if the plate is unknown.</returns>
         void* get_plate_object(uint32_t module_id, void* player, std::string_view plate_id);
+        /// <summary>Gets the plate's text GameObject.</summary>
+        /// <returns>The native GameObject pointer, or null if the plate or its text is unknown.</returns>
+        void* get_plate_text_object(uint32_t module_id, void* player, std::string_view plate_id);
+        /// <summary>Gets the plate's background GameObject.</summary>
+        /// <returns>The native GameObject pointer, or null if the plate or its background is unknown.</returns>
+        void* get_plate_background_object(uint32_t module_id, void* player, std::string_view plate_id);
         void set_plate_width(uint32_t module_id, void* player, std::string_view plate_id, float width);
+        void set_plate_height(uint32_t module_id, void* player, std::string_view plate_id, float height);
 
     private:
         NameplateService() = default;

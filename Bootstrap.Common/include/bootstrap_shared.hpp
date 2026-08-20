@@ -7,7 +7,7 @@
 namespace Bootstrap {
 
     constexpr uint32_t invalid_id = ~0u;
-    constexpr uint32_t vtable_version = 16;
+    constexpr uint32_t vtable_version = 17;
 
     /// Menu lifecycle events fired by Bootstrap. Mods subscribe via
     /// register_menu_event to run initialization once the menu layer is
@@ -253,6 +253,13 @@ namespace Bootstrap {
     using fn_np_set_plate_width = void(__cdecl*)(uint32_t module_id, void* player,
         char const* plate_id, uint32_t plate_id_len,
         float width);
+    using fn_np_set_plate_height = void(__cdecl*)(uint32_t module_id, void* player,
+        char const* plate_id, uint32_t plate_id_len,
+        float height);
+    using fn_np_get_plate_text_object = void*(__cdecl*)(uint32_t module_id, void* player,
+        char const* plate_id, uint32_t plate_id_len);
+    using fn_np_get_plate_background_object = void*(__cdecl*)(uint32_t module_id, void* player,
+        char const* plate_id, uint32_t plate_id_len);
 
     using fn_cu_register_client = void(__cdecl*)(uint32_t module_id,
         char const* client_name, uint32_t client_name_len,
@@ -595,10 +602,14 @@ namespace Bootstrap {
         fn_np_get_plate_object np_get_plate_object;
         fn_np_set_plate_width  np_set_plate_width;
 
+        fn_np_set_plate_height           np_set_plate_height;
+        fn_np_get_plate_text_object      np_get_plate_text_object;
+        fn_np_get_plate_background_object np_get_plate_background_object;
+
         uint32_t version;
         uint32_t _reserved;
     };
 
-    static_assert(std::is_trivial_v<BootstrapVtable> && sizeof(BootstrapVtable) == 1104);
+    static_assert(std::is_trivial_v<BootstrapVtable> && sizeof(BootstrapVtable) == 1128);
 
 } // namespace Bootstrap

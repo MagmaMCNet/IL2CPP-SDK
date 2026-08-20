@@ -1409,11 +1409,32 @@ namespace Bootstrap::Module {
             plate_id.data(), static_cast<uint32_t>(plate_id.size()));
     }
 
+    void* NameplateService::get_plate_text_object(uint32_t module_id, void* player,
+        std::string_view plate_id) {
+        if (!is_connected() || !player) return nullptr;
+        return g_conn.vtable->np_get_plate_text_object(module_id, player,
+            plate_id.data(), static_cast<uint32_t>(plate_id.size()));
+    }
+
+    void* NameplateService::get_plate_background_object(uint32_t module_id, void* player,
+        std::string_view plate_id) {
+        if (!is_connected() || !player) return nullptr;
+        return g_conn.vtable->np_get_plate_background_object(module_id, player,
+            plate_id.data(), static_cast<uint32_t>(plate_id.size()));
+    }
+
     void NameplateService::set_plate_width(uint32_t module_id, void* player,
         std::string_view plate_id, float width) {
         if (!is_connected() || !player) return;
         g_conn.vtable->np_set_plate_width(module_id, player,
             plate_id.data(), static_cast<uint32_t>(plate_id.size()), width);
+    }
+
+    void NameplateService::set_plate_height(uint32_t module_id, void* player,
+        std::string_view plate_id, float height) {
+        if (!is_connected() || !player) return;
+        g_conn.vtable->np_set_plate_height(module_id, player,
+            plate_id.data(), static_cast<uint32_t>(plate_id.size()), height);
     }
 
     // ClientUsage

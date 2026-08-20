@@ -42,6 +42,16 @@ namespace IL2CPP::Module::Unity {
             MethodHandler::invoke(m, raw(), params);
         }
 
+        [[nodiscard]] int GetPixelWidth() const {
+            static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Camera"), IL2CPP_STR("get_pixelWidth"), 0);
+            return MethodHandler::invoke<int>(m, raw());
+        }
+
+        [[nodiscard]] int GetPixelHeight() const {
+            static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Camera"), IL2CPP_STR("get_pixelHeight"), 0);
+            return MethodHandler::invoke<int>(m, raw());
+        }
+
         [[nodiscard]] float GetFieldOfView() const {
             static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Camera"), IL2CPP_STR("get_fieldOfView"), 0);
             return MethodHandler::invoke<float>(m, raw());
