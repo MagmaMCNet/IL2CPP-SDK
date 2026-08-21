@@ -226,6 +226,22 @@ namespace Bootstrap::Module {
 
         uint32_t add_separator(uint32_t module_id, uint32_t foldout_id);
 
+        /// <summary>Subscribe to VRChat's user page opening, changing user, or closing.</summary>
+        /// <returns>Callback id for remove_user_select_callback, or invalid_id.</returns>
+        uint32_t register_user_select_callback(uint32_t module_id, Bootstrap::fn_user_select_callback callback);
+        void remove_user_select_callback(uint32_t module_id, uint32_t callback_id);
+        /// <summary>Add a row to VRChat's user page. The callback receives the user it was pressed on.</summary>
+        uint32_t add_user_button(uint32_t module_id, std::string_view text,
+                                 Bootstrap::fn_user_button_callback callback);
+        void remove_user_button(uint32_t module_id, uint32_t button_id);
+        /// <summary>Add a user-page row that opens a page of your own.</summary>
+        /// <returns>Page id usable with every other page call, or invalid_id.</returns>
+        uint32_t add_user_sub_page(uint32_t module_id, std::string_view name);
+        /// <summary>The user whose page is currently open.</summary>
+        /// <param name="out_api_user">Receives the APIUser pointer when non-null.</param>
+        /// <returns>VRC.Player pointer, or null when nothing is selected or the user is not in the instance.</returns>
+        void* get_selected_user(void** out_api_user = nullptr);
+
         void navigate_to(uint32_t page_id);
         void navigate_back();
 

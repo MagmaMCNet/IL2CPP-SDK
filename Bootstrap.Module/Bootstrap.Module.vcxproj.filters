@@ -33,6 +33,9 @@
     <ClCompile Include="source\VRChat\ApiBadge.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\VRChat\ApiContentModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="source\VRChat\APIUser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -87,6 +90,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\VRChat\ApiBadge.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VRChat\ApiAvatar.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VRChat\ApiContentModel.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\VRChat\APIUser.hpp">

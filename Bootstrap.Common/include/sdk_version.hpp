@@ -2,7 +2,7 @@
 #include <cstdint>
 
 #define UNIX_SDK_MAJOR 6
-#define UNIX_SDK_MINOR 0
+#define UNIX_SDK_MINOR 1
 #define UNIX_SDK_PATCH 0
 
 #define UNIX_STR_(x) #x

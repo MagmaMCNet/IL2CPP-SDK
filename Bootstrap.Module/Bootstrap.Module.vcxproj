@@ -98,6 +98,7 @@
     <ClCompile Include="source\VRChat\VRCPlayer.cpp" />
     <ClCompile Include="source\VRChat\ApiModel.cpp" />
     <ClCompile Include="source\VRChat\ApiBadge.cpp" />
+    <ClCompile Include="source\VRChat\ApiContentModel.cpp" />
     <ClCompile Include="source\VRChat\APIUser.cpp" />
     <ClCompile Include="source\VRChat\EventData.cpp" />
     <ClCompile Include="source\VRChat\Networking.cpp" />
@@ -118,6 +119,8 @@
     <ClInclude Include="include\VRChat\VRCPlayer.hpp" />
     <ClInclude Include="include\VRChat\ApiModel.hpp" />
     <ClInclude Include="include\VRChat\ApiBadge.hpp" />
+    <ClInclude Include="include\VRChat\ApiAvatar.hpp" />
+    <ClInclude Include="include\VRChat\ApiContentModel.hpp" />
     <ClInclude Include="include\VRChat\APIUser.hpp" />
     <ClInclude Include="include\VRChat\EventData.hpp" />
     <ClInclude Include="include\VRChat\Networking.hpp" />

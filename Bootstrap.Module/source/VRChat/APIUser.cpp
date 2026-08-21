@@ -197,4 +197,14 @@ namespace IL2CPP::VRChat {
         return static_cast<PlayerRank>(
             Bootstrap::Module::get_vtable()->get_player_rank(raw()));
     }
+
+    std::string APIUser::GetDateJoined() {
+        static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_date_joined", 0);
+        return invoke_string_getter(m, raw());
+    }
+
+    std::string APIUser::GetDeveloperType() {
+        static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_developerType", 0);
+        return invoke_string_getter(m, raw());
+    }
 } // namespace IL2CPP::VRChat

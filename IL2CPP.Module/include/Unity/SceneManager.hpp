@@ -1,5 +1,6 @@
 #pragma once
 #include "../MethodHandler.hpp"
+#include "../il2cpp_module.hpp"
 #include "../System/String.hpp"
 #include "../System/Array.hpp"
 #include "Object.hpp"
@@ -59,6 +60,14 @@ namespace IL2CPP::Module::Unity {
         }
 
         [[nodiscard]] std::vector<Object> GetRootGameObjects() const {
+            static auto direct = reinterpret_cast<void*(IL2CPP_CALLTYPE)(void*)>(
+                ResolveCall(IL2CPP_STR("UnityEngine.SceneManagement.Scene::GetRootGameObjects")));
+            if (direct) {
+                Scene s = m_scene;
+                auto v = Object::FromArray<Object>(direct(&s));
+                if (!v.empty()) return v;
+            }
+
             static auto m2 = MethodHandler::resolve(IL2CPP_STR("UnityEngine.SceneManagement.Scene"), IL2CPP_STR("GetRootGameObjects"), 0);
             auto* e = GetExports();
             if (!e) return {};

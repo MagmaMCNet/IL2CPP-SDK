@@ -47,6 +47,9 @@ namespace IL2CPP::VRChat {
         [[nodiscard]] std::string GetLastPlatform();
         [[nodiscard]] std::string GetPlatform();
         [[nodiscard]] PlayerRank GetPlayerRank();
+
+        [[nodiscard]] std::string GetDateJoined();
+        [[nodiscard]] std::string GetDeveloperType();
     };
 
 } // namespace IL2CPP::VRChat

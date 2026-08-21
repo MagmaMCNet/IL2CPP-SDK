@@ -10,7 +10,7 @@
                      "Logging.Module",
                      "SharedMemory.Common"
                  ],
-    "generated":  "2026-08-20T08:06:16Z",
+    "generated":  "2026-08-21T09:10:36Z",
     "min_loader_version":  "10.2.2",
-    "version":  "10.2.2"
+    "version":  "10.3.0"
 }

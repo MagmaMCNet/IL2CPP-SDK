@@ -993,6 +993,43 @@ namespace Bootstrap::Module {
         return g_conn.vtable->qm_add_separator(module_id, foldout_id);
     }
 
+    uint32_t QuickMenu::register_user_select_callback(uint32_t module_id,
+        Bootstrap::fn_user_select_callback callback) {
+        if (!valid() || !callback) return Bootstrap::invalid_id;
+        return g_conn.vtable->qm_register_user_select(module_id, callback);
+    }
+
+    void QuickMenu::remove_user_select_callback(uint32_t module_id, uint32_t callback_id) {
+        if (!valid()) return;
+        g_conn.vtable->qm_unregister_user_select(module_id, callback_id);
+    }
+
+    uint32_t QuickMenu::add_user_button(uint32_t module_id, std::string_view text,
+        Bootstrap::fn_user_button_callback callback) {
+        if (!valid() || !callback) return Bootstrap::invalid_id;
+        return g_conn.vtable->qm_add_user_button(module_id,
+            text.data(), static_cast<uint32_t>(text.size()), callback);
+    }
+
+    void QuickMenu::remove_user_button(uint32_t module_id, uint32_t button_id) {
+        if (!valid()) return;
+        g_conn.vtable->qm_remove_user_button(module_id, button_id);
+    }
+
+    uint32_t QuickMenu::add_user_sub_page(uint32_t module_id, std::string_view name) {
+        if (!valid()) return Bootstrap::invalid_id;
+        return g_conn.vtable->qm_add_user_sub_page(module_id,
+            name.data(), static_cast<uint32_t>(name.size()));
+    }
+
+    void* QuickMenu::get_selected_user(void** out_api_user) {
+        if (!valid()) {
+            if (out_api_user) *out_api_user = nullptr;
+            return nullptr;
+        }
+        return g_conn.vtable->qm_get_selected_user(out_api_user);
+    }
+
     void QuickMenu::navigate_to(uint32_t page_id) {
         if (!valid()) return;
         g_conn.vtable->qm_navigate_to(page_id);
