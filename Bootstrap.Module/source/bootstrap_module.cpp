@@ -1030,6 +1030,13 @@ namespace Bootstrap::Module {
         return g_conn.vtable->qm_get_selected_user(out_api_user);
     }
 
+    std::string QuickMenu::get_selected_user_id() {
+        if (!valid()) return {};
+        char buf[128];
+        uint32_t len = g_conn.vtable->qm_get_selected_user_id(buf, sizeof(buf));
+        return std::string(buf, len);
+    }
+
     void QuickMenu::navigate_to(uint32_t page_id) {
         if (!valid()) return;
         g_conn.vtable->qm_navigate_to(page_id);

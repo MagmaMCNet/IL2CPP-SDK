@@ -7,7 +7,7 @@
 namespace Bootstrap {
 
     constexpr uint32_t invalid_id = ~0u;
-    constexpr uint32_t vtable_version = 18;
+    constexpr uint32_t vtable_version = 19;
 
     /// Menu lifecycle events fired by Bootstrap. Mods subscribe via
     /// register_menu_event to run initialization once the menu layer is
@@ -200,10 +200,14 @@ namespace Bootstrap {
     /// <param name="player">VRC.Player of the selected user, null when they are not in the instance.</param>
     /// <param name="api_user">APIUser of the selected user, null when unavailable.</param>
     /// <param name="display_name">Display name shown on the page; empty when the page closed.</param>
+    /// <param name="user_id">VRChat user id ("usr_..."), empty when the page closed. Identifies the
+    /// user even when they are not in the instance and player is therefore null.</param>
     using fn_user_select_callback = void(__cdecl*)(void* player, void* api_user,
-        char const* display_name, uint32_t name_len);
+        char const* display_name, uint32_t name_len,
+        char const* user_id, uint32_t user_id_len);
     /// <summary>Fired when a user-page button is pressed, carrying the user it was pressed on.</summary>
-    using fn_user_button_callback = void(__cdecl*)(uint32_t button_id, void* player, void* api_user);
+    using fn_user_button_callback = void(__cdecl*)(uint32_t button_id, void* player, void* api_user,
+        char const* user_id, uint32_t user_id_len);
     using fn_qm_register_user_select   = uint32_t(__cdecl*)(uint32_t module_id, fn_user_select_callback cb);
     using fn_qm_unregister_user_select = void(__cdecl*)(uint32_t module_id, uint32_t callback_id);
     using fn_qm_add_user_button    = uint32_t(__cdecl*)(uint32_t module_id,
@@ -214,6 +218,9 @@ namespace Bootstrap {
     /// <summary>Creates a page reachable only from a row on VRChat's user page.</summary>
     /// <returns>Page id usable with every qm_* page call, or invalid_id.</returns>
     using fn_qm_add_user_sub_page  = uint32_t(__cdecl*)(uint32_t module_id, char const* name, uint32_t name_len);
+    /// <summary>VRChat user id of the open user page.</summary>
+    /// <returns>Bytes written to out_buf, NUL-terminated. 0 when no user page is open.</returns>
+    using fn_qm_get_selected_user_id = uint32_t(__cdecl*)(char* out_buf, uint32_t buf_size);
 
     using fn_tween_completion_callback = void(__cdecl*)(uint32_t tween_id);
     using fn_tween_anchored_position = uint32_t(__cdecl*)(uint32_t module_id,
@@ -632,11 +639,12 @@ namespace Bootstrap {
         fn_qm_remove_user_button     qm_remove_user_button;
         fn_qm_get_selected_user      qm_get_selected_user;
         fn_qm_add_user_sub_page      qm_add_user_sub_page;
+        fn_qm_get_selected_user_id   qm_get_selected_user_id;
 
         uint32_t version;
         uint32_t _reserved;
     };
 
-    static_assert(std::is_trivial_v<BootstrapVtable> && sizeof(BootstrapVtable) == 1176);
+    static_assert(std::is_trivial_v<BootstrapVtable> && sizeof(BootstrapVtable) == 1184);
 
 } // namespace Bootstrap

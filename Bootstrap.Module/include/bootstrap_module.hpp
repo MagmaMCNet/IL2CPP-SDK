@@ -241,6 +241,9 @@ namespace Bootstrap::Module {
         /// <param name="out_api_user">Receives the APIUser pointer when non-null.</param>
         /// <returns>VRC.Player pointer, or null when nothing is selected or the user is not in the instance.</returns>
         void* get_selected_user(void** out_api_user = nullptr);
+        /// <summary>VRChat user id of the open user page, empty when none is open.</summary>
+        /// <remarks>Set even for a user who is not in the instance, where get_selected_user is null.</remarks>
+        std::string get_selected_user_id();
 
         void navigate_to(uint32_t page_id);
         void navigate_back();
