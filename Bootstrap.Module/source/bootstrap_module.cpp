@@ -1005,10 +1005,16 @@ namespace Bootstrap::Module {
     }
 
     uint32_t QuickMenu::add_user_button(uint32_t module_id, std::string_view text,
-        Bootstrap::fn_user_button_callback callback) {
+        Bootstrap::fn_user_button_callback callback, Bootstrap::UserPageAudience audience) {
         if (!valid() || !callback) return Bootstrap::invalid_id;
         return g_conn.vtable->qm_add_user_button(module_id,
-            text.data(), static_cast<uint32_t>(text.size()), callback);
+            text.data(), static_cast<uint32_t>(text.size()), callback,
+            static_cast<uint32_t>(audience));
+    }
+
+    Bootstrap::UserPageKind QuickMenu::get_selected_user_kind() {
+        if (!valid()) return Bootstrap::UserPageKind::None;
+        return static_cast<Bootstrap::UserPageKind>(g_conn.vtable->qm_get_selected_user_kind());
     }
 
     void QuickMenu::remove_user_button(uint32_t module_id, uint32_t button_id) {
@@ -1035,6 +1041,24 @@ namespace Bootstrap::Module {
         char buf[128];
         uint32_t len = g_conn.vtable->qm_get_selected_user_id(buf, sizeof(buf));
         return std::string(buf, len);
+    }
+
+    uint32_t QuickMenu::add_corner_button(uint32_t module_id, uint32_t host_button_id, int32_t sprite_id,
+                                          uint32_t target_page_id,
+                                          Bootstrap::fn_menu_button_callback callback) {
+        if (!valid()) return Bootstrap::invalid_id;
+        return g_conn.vtable->qm_add_corner_button(module_id, host_button_id, sprite_id,
+                                                   target_page_id, callback);
+    }
+
+    void QuickMenu::remove_corner_button(uint32_t module_id, uint32_t corner_button_id) {
+        if (!valid()) return;
+        g_conn.vtable->qm_remove_corner_button(module_id, corner_button_id);
+    }
+
+    void QuickMenu::set_hover_fx_enabled(bool enabled) {
+        if (!valid()) return;
+        g_conn.vtable->qm_set_hover_fx_enabled(enabled);
     }
 
     void QuickMenu::navigate_to(uint32_t page_id) {

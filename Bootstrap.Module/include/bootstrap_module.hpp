@@ -231,8 +231,21 @@ namespace Bootstrap::Module {
         uint32_t register_user_select_callback(uint32_t module_id, Bootstrap::fn_user_select_callback callback);
         void remove_user_select_callback(uint32_t module_id, uint32_t callback_id);
         /// <summary>Add a row to VRChat's user page. The callback receives the user it was pressed on.</summary>
+        /// <param name="audience">Which selected users the row is shown for.</param>
         uint32_t add_user_button(uint32_t module_id, std::string_view text,
-                                 Bootstrap::fn_user_button_callback callback);
+                                 Bootstrap::fn_user_button_callback callback,
+                                 Bootstrap::UserPageAudience audience = Bootstrap::UserPageAudience::All);
+        /// <summary>Which kind of user the open page is showing.</summary>
+        Bootstrap::UserPageKind get_selected_user_kind();
+
+        /// <summary>Pin a small icon button into a tile's corner, leaving the tile's own action intact.</summary>
+        /// <param name="target_page_id">Page to open on click; 0 to use the callback instead.</param>
+        uint32_t add_corner_button(uint32_t module_id, uint32_t host_button_id, int32_t sprite_id,
+                                   uint32_t target_page_id = 0,
+                                   Bootstrap::fn_menu_button_callback callback = nullptr);
+        void remove_corner_button(uint32_t module_id, uint32_t corner_button_id);
+        /// <summary>Turn the menu-wide hover and press feedback on or off.</summary>
+        void set_hover_fx_enabled(bool enabled);
         void remove_user_button(uint32_t module_id, uint32_t button_id);
         /// <summary>Add a user-page row that opens a page of your own.</summary>
         /// <returns>Page id usable with every other page call, or invalid_id.</returns>

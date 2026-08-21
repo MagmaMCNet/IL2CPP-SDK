@@ -1,4 +1,5 @@
 #pragma once
+#include <cstddef>
 #include <cstdint>
 #include <type_traits>
 #include "vrc_types.hpp"
@@ -205,13 +206,55 @@ namespace Bootstrap {
     using fn_user_select_callback = void(__cdecl*)(void* player, void* api_user,
         char const* display_name, uint32_t name_len,
         char const* user_id, uint32_t user_id_len);
+    /// <summary>Which selected users a user-page row is shown for.</summary>
+    /// <remarks>VRChat shows the same page for the local player and for players in the instance,
+    /// hiding its own action groups on your own page; the separate modal is for a user who is not
+    /// in the instance, where no VRC.Player exists.</remarks>
+    enum class UserPageAudience : uint32_t {
+        Self           = 1u << 0,  // your own page
+        InstancePlayer = 1u << 1,  // another player in the instance
+        ExternalUser   = 1u << 2,  // a user outside the instance
+        Others         = InstancePlayer | ExternalUser,
+        All            = Self | InstancePlayer | ExternalUser,
+    };
+
+    /// <summary>Which kind of user the open page is showing.</summary>
+    enum class UserPageKind : uint32_t {
+        None           = 0,
+        Self           = 1,
+        InstancePlayer = 2,
+        ExternalUser   = 3,
+    };
+
     /// <summary>Fired when a user-page button is pressed, carrying the user it was pressed on.</summary>
     using fn_user_button_callback = void(__cdecl*)(uint32_t button_id, void* player, void* api_user,
         char const* user_id, uint32_t user_id_len);
     using fn_qm_register_user_select   = uint32_t(__cdecl*)(uint32_t module_id, fn_user_select_callback cb);
     using fn_qm_unregister_user_select = void(__cdecl*)(uint32_t module_id, uint32_t callback_id);
+    /// <param name="audience">UserPageAudience bits; 0 means All.</param>
     using fn_qm_add_user_button    = uint32_t(__cdecl*)(uint32_t module_id,
-        char const* text, uint32_t text_len, fn_user_button_callback callback);
+        char const* text, uint32_t text_len, fn_user_button_callback callback, uint32_t audience);
+    /// <summary>Which kind of user the open page is showing, as UserPageKind.</summary>
+    using fn_qm_get_selected_user_kind = uint32_t(__cdecl*)();
+    /// <summary>Adds a row that holds compact side-by-side buttons on the user page.</summary>
+    /// <remarks>A row is the only place a user-page button carries an icon and a label at once:
+    /// a button appended straight to the actions list is full width, where the two do not fit.</remarks>
+    using fn_qm_add_user_row       = uint32_t(__cdecl*)(uint32_t module_id, uint32_t audience);
+    /// <summary>Adds a compact button inside a row, with an icon, a label, or both.</summary>
+    /// <param name="sprite_id">Bootstrap::Sprite value, or -1 for no icon.</param>
+    using fn_qm_add_user_row_button = uint32_t(__cdecl*)(uint32_t module_id, uint32_t row_id,
+        char const* text, uint32_t text_len, int32_t sprite_id, fn_user_button_callback callback);
+    /// <summary>Sets the icon of a full-width user-page row, which replaces its label.</summary>
+    using fn_qm_set_user_button_icon = void(__cdecl*)(uint32_t module_id, uint32_t button_id, int32_t sprite_id);
+
+    /// <summary>Pins a small icon button into a tile's corner, leaving the tile's own action intact.</summary>
+    /// <param name="target_page_id">Page to open on click; 0 to use the callback instead.</param>
+    /// <returns>Button id of the corner button, or invalid_id.</returns>
+    using fn_qm_add_corner_button    = uint32_t(__cdecl*)(uint32_t module_id, uint32_t host_button_id,
+        int32_t sprite_id, uint32_t target_page_id, fn_menu_button_callback callback);
+    using fn_qm_remove_corner_button = void(__cdecl*)(uint32_t module_id, uint32_t corner_button_id);
+    /// <summary>Turns the menu-wide pointer hover and press feedback on or off.</summary>
+    using fn_qm_set_hover_fx_enabled = void(__cdecl*)(bool enabled);
     using fn_qm_remove_user_button = void(__cdecl*)(uint32_t module_id, uint32_t button_id);
     /// <returns>VRC.Player of the selected user, or null. out_api_user receives the APIUser when non-null.</returns>
     using fn_qm_get_selected_user  = void*(__cdecl*)(void** out_api_user);
@@ -471,6 +514,9 @@ namespace Bootstrap {
     };
 
     struct BootstrapVtable {
+        uint32_t version;
+        uint32_t _reserved;
+
         fn_register_module register_module;
         fn_unregister_module unregister_module;
 
@@ -568,7 +614,6 @@ namespace Bootstrap {
         fn_cu_register_client cu_register_client;
         fn_cu_is_client_registered cu_is_client_registered;
 
-        /// TweenService (extended) - appended for ABI compatibility.
         fn_tween_float tween_float;
         fn_tween_cancel_all_for_target tween_cancel_all_for_target;
         fn_tween_anchored_position_ex tween_anchored_position_ex;
@@ -619,7 +664,6 @@ namespace Bootstrap {
         fn_get_player_rank get_player_rank;
         fn_get_rank_color  get_rank_color;
 
-        /// Menu lifecycle events — appended for ABI compatibility.
         fn_register_menu_event   register_menu_event;
         fn_unregister_menu_event unregister_menu_event;
 
@@ -632,7 +676,6 @@ namespace Bootstrap {
         fn_np_get_plate_text_object      np_get_plate_text_object;
         fn_np_get_plate_background_object np_get_plate_background_object;
 
-        /// User page (VRChat's selected-user menu) — appended for ABI compatibility.
         fn_qm_register_user_select   qm_register_user_select;
         fn_qm_unregister_user_select qm_unregister_user_select;
         fn_qm_add_user_button        qm_add_user_button;
@@ -640,11 +683,17 @@ namespace Bootstrap {
         fn_qm_get_selected_user      qm_get_selected_user;
         fn_qm_add_user_sub_page      qm_add_user_sub_page;
         fn_qm_get_selected_user_id   qm_get_selected_user_id;
+        fn_qm_get_selected_user_kind qm_get_selected_user_kind;
+        fn_qm_add_user_row           qm_add_user_row;
+        fn_qm_add_user_row_button    qm_add_user_row_button;
+        fn_qm_set_user_button_icon   qm_set_user_button_icon;
 
-        uint32_t version;
-        uint32_t _reserved;
+        fn_qm_add_corner_button      qm_add_corner_button;
+        fn_qm_remove_corner_button   qm_remove_corner_button;
+        fn_qm_set_hover_fx_enabled   qm_set_hover_fx_enabled;
     };
 
-    static_assert(std::is_trivial_v<BootstrapVtable> && sizeof(BootstrapVtable) == 1184);
+    static_assert(std::is_trivial_v<BootstrapVtable> && sizeof(BootstrapVtable) == 1240);
+    static_assert(offsetof(BootstrapVtable, version) == 0);
 
 } // namespace Bootstrap
