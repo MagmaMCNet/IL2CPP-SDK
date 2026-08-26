@@ -238,6 +238,17 @@ namespace Bootstrap::Module {
         /// <summary>Which kind of user the open page is showing.</summary>
         Bootstrap::UserPageKind get_selected_user_kind();
 
+        /// <summary>Add an action group to the user page: a row of compact buttons.</summary>
+        /// <param name="audience">Which selected users the group is shown for.</param>
+        uint32_t add_user_row(uint32_t module_id,
+                              Bootstrap::UserPageAudience audience = Bootstrap::UserPageAudience::All);
+        /// <summary>Add a compact button inside a group, with an icon, a label, or both.</summary>
+        /// <param name="sprite_id">Icon sprite, or -1 for none.</param>
+        uint32_t add_user_row_button(uint32_t module_id, uint32_t row_id, std::string_view text,
+                                     int32_t sprite_id, Bootstrap::fn_user_button_callback callback);
+        /// <summary>Set a full-width user-page row's icon, which replaces its label.</summary>
+        void set_user_button_icon(uint32_t module_id, uint32_t button_id, int32_t sprite_id);
+
         /// <summary>Pin a small icon button into a tile's corner, leaving the tile's own action intact.</summary>
         /// <param name="target_page_id">Page to open on click; 0 to use the callback instead.</param>
         uint32_t add_corner_button(uint32_t module_id, uint32_t host_button_id, int32_t sprite_id,

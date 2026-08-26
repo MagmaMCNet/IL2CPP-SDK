@@ -69,6 +69,16 @@ namespace IL2CPP::Module::System {
         [[nodiscard]] static String create(std::string_view str) {
             return create(std::string(str).c_str());
         }
+
+        /// <summary>Create a new managed String from UTF-16 units.</summary>
+        /// <param name="len">Unit count; the text need not be null-terminated.</param>
+        /// <returns>An invalid String when the runtime does not export the UTF-16 constructor.</returns>
+        [[nodiscard]] static String create_utf16(const char16_t* text, int32_t len) {
+            auto* exports = GetExports();
+            if (!exports || !exports->m_stringNewUtf16 || !text || len < 0) return String{};
+            return String{ reinterpret_cast<void*(IL2CPP_CALLTYPE)(const char16_t*, int32_t)>(
+                exports->m_stringNewUtf16)(text, len) };
+        }
     };
 
     [[nodiscard]] inline String operator""_il(const char* str, std::size_t) {

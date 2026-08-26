@@ -294,9 +294,10 @@ namespace IL2CPP {
         void*       m_dispatchPostWorker    = nullptr;   // bool(*)(void(*fn)(void*), void(*destroy)(void*), void* ud)
         void*       m_dispatchIsMainThread  = nullptr;   // bool(*)()
         void*       m_dispatchWorkerCount   = nullptr;   // uint32_t(*)()  — pool size (for tuning)
+        void*       m_stringNewUtf16        = nullptr;   // Il2CppString*(*)(const Il2CppChar*, int32_t)
     };
 
-    constexpr uint32_t exports_version = 21;
+    constexpr uint32_t exports_version = 22;
     constexpr uint32_t exports_size = static_cast<uint32_t>(sizeof(il2cpp_exports));
 
     static_assert(std::is_standard_layout_v<il2cpp_exports>);
@@ -305,7 +306,9 @@ namespace IL2CPP {
     static_assert(offsetof(il2cpp_exports, m_uSize) == offsetof(il2cpp_exports, m_uVersion) + sizeof(uint32_t));
     static_assert(offsetof(il2cpp_exports, m_threadCurrent) > offsetof(il2cpp_exports, m_classGetName));
     static_assert(offsetof(il2cpp_exports, m_offObjectCachedPtr) > offsetof(il2cpp_exports, m_helperResolveExport));
-    static_assert(offsetof(il2cpp_exports, m_dispatchWorkerCount) + sizeof(void*) == sizeof(il2cpp_exports));
-    static_assert(exports_version == 21);
+    static_assert(offsetof(il2cpp_exports, m_stringNewUtf16) + sizeof(void*) == sizeof(il2cpp_exports));
+    static_assert(offsetof(il2cpp_exports, m_stringNewUtf16) >
+                  offsetof(il2cpp_exports, m_dispatchWorkerCount));
+    static_assert(exports_version == 22);
 
 } // namespace IL2CPP

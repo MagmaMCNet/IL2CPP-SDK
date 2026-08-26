@@ -4,6 +4,7 @@
 #include <string>
 #include <string_view>
 #include <vector>
+#include <utility>
 
 namespace IL2CPP::Module {
 
@@ -185,6 +186,39 @@ namespace IL2CPP::Module {
         [[nodiscard]] Method get_method(std::string_view name, int argc = -1) const;
         [[nodiscard]] void* get_method_pointer(std::string_view name, int argc = -1) const;
         [[nodiscard]] std::vector<Method> get_methods() const;
+
+        /// <summary>Fields declared here and on every base class, nearest first.</summary>
+        /// <param name="maxDepth">Cap on how far up the chain to walk.</param>
+        /// <returns>Each field paired with the full name of the class declaring it.</returns>
+        [[nodiscard]] std::vector<std::pair<Field, std::string>> get_fields_deep(int maxDepth = 16) const;
+
+        /// <summary>Methods declared here and on every base class, nearest first.</summary>
+        /// <param name="maxDepth">Cap on how far up the chain to walk.</param>
+        /// <returns>Each method paired with the full name of the class declaring it.</returns>
+        [[nodiscard]] std::vector<std::pair<Method, std::string>> get_methods_deep(int maxDepth = 16) const;
+
+        /// <summary>Find a field by name, walking base classes.</summary>
+        [[nodiscard]] Field get_field_deep(std::string_view name, int maxDepth = 16) const;
+
+        /// <summary>Every overload of a name, optionally filtered by arity.</summary>
+        /// <param name="name">Method name.</param>
+        /// <param name="argc">Parameter count, or -1 for any.</param>
+        /// <param name="searchBases">Also collect overloads declared on base classes.</param>
+        [[nodiscard]] std::vector<Method> get_overloads(std::string_view name, int argc = -1,
+                                                        bool searchBases = true) const;
+
+        /// <summary>Resolve one overload by its parameter type names.</summary>
+        /// <param name="name">Method name.</param>
+        /// <param name="paramTypes">One type name per parameter; matched against the
+        /// declared type's short or full name.</param>
+        /// <param name="searchBases">Also consider methods declared on base classes.</param>
+        /// <returns>The single matching method, or an empty handle when none or several match.</returns>
+        [[nodiscard]] Method get_method_by_signature(std::string_view name,
+                                                     const std::vector<std::string>& paramTypes,
+                                                     bool searchBases = true) const;
+
+        /// <summary>The deobfuscated name, which full_name() stops one mapping hop short of.</summary>
+        [[nodiscard]] std::string display_name() const;
 
         [[nodiscard]] Property get_property(std::string_view name) const;
         [[nodiscard]] std::vector<Property> get_properties() const;

@@ -9,9 +9,11 @@ namespace IL2CPP::Module {
         return get_class_internal().get_method_pointer(name, argc);
     }
 
+    // Walks base classes: a field declared on a base is still a field of this
+    // object, and most of a VRChat component's state lives above its own class.
     Field ManagedObject::get_field_info(std::string_view name) const {
         if (!valid()) return Field{};
-        return get_class_internal().get_field(name);
+        return get_class_internal().get_field_deep(name);
     }
 
     Method ManagedObject::get_method_info(std::string_view name, int argc) const {
@@ -22,12 +24,12 @@ namespace IL2CPP::Module {
 
     bool ManagedObject::has_field(std::string_view name) const {
         if (!valid()) return false;
-        return static_cast<bool>(get_class_internal().get_field(name));
+        return static_cast<bool>(get_class_internal().get_field_deep(name));
     }
 
     int ManagedObject::get_field_offset(std::string_view name) const {
         if (!valid()) return -1;
-        Field f = get_class_internal().get_field(name);
+        Field f = get_class_internal().get_field_deep(name);
         return f ? f.offset() : -1;
     }
 

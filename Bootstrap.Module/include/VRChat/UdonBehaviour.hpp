@@ -38,6 +38,14 @@ namespace IL2CPP::VRChat {
         bool          initialized = false;
     };
 
+    struct UdonCachedExtern {
+        uint32_t    address = 0;
+        std::string signature;
+        void*       delegateObject = nullptr;
+        void*       methodPointer = nullptr;
+        int32_t     parameterCount = 0;
+    };
+
     class UdonBehaviour : public VRC_Interactable {
     public:
         using VRC_Interactable::VRC_Interactable;
@@ -82,6 +90,9 @@ namespace IL2CPP::VRChat {
         /// <summary>Whether the program declares an entry point with this name.</summary>
         [[nodiscard]] bool HasEvent(std::string_view eventName) const;
 
+        /// <summary>List every entry point with the code address its event starts at.</summary>
+        [[nodiscard]] std::vector<UdonSymbol> GetEntryPoints() const;
+
         /// <summary>List every program symbol with its heap address and declared type.</summary>
         [[nodiscard]] std::vector<UdonSymbol> GetSymbols() const;
 
@@ -104,6 +115,9 @@ namespace IL2CPP::VRChat {
         /// <summary>Read the whole heap into a flat list, one entry per slot, decoded.</summary>
         /// <param name="namedOnly">Only return slots the symbol table has a name for.</param>
         [[nodiscard]] std::vector<UdonVariable> DumpHeap(bool namedOnly = false) const;
+
+        /// <summary>List every heap slot holding an already-resolved extern delegate.</summary>
+        [[nodiscard]] std::vector<UdonCachedExtern> GetCachedExterns() const;
 
         /// <summary>Write a boxed value into a heap slot, keeping the slot's declared type.</summary>
         /// <returns>False when the heap, the address, or the slot type could not be resolved.</returns>

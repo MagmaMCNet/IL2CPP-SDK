@@ -1043,6 +1043,24 @@ namespace Bootstrap::Module {
         return std::string(buf, len);
     }
 
+    uint32_t QuickMenu::add_user_row(uint32_t module_id, Bootstrap::UserPageAudience audience) {
+        if (!valid()) return Bootstrap::invalid_id;
+        return g_conn.vtable->qm_add_user_row(module_id, static_cast<uint32_t>(audience));
+    }
+
+    uint32_t QuickMenu::add_user_row_button(uint32_t module_id, uint32_t row_id, std::string_view text,
+                                            int32_t sprite_id,
+                                            Bootstrap::fn_user_button_callback callback) {
+        if (!valid() || !callback) return Bootstrap::invalid_id;
+        return g_conn.vtable->qm_add_user_row_button(module_id, row_id,
+            text.data(), static_cast<uint32_t>(text.size()), sprite_id, callback);
+    }
+
+    void QuickMenu::set_user_button_icon(uint32_t module_id, uint32_t button_id, int32_t sprite_id) {
+        if (!valid()) return;
+        g_conn.vtable->qm_set_user_button_icon(module_id, button_id, sprite_id);
+    }
+
     uint32_t QuickMenu::add_corner_button(uint32_t module_id, uint32_t host_button_id, int32_t sprite_id,
                                           uint32_t target_page_id,
                                           Bootstrap::fn_menu_button_callback callback) {

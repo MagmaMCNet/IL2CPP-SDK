@@ -218,6 +218,13 @@ namespace Bootstrap {
         All            = Self | InstancePlayer | ExternalUser,
     };
 
+    constexpr UserPageAudience operator|(UserPageAudience a, UserPageAudience b) {
+        return static_cast<UserPageAudience>(static_cast<uint32_t>(a) | static_cast<uint32_t>(b));
+    }
+    constexpr UserPageAudience operator&(UserPageAudience a, UserPageAudience b) {
+        return static_cast<UserPageAudience>(static_cast<uint32_t>(a) & static_cast<uint32_t>(b));
+    }
+
     /// <summary>Which kind of user the open page is showing.</summary>
     enum class UserPageKind : uint32_t {
         None           = 0,

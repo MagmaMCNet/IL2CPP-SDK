@@ -121,6 +121,9 @@ namespace IL2CPP::VRChat {
             Type type = value.type();
             if (!type) return;
             var.typeName = type.full_name();
+            if (var.typeName.empty()) {
+                if (const char* n = value.type_name()) var.typeName = n;
+            }
 
             const int offset = value.offset();
             if (offset < 0) return;
@@ -379,6 +382,25 @@ namespace IL2CPP::VRChat {
         return entry.call_method<bool>("HasAddressForSymbol", params, 1);
     }
 
+    std::vector<UdonSymbol> UdonBehaviour::GetEntryPoints() const {
+        std::vector<UdonSymbol> out;
+        ManagedObject table = EntryPointsOf(GetProgram());
+        if (!table) return out;
+
+        auto names = ReadSymbols(table, "_symbols", "GetSymbols");
+        out.reserve(names.size());
+        for (auto& name : names) {
+            UdonSymbol sym;
+            sym.name = std::move(name);
+
+            bool found = false;
+            sym.address = AddressOf(table, sym.name, found);
+            if (!found) continue;
+            out.push_back(std::move(sym));
+        }
+        return out;
+    }
+
     std::vector<UdonSymbol> UdonBehaviour::GetSymbols() const {
         std::vector<UdonSymbol> out;
         ManagedObject table = SymbolTableOf(GetProgram());
@@ -450,6 +472,71 @@ namespace IL2CPP::VRChat {
             if (var.kind == UdonValueKind::Unknown && var.initialized) DecodeThroughApi(heap, var);
             if (it != names.end()) var.symbol = it->second;
             out.push_back(std::move(var));
+        }
+        return out;
+    }
+
+    std::vector<UdonCachedExtern> UdonBehaviour::GetCachedExterns() const {
+        std::vector<UdonCachedExtern> out;
+
+        auto slots = HeapSlots(GetHeap());
+        const uintptr_t capacity = slots.size();
+        for (uint32_t address = 0; address < capacity; ++address) {
+            void* slot = slots[address];
+            if (!slot) continue;
+
+            Field value = ManagedObject(slot).get_field_info("Value");
+            if (!value || value.offset() < 0) continue;
+
+            Type valueType = value.type();
+            if (!valueType) continue;
+            const int typeEnum = valueType.type_enum();
+            if (typeEnum != kTypeClass && typeEnum != kTypeObject) continue;
+
+            void* cached = *reinterpret_cast<void**>(static_cast<char*>(slot) + value.offset());
+            if (!Module::IsValidPointer(cached)) continue;
+
+            // The slot's declared type is not proof of what it holds, and these offsets are
+            // read raw, so the runtime class is checked before anything is dereferenced.
+            ManagedObject obj{ cached };
+            Class cachedClass = obj.get_class();
+            if (!cachedClass) continue;
+            const char* className = cachedClass.name();
+            if (!className || std::strcmp(className, "CachedUdonExternDelegate") != 0) continue;
+
+            static void* resolvedFor = nullptr;
+            static Field signatureField;
+            static Field delegateField;
+            static Field countField;
+            if (resolvedFor != cachedClass.raw()) {
+                Field s = obj.get_field_info("externSignature");
+                Field d = obj.get_field_info("externDelegate");
+                Field c = obj.get_field_info("parameterCount");
+                if (!d || d.offset() < 0) continue;
+                signatureField = s;
+                delegateField = d;
+                countField = c;
+                resolvedFor = cachedClass.raw();
+            }
+            if (!delegateField || delegateField.offset() < 0) continue;
+
+            void* del = *reinterpret_cast<void**>(static_cast<char*>(cached) + delegateField.offset());
+            if (!Module::IsValidPointer(del)) continue;
+
+            void* fn = *reinterpret_cast<void**>(static_cast<char*>(del) + Module::g_layoutOffsets.delegateMethodPtr);
+            if (!Module::IsValidPointer(fn)) continue;
+
+            UdonCachedExtern entry;
+            entry.address = address;
+            entry.delegateObject = del;
+            entry.methodPointer = fn;
+            if (signatureField && signatureField.offset() >= 0) {
+                if (void* str = *reinterpret_cast<void**>(static_cast<char*>(cached) + signatureField.offset()))
+                    entry.signature = String(str).to_string();
+            }
+            if (countField && countField.offset() >= 0)
+                entry.parameterCount = *reinterpret_cast<int32_t*>(static_cast<char*>(cached) + countField.offset());
+            out.push_back(std::move(entry));
         }
         return out;
     }

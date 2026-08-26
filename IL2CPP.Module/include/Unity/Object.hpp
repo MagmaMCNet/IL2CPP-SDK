@@ -163,10 +163,12 @@ namespace IL2CPP::Module::Unity {
         /// Find all objects of the specified type.
         /// @param systemType The System.Type object pointer (Il2CppSystemType*)
         /// @return A vector of Object containing all found objects.
-        [[nodiscard]] static std::vector<Object> FindObjectsOfType(Il2CppSystemType* systemType) {
+        /// @param includeInactive Also return components on inactive GameObjects.
+        [[nodiscard]] static std::vector<Object> FindObjectsOfType(Il2CppSystemType* systemType,
+                                                                   bool includeInactive = false) {
             static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Object"), IL2CPP_STR("FindObjectsOfType"), 2);
             if (!systemType) return {};
-            bool inactive = false;
+            bool inactive = includeInactive;
             void* params[] = { systemType, &inactive };
             void* result = MethodHandler::invoke<void*>(m, nullptr, params);
             return FromArray<Object>(result);
@@ -174,21 +176,25 @@ namespace IL2CPP::Module::Unity {
 
         /// Find all objects of the specified class type.
         /// @param klass The Class handle to search for.
+        /// @param includeInactive Also return components on inactive GameObjects.
         /// @return A vector of Object containing all found objects.
-        [[nodiscard]] static std::vector<Object> FindObjectsOfType(Class klass) {
+        [[nodiscard]] static std::vector<Object> FindObjectsOfType(Class klass, bool includeInactive = false) {
             if (!klass) return {};
             Type t = klass.get_type();
             if (!t) return {};
-            return FindObjectsOfType(reinterpret_cast<Il2CppSystemType*>(t.get_system_type_object()));
+            return FindObjectsOfType(reinterpret_cast<Il2CppSystemType*>(t.get_system_type_object()),
+                                     includeInactive);
         }
 
         /// Find all objects of the specified class by name.
         /// @param className Full class name (e.g., "UnityEngine.Camera")
+        /// @param includeInactive Also return components on inactive GameObjects.
         /// @return A vector of Object containing all found objects.
-        [[nodiscard]] static std::vector<Object> FindObjectsOfType(std::string_view className) {
+        [[nodiscard]] static std::vector<Object> FindObjectsOfType(std::string_view className,
+                                                                   bool includeInactive = false) {
             Class klass = Class::find(className);
             if (!klass) return {};
-            return FindObjectsOfType(klass);
+            return FindObjectsOfType(klass, includeInactive);
         }
 
 

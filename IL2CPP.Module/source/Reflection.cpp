@@ -7,6 +7,8 @@
 #include <Deobfuscation.hpp>
 #include <il2cpp_module.hpp>
 #include <cstring>
+#include <set>
+#include <utility>
 
 namespace IL2CPP::Module {
 
@@ -1045,6 +1047,89 @@ namespace IL2CPP::Module {
             result.emplace_back(m);
         }
         return result;
+    }
+
+    // il2cpp_class_get_fields/_get_methods report only what a class declares itself.
+    // Most of a VRChat component's surface lives on a base, so a caller that does not
+    // walk the chain sees an almost empty type.
+    std::vector<std::pair<Field, std::string>> Class::get_fields_deep(int maxDepth) const {
+        std::vector<std::pair<Field, std::string>> out;
+        std::set<std::pair<std::string, int>> seen;
+        Class cur = *this;
+        for (int depth = 0; cur && depth < maxDepth; ++depth, cur = cur.parent()) {
+            std::string owner = cur.full_name();
+            for (auto& f : cur.get_fields()) {
+                const char* n = f.name();
+                if (!seen.emplace(n ? n : "", f.offset()).second) continue;
+                out.emplace_back(f, owner);
+            }
+        }
+        return out;
+    }
+
+    std::vector<std::pair<Method, std::string>> Class::get_methods_deep(int maxDepth) const {
+        std::vector<std::pair<Method, std::string>> out;
+        std::set<std::pair<std::string, void*>> seen;
+        Class cur = *this;
+        for (int depth = 0; cur && depth < maxDepth; ++depth, cur = cur.parent()) {
+            std::string owner = cur.full_name();
+            for (auto& m : cur.get_methods()) {
+                const char* n = m.name();
+                // Keyed on the entry point, not the arity: two overloads of one name
+                // with the same parameter count are distinct methods.
+                if (!seen.emplace(n ? n : "", m.pointer()).second) continue;
+                out.emplace_back(m, owner);
+            }
+        }
+        return out;
+    }
+
+    Field Class::get_field_deep(std::string_view fname, int maxDepth) const {
+        Class cur = *this;
+        for (int depth = 0; cur && depth < maxDepth; ++depth, cur = cur.parent()) {
+            if (auto f = cur.get_field(fname)) return f;
+        }
+        return Field{};
+    }
+
+    std::vector<Method> Class::get_overloads(std::string_view mname, int argc, bool searchBases) const {
+        std::vector<Method> out;
+        std::string want(mname);
+        Class cur = *this;
+        for (int depth = 0; cur && depth < 16; ++depth, cur = cur.parent()) {
+            for (auto& m : cur.get_methods()) {
+                const char* n = m.name();
+                if (!n || want != n) continue;
+                if (argc >= 0 && static_cast<int>(m.param_count()) != argc) continue;
+                out.push_back(m);
+            }
+            if (!searchBases) break;
+        }
+        return out;
+    }
+
+    Method Class::get_method_by_signature(std::string_view mname,
+                                          const std::vector<std::string>& paramTypes,
+                                          bool searchBases) const {
+        auto candidates = get_overloads(mname, static_cast<int>(paramTypes.size()), searchBases);
+        Method match;
+        for (auto& m : candidates) {
+            bool ok = true;
+            for (size_t i = 0; i < paramTypes.size() && ok; ++i) {
+                Type t = m.get_param_type(static_cast<uint32_t>(i));
+                if (!t) { ok = false; break; }
+                const char* shortName = t.name();
+                ok = (shortName && paramTypes[i] == shortName) || paramTypes[i] == t.full_name();
+            }
+            if (!ok) continue;
+            if (match) return Method{};  // ambiguous: refuse rather than pick arbitrarily
+            match = m;
+        }
+        return match;
+    }
+
+    std::string Class::display_name() const {
+        return Deobfuscation::DisplayName(full_name());
     }
 
     Property Class::get_property(std::string_view pname) const {

@@ -67,6 +67,21 @@ namespace IL2CPP::Module {
             return result ? result : std::string(stableName);
         }
 
+        /// <summary>Chase the obfuscated -> stable -> human chain to a fixpoint.</summary>
+        /// <param name="name">Any name: raw, stable, or already human.</param>
+        /// <param name="maxHops">Cap on chained lookups; guards a cyclic mapping.</param>
+        /// <returns>The most human name registered for it, or the input unchanged.</returns>
+        [[nodiscard]] static std::string DisplayName(std::string_view name, int maxHops = 4) {
+            if (name.empty()) return {};
+            std::string cur(name);
+            for (int hop = 0; hop < maxHops; ++hop) {
+                std::string next = GetStableNameStr(cur);
+                if (next.empty() || next == cur) break;
+                cur = std::move(next);
+            }
+            return cur;
+        }
+
         /// <summary>Check if a name appears to be obfuscated (contains non-ASCII / non-printable chars).</summary>
         [[nodiscard]] static bool IsObfuscated(const char* name) noexcept {
             if (!name || !*name) return false;

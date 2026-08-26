@@ -152,6 +152,16 @@ namespace Bootstrap {
         int apiWorldInstance;
     };
 
+    struct UIPageData {
+        void* Class;
+        int pageName;
+        int isModal;
+        int isTransparent;
+        int clearContextWhenClosed;
+        int rectTransform;
+        int canvasGroup;
+    };
+
     struct VRCRectMask2DData {
         void* Class;
         int mask;
