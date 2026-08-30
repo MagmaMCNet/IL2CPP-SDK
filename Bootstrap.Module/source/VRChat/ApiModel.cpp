@@ -13,4 +13,11 @@ namespace IL2CPP::VRChat {
         return str ? IL2CPP::Module::System::String(str).to_string() : "";
     }
 
+    bool ApiModel::GetPopulated() {
+        if (!valid()) return false;
+        static auto m = MethodHandler::resolve(IL2CPP_STR("VRC.Core.ApiModel"),
+                                               IL2CPP_STR("get_Populated"), 0);
+        return MethodHandler::invoke<bool>(m, raw());
+    }
+
 } // namespace IL2CPP::VRChat

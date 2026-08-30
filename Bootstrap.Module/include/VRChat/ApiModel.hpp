@@ -10,6 +10,10 @@ namespace IL2CPP::VRChat {
         using ManagedObject::ManagedObject;
 
         [[nodiscard]] std::string GetId();
+
+        /// <summary>True once the record holds real data. VRChat caches a model
+        /// before filling it in, so an unpopulated object carries only an id.</summary>
+        [[nodiscard]] bool GetPopulated();
     };
 
 } // namespace IL2CPP::VRChat

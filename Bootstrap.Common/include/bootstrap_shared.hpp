@@ -8,7 +8,7 @@
 namespace Bootstrap {
 
     constexpr uint32_t invalid_id = ~0u;
-    constexpr uint32_t vtable_version = 19;
+    constexpr uint32_t vtable_version = 20;
 
     /// Menu lifecycle events fired by Bootstrap. Mods subscribe via
     /// register_menu_event to run initialization once the menu layer is
@@ -411,6 +411,81 @@ namespace Bootstrap {
     using fn_fs_file_size   = uint64_t(__cdecl*)(uint32_t module_id, char const* path, uint32_t path_len);
     using fn_fs_append_file = bool(__cdecl*)(uint32_t module_id, char const* path, uint32_t path_len, uint8_t const* data, uint32_t data_len);
 
+    /// <summary>Declared type of a world script's public variable.</summary>
+    enum class WorldVarType : uint32_t {
+        Bool = 0,
+        Int = 1,
+        Float = 2,
+        String = 3,
+    };
+
+    /// <summary>A world script bound to the current world.</summary>
+    struct WorldScriptInfo {
+        char     name[64];
+        char     author[64];
+        char     version[32];
+        char     description[192];
+        /// Lua module that registered it, for attribution and unload tracking.
+        char     source[128];
+        /// Client menu the script asked to live under, from the manifest's `page`
+        /// field: "Menu_UNIx_Luna/Games" gives "Luna" here, with the "Menu_UNIx_"
+        /// prefix stripped. Empty means it did not name one, so it belongs to
+        /// UNIx's own menu; a client renders only what names it.
+        char     page_host[64];
+        /// Sub-page under that menu. Defaults to "Games" when unspecified.
+        char     page_name[64];
+        /// True when the script declared no world ids, so it runs everywhere.
+        bool     any_world;
+        uint32_t entry_count;
+        uint32_t var_count;
+    };
+
+    /// <summary>One action a world script exposes: a button, or a toggle.</summary>
+    struct WorldScriptEntry {
+        char id[64];
+        char label[64];
+        char tooltip[128];
+        bool is_toggle;
+        /// Current state of a toggle entry; false for buttons.
+        bool state;
+    };
+
+    /// <summary>One public variable a world script exposes, with its live value.</summary>
+    struct WorldScriptVar {
+        char         id[64];
+        char         label[64];
+        WorldVarType type;
+        /// True when the script declared min/max, so the value earns a slider.
+        bool         has_range;
+        float        min_value;
+        float        max_value;
+        /// Current value for Bool, Int and Float.
+        float        number;
+        /// Current value for String.
+        char         text[128];
+    };
+
+    /// <returns>How many world scripts are bound to the current world.</returns>
+    using fn_ws_get_count      = uint32_t(__cdecl*)();
+    /// <summary>Why nothing is bound, for display. Empty when at least one script is.</summary>
+    /// <returns>Bytes written to out_buf, truncated to buf_size - 1 and NUL-terminated.</returns>
+    using fn_ws_get_status     = uint32_t(__cdecl*)(char* out_buf, uint32_t buf_size);
+    using fn_ws_get_info       = bool(__cdecl*)(uint32_t script_index, WorldScriptInfo* out);
+    /// <returns>Entries written, capped at buf_count.</returns>
+    using fn_ws_get_entries    = uint32_t(__cdecl*)(uint32_t script_index, WorldScriptEntry* out_buf, uint32_t buf_count);
+    /// <returns>Variables written, capped at buf_count.</returns>
+    using fn_ws_get_vars       = uint32_t(__cdecl*)(uint32_t script_index, WorldScriptVar* out_buf, uint32_t buf_count);
+    /// <summary>Run a button entry, or a toggle entry's body once at its current state.</summary>
+    using fn_ws_invoke         = bool(__cdecl*)(uint32_t script_index, char const* entry_id, uint32_t id_len);
+    using fn_ws_set_toggle     = bool(__cdecl*)(uint32_t script_index, char const* entry_id, uint32_t id_len, bool state);
+    using fn_ws_set_var_number = bool(__cdecl*)(uint32_t script_index, char const* var_id, uint32_t id_len, float value);
+    using fn_ws_set_var_string = bool(__cdecl*)(uint32_t script_index, char const* var_id, uint32_t id_len, char const* value, uint32_t value_len);
+    /// <summary>Counter bumped whenever the bound set, its entries or its variables change.</summary>
+    /// <returns>The current revision; a client rebuilds its UI when this moves.</returns>
+    using fn_ws_get_revision   = uint32_t(__cdecl*)();
+    /// <summary>Re-evaluate which scripts match the current world.</summary>
+    using fn_ws_rebind         = void(__cdecl*)();
+
     using fn_clipboard_set = bool(__cdecl*)(char const* text, uint32_t text_len);
     /// <returns>Bytes written to out_buf, truncated to buf_size - 1 and NUL-terminated. 0 means empty or unavailable; truncation is not reported.</returns>
     using fn_clipboard_get = uint32_t(__cdecl*)(char* out_buf, uint32_t buf_size);
@@ -698,9 +773,22 @@ namespace Bootstrap {
         fn_qm_add_corner_button      qm_add_corner_button;
         fn_qm_remove_corner_button   qm_remove_corner_button;
         fn_qm_set_hover_fx_enabled   qm_set_hover_fx_enabled;
+
+        /// World scripts — appended for ABI compatibility.
+        fn_ws_get_count      ws_get_count;
+        fn_ws_get_status     ws_get_status;
+        fn_ws_get_info       ws_get_info;
+        fn_ws_get_entries    ws_get_entries;
+        fn_ws_get_vars       ws_get_vars;
+        fn_ws_invoke         ws_invoke;
+        fn_ws_set_toggle     ws_set_toggle;
+        fn_ws_set_var_number ws_set_var_number;
+        fn_ws_set_var_string ws_set_var_string;
+        fn_ws_get_revision   ws_get_revision;
+        fn_ws_rebind         ws_rebind;
     };
 
-    static_assert(std::is_trivial_v<BootstrapVtable> && sizeof(BootstrapVtable) == 1240);
+    static_assert(std::is_trivial_v<BootstrapVtable> && sizeof(BootstrapVtable) == 1328);
     static_assert(offsetof(BootstrapVtable, version) == 0);
 
 } // namespace Bootstrap

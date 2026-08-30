@@ -590,6 +590,44 @@ namespace Bootstrap::Module {
         KeyAuth() = default;
     };
 
+    /// <summary>
+    /// World scripts the loader has bound to the current world. Any Lua module can
+    /// register one with game.World.register; this is the read-and-drive side a
+    /// client uses to render them.
+    /// </summary>
+    class WorldScripts {
+    public:
+        static WorldScripts& Get();
+
+        /// <summary>How many scripts are bound to the current world.</summary>
+        [[nodiscard]] uint32_t count();
+        /// <summary>Why nothing is bound, for display. Empty when at least one script is.</summary>
+        [[nodiscard]] std::string status();
+        /// <summary>Bumped whenever the bound set, its entries or its variables change.</summary>
+        [[nodiscard]] uint32_t revision();
+        /// <summary>Re-evaluate which scripts match the current world.</summary>
+        void rebind();
+
+        /// <summary>Manifest of one bound script.</summary>
+        [[nodiscard]] bool info(uint32_t script_index, Bootstrap::WorldScriptInfo& out);
+
+        /// <summary>Whether a bound script asked to live under this client's menu.</summary>
+        /// <param name="host_page">The client's top-level page name, e.g. "Luna". Pass empty to claim the scripts that named no host.</param>
+        [[nodiscard]] bool targets(uint32_t script_index, std::string_view host_page);
+        [[nodiscard]] std::vector<Bootstrap::WorldScriptEntry> entries(uint32_t script_index);
+        [[nodiscard]] std::vector<Bootstrap::WorldScriptVar> vars(uint32_t script_index);
+
+        /// <summary>Run a button entry.</summary>
+        bool invoke(uint32_t script_index, std::string_view entry_id);
+        /// <summary>Set a toggle entry, running its body once with the new state.</summary>
+        bool set_toggle(uint32_t script_index, std::string_view entry_id, bool state);
+        bool set_var(uint32_t script_index, std::string_view var_id, float value);
+        bool set_var(uint32_t script_index, std::string_view var_id, std::string_view value);
+
+    private:
+        WorldScripts() = default;
+    };
+
     class FileSystem {
     public:
         static FileSystem& Get();

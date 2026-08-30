@@ -1724,6 +1724,89 @@ namespace Bootstrap::Module {
         return instance;
     }
 
+    WorldScripts& WorldScripts::Get() {
+        static WorldScripts instance;
+        return instance;
+    }
+
+    uint32_t WorldScripts::count() {
+        if (!is_connected() || !g_conn.vtable->ws_get_count) return 0;
+        return g_conn.vtable->ws_get_count();
+    }
+
+    std::string WorldScripts::status() {
+        if (!is_connected() || !g_conn.vtable->ws_get_status) return {};
+        char buf[256];
+        const uint32_t len = g_conn.vtable->ws_get_status(buf, sizeof(buf));
+        return len == 0 ? std::string{} : std::string(buf, len);
+    }
+
+    uint32_t WorldScripts::revision() {
+        if (!is_connected() || !g_conn.vtable->ws_get_revision) return 0;
+        return g_conn.vtable->ws_get_revision();
+    }
+
+    void WorldScripts::rebind() {
+        if (!is_connected() || !g_conn.vtable->ws_rebind) return;
+        g_conn.vtable->ws_rebind();
+    }
+
+    bool WorldScripts::info(uint32_t script_index, Bootstrap::WorldScriptInfo& out) {
+        if (!is_connected() || !g_conn.vtable->ws_get_info) return false;
+        return g_conn.vtable->ws_get_info(script_index, &out);
+    }
+
+    bool WorldScripts::targets(uint32_t script_index, std::string_view host_page) {
+        Bootstrap::WorldScriptInfo meta{};
+        if (!info(script_index, meta)) return false;
+        return host_page == std::string_view(meta.page_host);
+    }
+
+    std::vector<Bootstrap::WorldScriptEntry> WorldScripts::entries(uint32_t script_index) {
+        Bootstrap::WorldScriptInfo meta{};
+        if (!info(script_index, meta) || meta.entry_count == 0) return {};
+
+        std::vector<Bootstrap::WorldScriptEntry> out(meta.entry_count);
+        const uint32_t written = g_conn.vtable->ws_get_entries(script_index, out.data(), meta.entry_count);
+        out.resize(written);
+        return out;
+    }
+
+    std::vector<Bootstrap::WorldScriptVar> WorldScripts::vars(uint32_t script_index) {
+        Bootstrap::WorldScriptInfo meta{};
+        if (!info(script_index, meta) || meta.var_count == 0) return {};
+
+        std::vector<Bootstrap::WorldScriptVar> out(meta.var_count);
+        const uint32_t written = g_conn.vtable->ws_get_vars(script_index, out.data(), meta.var_count);
+        out.resize(written);
+        return out;
+    }
+
+    bool WorldScripts::invoke(uint32_t script_index, std::string_view entry_id) {
+        if (!is_connected() || !g_conn.vtable->ws_invoke) return false;
+        return g_conn.vtable->ws_invoke(script_index, entry_id.data(),
+                                        static_cast<uint32_t>(entry_id.size()));
+    }
+
+    bool WorldScripts::set_toggle(uint32_t script_index, std::string_view entry_id, bool state) {
+        if (!is_connected() || !g_conn.vtable->ws_set_toggle) return false;
+        return g_conn.vtable->ws_set_toggle(script_index, entry_id.data(),
+                                            static_cast<uint32_t>(entry_id.size()), state);
+    }
+
+    bool WorldScripts::set_var(uint32_t script_index, std::string_view var_id, float value) {
+        if (!is_connected() || !g_conn.vtable->ws_set_var_number) return false;
+        return g_conn.vtable->ws_set_var_number(script_index, var_id.data(),
+                                                static_cast<uint32_t>(var_id.size()), value);
+    }
+
+    bool WorldScripts::set_var(uint32_t script_index, std::string_view var_id, std::string_view value) {
+        if (!is_connected() || !g_conn.vtable->ws_set_var_string) return false;
+        return g_conn.vtable->ws_set_var_string(script_index, var_id.data(),
+                                                static_cast<uint32_t>(var_id.size()),
+                                                value.data(), static_cast<uint32_t>(value.size()));
+    }
+
     bool Clipboard::set(std::string_view text) {
         if (!is_connected()) return false;
         return g_conn.vtable->clipboard_set(text.data(), static_cast<uint32_t>(text.size()));
