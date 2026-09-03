@@ -3,6 +3,8 @@
 #include <IL2CPP.Module/include/System/String.hpp>
 #include <IL2CPP.Module/include/System/Array.hpp>
 #include <IL2CPP.Module/include/ManagedObject.hpp>
+#include <IL2CPP.Module/include/Unity/Object.hpp>
+#include <cctype>
 #include <cstring>
 #include <format>
 #include <unordered_map>
@@ -209,6 +211,57 @@ namespace IL2CPP::VRChat {
             SetReference(var, MethodHandler::invoke<void*>(getValue, heap, params));
         }
 
+        std::string_view Trimmed(std::string_view text) {
+            while (!text.empty() && std::isspace(static_cast<unsigned char>(text.front()))) text.remove_prefix(1);
+            while (!text.empty() && std::isspace(static_cast<unsigned char>(text.back()))) text.remove_suffix(1);
+            return text;
+        }
+
+        bool LooksLikeHash(std::string_view name) {
+            if (name.size() < 24) return false;
+            for (char c : name)
+                if (!std::isxdigit(static_cast<unsigned char>(c))) return false;
+            return true;
+        }
+
+        bool IsReflTypeNameSymbol(std::string_view name) {
+            std::string lower;
+            lower.reserve(name.size());
+            for (char c : name) lower.push_back(static_cast<char>(std::tolower(static_cast<unsigned char>(c))));
+            if (lower.find("__refl_typename") != std::string::npos) return true;
+            if (lower.find("__refl_udontypename") != std::string::npos) return true;
+            return lower.starts_with("__refl_") && lower.ends_with("typename");
+        }
+
+        std::string CleanTypeName(std::string_view raw) {
+            std::string_view name = Trimmed(raw);
+            if (const size_t dot = name.rfind('.'); dot != std::string_view::npos) name.remove_prefix(dot + 1);
+            if (name.starts_with("UdonSharpBehaviour") && name.size() > 18) name.remove_prefix(18);
+            return std::string{ Trimmed(name) };
+        }
+
+        std::string AssetName(ManagedObject obj, const char* fieldName, bool rejectHash) {
+            if (!obj) return {};
+            void* asset = obj.get_field<void*>(fieldName);
+            if (!asset) return {};
+
+            // GetName reads objectCachedPtr, which only exists on a real UnityEngine.Object.
+            Class unityBase = Class::find("UnityEngine.Object");
+            Class assetClass = ManagedObject{ asset }.get_class();
+            if (!unityBase || !assetClass || !assetClass.is_subclass_of(unityBase)) return {};
+
+            Module::Unity::Object unityObj{ asset };
+            if (!unityObj.IsValid()) return {};
+
+            const std::string raw = unityObj.GetName();
+            std::string_view name = Trimmed(raw);
+            static constexpr std::string_view kAssetSuffix = " (SerializedUdonProgramAsset)";
+            if (name.ends_with(kAssetSuffix))
+                name = Trimmed(name.substr(0, name.size() - kAssetSuffix.size()));
+            if (rejectHash && LooksLikeHash(name)) return {};
+            return std::string{ name };
+        }
+
         uint32_t AddressOf(ManagedObject symbolTable, std::string_view symbolName, bool& found) {
             uint32_t address = 0;
             found = false;
@@ -312,6 +365,31 @@ namespace IL2CPP::VRChat {
         MethodHandler::invoke<void>(m, raw(), params);
     }
 
+    void UdonBehaviour::Interact() {
+        if (!valid()) return;
+        static auto m = MethodHandler::resolve("VRC.Udon.UdonBehaviour", "Interact", 0);
+        if (!m) m = MethodHandler::resolve("VRC.Udon.UdonBehaviour", "Interact", 0);
+        if (!m) return;
+        MethodHandler::invoke<void>(m, raw());
+    }
+
+    bool UdonBehaviour::GetDisableInteractive() {
+        if (!valid()) return false;
+        static auto m = MethodHandler::resolve("VRC.Udon.UdonBehaviour", "get_DisableInteractive", 0);
+        if (!m) m = MethodHandler::resolve("VRC.Udon.UdonBehaviour", "get_DisableInteractive", 0);
+        if (!m) return false;
+        return MethodHandler::invoke<bool>(m, raw());
+    }
+
+    void UdonBehaviour::SetDisableInteractive(bool value) {
+        if (!valid()) return;
+        static auto m = MethodHandler::resolve("VRC.Udon.UdonBehaviour", "set_DisableInteractive", 1);
+        if (!m) m = MethodHandler::resolve("VRC.Udon.UdonBehaviour", "set_DisableInteractive", 1);
+        if (!m) return;
+        void* params[1] = { &value };
+        MethodHandler::invoke<void>(m, raw(), params);
+    }
+
     void UdonBehaviour::SetProgramVariable(std::string_view symbolName, void* value) {
         uint32_t address = 0;
         if (!TryGetSymbolAddress(symbolName, address)) return;
@@ -358,6 +436,55 @@ namespace IL2CPP::VRChat {
             if (void* h = vm.call_method<void*>("InspectHeap", nullptr, 0)) return h;
         }
         return AutoProperty(ManagedObject{ GetProgram() }, "Heap", "<Heap>k__BackingField").raw();
+    }
+
+    void* UdonBehaviour::GetVM() const {
+        if (!valid()) return nullptr;
+        return get_field<void*>("_udonVM");
+    }
+
+    std::string UdonBehaviour::GetScriptName() const {
+        for (const UdonSymbol& sym : GetSymbols()) {
+            if (!IsReflTypeNameSymbol(sym.name)) continue;
+            UdonVariable var = ReadHeap(sym.address);
+            if (var.kind != UdonValueKind::String) continue;
+            std::string name = CleanTypeName(var.display);
+            if (!name.empty()) return name;
+        }
+
+        ManagedObject self{ raw() };
+        // Only genuine UnityEngine.Object assets: _program is an IUdonProgram, and reading
+        // objectCachedPtr off one crashes when nothing earlier resolved.
+        if (std::string name = AssetName(self, "programSource", true); !name.empty()) return name;
+        if (std::string name = AssetName(self, "serializedProgramAsset", true); !name.empty()) return name;
+        return {};
+    }
+
+    std::vector<uint32_t> UdonBehaviour::GetByteCode() const {
+        ManagedObject vm{ GetVM() };
+        if (!vm) return {};
+        return Module::System::Array<uint32_t>{ vm.get_field<void*>("_processedByteCode") }.to_vector();
+    }
+
+    bool UdonBehaviour::SetByteCode(const std::vector<uint32_t>& words) {
+        ManagedObject vm{ GetVM() };
+        if (!vm) return false;
+
+        Field field = vm.get_field_info("_processedByteCode");
+        if (!field || field.offset() < 0) return false;
+
+        Module::System::Array<uint32_t> existing{ vm.get_field<void*>(field) };
+        if (existing && existing.size() == words.size()) {
+            if (!words.empty()) std::memcpy(existing.data(), words.data(), words.size() * sizeof(uint32_t));
+            return true;
+        }
+
+        auto replacement = Module::System::Array<uint32_t>::Create("System.UInt32", words.size());
+        if (!replacement) return false;
+        if (!words.empty()) std::memcpy(replacement.data(), words.data(), words.size() * sizeof(uint32_t));
+
+        vm.set_field<void*>(field, replacement.raw());
+        return true;
     }
 
     std::string UdonBehaviour::GetInstructionSetIdentifier() const {

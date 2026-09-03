@@ -52,6 +52,9 @@ namespace IL2CPP::Module::Unity {
             return static_cast<FullScreenMode>(MethodHandler::invoke<int>(m, nullptr));
         }
 
+        /// <summary>Not present on every build - VRChat 1832 ships only the
+        /// getter, so check the handle before relying on this; SetFullScreen or
+        /// SetResolution is the portable way to change presentation.</summary>
         static void SetFullScreenMode(FullScreenMode mode) {
             static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Screen"), IL2CPP_STR("set_fullScreenMode"), 1);
             int val = static_cast<int>(mode);

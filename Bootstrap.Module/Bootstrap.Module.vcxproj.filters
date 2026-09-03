@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\bootstrap_module.cpp">
+    <ClCompile Include="source\unix_bind.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="source\VRChat\VRCPlayerApi.cpp">
@@ -54,6 +54,24 @@
     <ClCompile Include="source\VRChat\UdonBehaviour.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\VRChat\VRC_Pickup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\VRChat\VRCStation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\VRChat\VRCObjectSync.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\VRChat\VRC_SceneDescriptor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\VRChat\PlayerData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\VRChat\VRCObjectPool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="source\VRChat\VRChatEvents.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -62,10 +80,22 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\bootstrap_module.hpp">
+    <ClInclude Include="include\unix\module.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\bootstrap_internal.hpp">
+    <ClInclude Include="include\unix\ui.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\unix\il2cpp.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\unix\compat\bootstrap_module_names.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\unix\services\*.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VRChat\HostBridge.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\VRChat\VRChat.hpp">
@@ -111,6 +141,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\VRChat\VRC_Interactable.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VRChat\VRC_Pickup.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VRChat\VRCStation.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VRChat\VRCObjectSync.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VRChat\VRC_SceneDescriptor.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VRChat\PlayerData.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VRChat\VRCObjectPool.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\VRChat\UdonBehaviour.hpp">

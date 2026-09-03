@@ -4,15 +4,13 @@
 
 namespace IL2CPP::VRChat {
 
-    class VRCPlayer;
-
     class PlayerNameplate : public IL2CPP::Module::Unity::MonoBehaviour {
     public:
         using MonoBehaviour::MonoBehaviour;
 
         /// <summary>True on builds whose nameplate still exposes the child
         /// GameObjects directly. When false the Get*() child accessors below all
-        /// return an invalid object and the fragment/content members apply instead.</summary>
+        /// return an invalid object.</summary>
         [[nodiscard]] bool HasChildObjects();
 
         [[nodiscard]] IL2CPP::Module::Unity::GameObject GetContents();
@@ -39,16 +37,6 @@ namespace IL2CPP::VRChat {
 
         [[nodiscard]] IL2CPP::Module::Unity::GameObject GetGroupInfo();
         [[nodiscard]] IL2CPP::Module::Unity::GameObject GetAvatarProgress();
-
-        // Rewritten-nameplate members. Invalid on builds where HasChildObjects()
-        // is true, and vice versa.
-        [[nodiscard]] IL2CPP::Module::Unity::GameObject GetRootObject();
-        [[nodiscard]] IL2CPP::Module::ManagedObject GetFragment();
-        [[nodiscard]] IL2CPP::Module::ManagedObject GetContent();
-        [[nodiscard]] IL2CPP::Module::ManagedObject GetIcons();
-        [[nodiscard]] IL2CPP::Module::ManagedObject GetPositioner();
-        [[nodiscard]] IL2CPP::Module::Unity::RectTransform GetChatBubbleRect();
-        [[nodiscard]] VRCPlayer GetVRCPlayer();
     };
 
 } // namespace IL2CPP::VRChat

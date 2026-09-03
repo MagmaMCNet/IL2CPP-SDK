@@ -1,48 +1,44 @@
 #include <VRChat/VRChatEvents.hpp>
-#include <bootstrap_internal.hpp>
+#include <VRChat/HostBridge.hpp>
 
 namespace IL2CPP::VRChat {
+
+    namespace {
+        void UNIX_CC forward_player_event(void* ud, const unix_player_ev* ev) {
+            if (!ud || !ev) return;
+            reinterpret_cast<PlayerCallback>(ud)(Player(ev->player));
+        }
+
+        uint32_t subscribe(unix_player_phase phase, PlayerCallback callback) {
+            if (!callback) return 0;
+            return Bridge::OnPlayerEvent(1u << static_cast<uint32_t>(phase), &forward_player_event,
+                                         reinterpret_cast<void*>(callback));
+        }
+    }
 
     VRChatEvents& VRChatEvents::Get() {
         static VRChatEvents instance;
         return instance;
     }
 
-    bool VRChatEvents::valid() const noexcept {
-        return Bootstrap::Module::is_connected();
+    uint32_t VRChatEvents::RegisterOnAwake(PlayerCallback callback) {
+        return subscribe(unix_player_awake, callback);
     }
 
-    uint32_t VRChatEvents::register_on_awake(uint32_t module_id, PlayerCallback callback) {
-        if (!valid() || !callback) return Bootstrap::invalid_id;
-        return Bootstrap::Module::get_vtable()->register_player_event(
-            module_id, Bootstrap::PlayerEvent::Awake,
-            reinterpret_cast<Bootstrap::fn_player_simple_callback>(callback));
+    uint32_t VRChatEvents::RegisterOnJoin(PlayerCallback callback) {
+        return subscribe(unix_player_joined, callback);
     }
 
-    uint32_t VRChatEvents::register_on_join(uint32_t module_id, PlayerCallback callback) {
-        if (!valid() || !callback) return Bootstrap::invalid_id;
-        return Bootstrap::Module::get_vtable()->register_player_event(
-            module_id, Bootstrap::PlayerEvent::Join,
-            reinterpret_cast<Bootstrap::fn_player_simple_callback>(callback));
+    uint32_t VRChatEvents::RegisterOnJoinComplete(PlayerCallback callback) {
+        return subscribe(unix_player_joined_complete, callback);
     }
 
-    uint32_t VRChatEvents::register_on_join_complete(uint32_t module_id, PlayerCallback callback) {
-        if (!valid() || !callback) return Bootstrap::invalid_id;
-        return Bootstrap::Module::get_vtable()->register_player_event(
-            module_id, Bootstrap::PlayerEvent::JoinComplete,
-            reinterpret_cast<Bootstrap::fn_player_simple_callback>(callback));
+    uint32_t VRChatEvents::RegisterOnLeave(PlayerCallback callback) {
+        return subscribe(unix_player_left, callback);
     }
 
-    uint32_t VRChatEvents::register_on_leave(uint32_t module_id, PlayerCallback callback) {
-        if (!valid() || !callback) return Bootstrap::invalid_id;
-        return Bootstrap::Module::get_vtable()->register_player_event(
-            module_id, Bootstrap::PlayerEvent::Leave,
-            reinterpret_cast<Bootstrap::fn_player_simple_callback>(callback));
-    }
-
-    void VRChatEvents::unregister_callback(uint32_t module_id, uint32_t callback_id) {
-        if (!valid()) return;
-        Bootstrap::Module::get_vtable()->unregister_player_event(module_id, callback_id);
+    void VRChatEvents::Unregister(uint32_t handle) {
+        if (handle != unix_null) Bridge::Cancel(handle);
     }
 
 } // namespace IL2CPP::VRChat

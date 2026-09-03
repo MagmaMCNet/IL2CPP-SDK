@@ -49,6 +49,10 @@ namespace IL2CPP::VRChat {
         [[nodiscard]] static int GetPlayerDataStorageUsage(VRCPlayerApi target);
         [[nodiscard]] static int GetPlayerObjectStorageUsage(VRCPlayerApi target);
 
+        [[nodiscard]] static void* GetPlayerObjectsArray(VRCPlayerApi target);
+        [[nodiscard]] static bool IsPlayerObject(IL2CPP::Module::Unity::GameObject obj);
+        [[nodiscard]] static VRCPlayerApi GetPlayerObjectOwner(IL2CPP::Module::Unity::GameObject obj);
+
     private:
         static IL2CPP::Module::Class klass();
     };

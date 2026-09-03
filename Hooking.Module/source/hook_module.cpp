@@ -1,5 +1,6 @@
 #include <include/hook_module.hpp>
-#include <SharedMemory.Common/shared_memory.hpp>
+#include <Bootstrap.Common/include/unix/unix_module_abi.hpp>
+#include <Bootstrap.Common/include/unix/unix_ctx.hpp>
 #include <windows.h>
 #include <atomic>
 #include <mutex>
@@ -31,7 +32,8 @@ namespace Hooking::Module {
         if (g_conn.connected.load(std::memory_order_acquire) && g_conn.vtable)
             return true;
 
-        auto const* vtable = SharedMemory::Resolve<HookVtable>("Hooking.Vtable");
+        auto const* vtable = UNIx::detail::g_ctx
+            ? static_cast<HookVtable const*>(UNIx::detail::g_ctx->hooking) : nullptr;
         if (!vtable || vtable->version != vtable_version) {
             g_conn.vtable = nullptr;
             g_conn.connected.store(false, std::memory_order_release);

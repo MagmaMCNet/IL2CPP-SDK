@@ -1,6 +1,7 @@
 #include <il2cpp_module.hpp>
 #include <IL2CPP.Common/il2cpp_unity_shared.hpp>
-#include <SharedMemory.Common/shared_memory.hpp>
+#include <Bootstrap.Common/include/unix/unix_module_abi.hpp>
+#include <Bootstrap.Common/include/unix/unix_ctx.hpp>
 #include <windows.h>
 #include <atomic>
 #include <climits>
@@ -159,7 +160,8 @@ namespace IL2CPP::Module {
         if (g_conn.connected.load(std::memory_order_acquire) && g_conn.exports)
             return true;
 
-        auto* exports = SharedMemory::Resolve<IL2CPP::il2cpp_exports>("IL2CPP.Exports");
+        auto const* exports = UNIx::detail::g_ctx
+            ? static_cast<IL2CPP::il2cpp_exports const*>(UNIx::detail::g_ctx->il2cpp) : nullptr;
         uint32_t version = 0;
         if (exports) {
             auto& versionStorage = const_cast<uint32_t&>(exports->m_uVersion);
@@ -176,7 +178,8 @@ namespace IL2CPP::Module {
         std::atomic_ref<const IL2CPP::il2cpp_exports*>(IL2CPP::g_structOffsets)
             .store(exports, std::memory_order_release);
 
-        g_conn.unity = SharedMemory::Resolve<unity_functions>("IL2CPP.Unity");
+        g_conn.unity = UNIx::detail::g_ctx
+            ? static_cast<unity_functions const*>(UNIx::detail::g_ctx->unity) : nullptr;
         if (g_conn.unity && g_conn.unity->m_uVersion != unity_version) {
             g_conn.unity = nullptr;
         }

@@ -77,6 +77,37 @@ namespace IL2CPP::VRChat {
         AlignRoomWithSpawnPoint
     };
 
+    enum class SpawnOrder : int {
+        First,
+        Sequential,
+        Random,
+        Demo
+    };
+
+    enum class PickupHand : int {
+        None,
+        Left,
+        Right
+    };
+
+    enum class PickupOrientation : int {
+        Any,
+        Grip,
+        Gun
+    };
+
+    enum class AutoHoldMode : int {
+        AutoDetect,
+        Yes,
+        No
+    };
+
+    enum class StationMobility : int {
+        Mobile,
+        Immobilize,
+        ImmobilizeForVehicle
+    };
+
     enum class VRC_SerializationMethod : int {
         None = 0,
         All,

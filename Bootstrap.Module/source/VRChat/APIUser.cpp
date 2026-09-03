@@ -1,6 +1,6 @@
 #include <VRChat/APIUser.hpp>
 #include <VRChat/ApiBadge.hpp>
-#include <bootstrap_internal.hpp>
+#include <VRChat/HostBridge.hpp>
 #include <IL2CPP.Module/include/MethodHandler.hpp>
 #include <IL2CPP.Module/include/System/String.hpp>
 #include <IL2CPP.Module/include/System/List.hpp>
@@ -193,9 +193,8 @@ namespace IL2CPP::VRChat {
     }
 
     PlayerRank APIUser::GetPlayerRank() {
-        if (!valid() || !Bootstrap::Module::is_connected()) return PlayerRank::Visitor;
-        return static_cast<PlayerRank>(
-            Bootstrap::Module::get_vtable()->get_player_rank(raw()));
+        if (!valid()) return PlayerRank::Visitor;
+        return static_cast<PlayerRank>(Bridge::Rank(raw()));
     }
 
     std::string APIUser::GetDateJoined() {
@@ -204,7 +203,16 @@ namespace IL2CPP::VRChat {
     }
 
     std::string APIUser::GetDeveloperType() {
+        if (!valid()) return "";
+        // developerType is the DeveloperType enum, not a string; reading the
+        // returned int as a String* handed callers whatever bytes sat at 0..3.
         static auto m = MethodHandler::resolve("VRC.Core.APIUser", "get_developerType", 0);
-        return invoke_string_getter(m, raw());
+        switch (MethodHandler::invoke<int>(m, raw())) {
+            case 0:  return "none";
+            case 1:  return "trusted";
+            case 2:  return "internal";
+            case 3:  return "moderator";
+            default: return "";
+        }
     }
 } // namespace IL2CPP::VRChat

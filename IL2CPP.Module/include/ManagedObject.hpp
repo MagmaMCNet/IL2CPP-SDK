@@ -103,12 +103,12 @@ namespace IL2CPP::Module {
             return T{};
         }
 
-        /// <summary>Set a field value by name.</summary>
+        /// <summary>Set a field value by name, searching base classes as get_field_info does.</summary>
         template<typename T>
         void set_field(std::string_view name, T value) {
             if (!valid()) return;
             Class klass = get_class_internal();
-            Field f = klass.get_field(name);
+            Field f = klass.get_field_deep(name);
             if (!f) return;
             int off = f.offset();
             if (off >= 0) {
@@ -354,6 +354,11 @@ namespace IL2CPP::Module {
         [[nodiscard]] std::string call_string_method(std::string_view name, void** params = nullptr, int argc = -1) const;
         void set_string_field(std::string_view name, std::string_view value);
         void set_string_property(std::string_view name, std::string_view value);
+
+        /// <summary>Store a managed reference in a field, routed through the GC write barrier.</summary>
+        /// <returns>False when the field does not exist on this object or any base.</returns>
+        bool set_reference_field(std::string_view name, void* value);
+        bool set_reference_field(const Field& field, void* value);
 
 
         [[nodiscard]] bool operator==(const ManagedObject& other) const noexcept { return m_native == other.m_native; }

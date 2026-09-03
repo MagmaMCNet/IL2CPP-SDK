@@ -108,6 +108,13 @@ namespace IL2CPP::VRChat {
 
         void EnablePickups(bool e);
 
+        [[nodiscard]] IL2CPP::Module::ManagedObject GetPickupInHand(PickupHand hand);
+        [[nodiscard]] std::string GetPlayerTag(std::string_view tagName);
+        void SetPlayerTag(std::string_view tagName, std::string_view tagValue);
+        void ClearPlayerTags();
+        void PlayHapticEventInHand(PickupHand hand, float duration, float amplitude, float frequency);
+        [[nodiscard]] bool IsVRCPlus();
+
         [[nodiscard]] IL2CPP::Module::Unity::GameObject GetGameObject();
         [[nodiscard]] VRCPlayer GetVRCPlayer();
 

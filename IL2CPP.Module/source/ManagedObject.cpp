@@ -217,16 +217,26 @@ namespace IL2CPP::Module {
 
     void ManagedObject::set_string_field(std::string_view name, std::string_view value) {
         if (!valid()) return;
-        Field f = get_class_internal().get_field(name);
+        Field f = get_class_internal().get_field_deep(name);
         if (!f) return;
-        int off = f.offset();
-        if (off < 0) return;
+        set_reference_field(f, System::String::create(value).raw());
+    }
 
-        auto str = System::String::create(value);
+    bool ManagedObject::set_reference_field(std::string_view name, void* value) {
+        if (!valid()) return false;
+        return set_reference_field(get_class_internal().get_field_deep(name), value);
+    }
+
+    bool ManagedObject::set_reference_field(const Field& field, void* value) {
+        if (!valid() || !field) return false;
+        int off = field.offset();
+        if (off < 0) return false;
+
         auto** slot = reinterpret_cast<void**>(static_cast<char*>(m_native) + off);
-        if (!SetReferenceWithWriteBarrier(static_cast<il2cppObject*>(m_native), slot, str.raw())) {
-            *slot = str.raw();
+        if (!SetReferenceWithWriteBarrier(static_cast<il2cppObject*>(m_native), slot, value)) {
+            *slot = value;
         }
+        return true;
     }
 
     void ManagedObject::set_string_property(std::string_view name, std::string_view value) {

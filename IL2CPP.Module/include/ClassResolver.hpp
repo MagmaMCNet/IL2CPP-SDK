@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <optional>
+#include <utility>
 #include <cstring>
 
 namespace IL2CPP::Module {
@@ -406,9 +407,7 @@ namespace IL2CPP::Module {
 
         std::string m_name;
         int         m_paramCount = -1;
-        Class       m_paramType;
-        bool        m_hasParamTypeFilter = false;
-        int         m_paramIndex = 0;
+        std::vector<std::pair<int, Class>> m_paramTypes;
         Class       m_returnType;
         bool        m_hasReturnFilter = false;
         bool        m_collectAll = false;
@@ -449,11 +448,10 @@ namespace IL2CPP::Module {
             return *this;
         }
 
-        /// <summary>Match methods where parameter at `index` has the given type class.</summary>
+        /// <summary>Match methods where parameter at `index` has the given type class. Call it
+        /// once per parameter to constrain; every filter added has to hold.</summary>
         MethodQuery& paramType(int index, Class type) {
-            m_paramIndex = index;
-            m_paramType = type;
-            m_hasParamTypeFilter = true;
+            m_paramTypes.emplace_back(index, type);
             return *this;
         }
 
@@ -506,9 +504,9 @@ namespace IL2CPP::Module {
             if (!m_collectAll && !m_matched.empty()) return false;
             if (!m_name.empty() && !detail::str_eq(method.name(), m_name.c_str())) return false;
             if (m_paramCount >= 0 && static_cast<int>(method.param_count()) != m_paramCount) return false;
-            if (m_hasParamTypeFilter) {
-                Class paramClass = detail::ClassFromMethodParam(method, m_paramIndex);
-                if (!paramClass || paramClass.raw() != m_paramType.raw()) return false;
+            for (const auto& [index, type] : m_paramTypes) {
+                Class paramClass = detail::ClassFromMethodParam(method, index);
+                if (!paramClass || paramClass.raw() != type.raw()) return false;
             }
             if (m_hasReturnFilter) {
                 Class retClass = detail::ClassFromMethodReturnType(method);

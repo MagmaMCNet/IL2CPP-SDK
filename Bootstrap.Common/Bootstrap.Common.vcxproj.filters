@@ -11,14 +11,25 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\bootstrap_shared.hpp">
+    <ClInclude Include="include\unix\unix_module_abi.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\unix\unix_attrs.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\unix\unix_types.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\unix\unix_note.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\vrc_types.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\sdk_version.hpp">
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="include\unix\unix_exports.inc">
       <Filter>Header Files</Filter>
-    </ClInclude>
+    </None>
   </ItemGroup>
 </Project>

@@ -1,68 +1,49 @@
 #include <VRChat/PlayerNameplate.hpp>
-#include <VRChat/VRCPlayer.hpp>
-#include <bootstrap_internal.hpp>
+#include <VRChat/HostBridge.hpp>
 
 namespace IL2CPP::VRChat {
 
     namespace {
-        // offset 0 means the member is absent from this build's nameplate.
-        void* member_at(void* self, int offset) {
-            if (!self || offset <= 0) return nullptr;
-            return *reinterpret_cast<void**>(reinterpret_cast<uintptr_t>(self) + offset);
-        }
-
-        const Bootstrap::PlayerNameplateData* nameplate_data() {
-            if (!Bootstrap::Module::is_connected()) return nullptr;
-            return Bootstrap::Module::get_vtable()->get_nameplate_data();
+        std::optional<unix_nameplate_offsets> nameplate_table() {
+            return Bridge::Offsets<unix_nameplate_offsets>(unix_offsets_nameplate);
         }
     }
 
-#define UNIX_NAMEPLATE_MEMBER(type, getter, member)     \
-    type PlayerNameplate::getter() {                    \
-        if (!valid()) return {};                        \
-        const auto* data = nameplate_data();            \
-        if (!data) return {};                           \
-        return type(member_at(m_native, data->member)); \
+#define UNIX_NAMEPLATE_CHILD(getter, member)                                    \
+    IL2CPP::Module::Unity::GameObject PlayerNameplate::getter() {               \
+        if (!valid()) return {};                                                \
+        const auto o = nameplate_table();                                       \
+        if (!o) return {};                                                      \
+        return IL2CPP::Module::Unity::GameObject(                               \
+            Bridge::MemberAt(m_native, o->member));                             \
     }
 
-#define UNIX_NAMEPLATE_CHILD(getter, member) \
-    UNIX_NAMEPLATE_MEMBER(IL2CPP::Module::Unity::GameObject, getter, member)
-
-    UNIX_NAMEPLATE_CHILD(GetContents,           gameObject_contents)
-    UNIX_NAMEPLATE_CHILD(GetMainContainer,      gameObject_mainContainer)
-    UNIX_NAMEPLATE_CHILD(GetTextContainer,      gameObject_textContainer)
-    UNIX_NAMEPLATE_CHILD(GetSubText,            gameObject_subText)
-    UNIX_NAMEPLATE_CHILD(GetPronouns,           gameObject_pronouns)
-    UNIX_NAMEPLATE_CHILD(GetIcon,               gameObject_icon)
-    UNIX_NAMEPLATE_CHILD(GetPlatform,           gameObject_platform)
-    UNIX_NAMEPLATE_CHILD(GetFriendIcon,         gameObject_friendIcon)
-    UNIX_NAMEPLATE_CHILD(GetDevBanner,          gameObject_devBanner)
-    UNIX_NAMEPLATE_CHILD(GetDevIcon,            gameObject_devIcon)
-    UNIX_NAMEPLATE_CHILD(GetQuickStats,         gameObject_quickStats)
-    UNIX_NAMEPLATE_CHILD(GetInteractionStatus,  gameObject_interactionStatus)
-    UNIX_NAMEPLATE_CHILD(GetPlayerStatusIcons,  gameObject_playerStatusIcons)
-    UNIX_NAMEPLATE_CHILD(GetUserMuted,          gameObject_userMuted)
-    UNIX_NAMEPLATE_CHILD(GetUserVolume,         gameObject_userVolume)
-    UNIX_NAMEPLATE_CHILD(GetListenBlocked,      gameObject_listenBlocked)
-    UNIX_NAMEPLATE_CHILD(GetEarmuffsIcon,       gameObject_earmuffsIcon)
-    UNIX_NAMEPLATE_CHILD(GetFocusViewIcon,      gameObject_focusViewIcon)
-    UNIX_NAMEPLATE_CHILD(GetGroupInfo,          gameObject_groupInfo)
-    UNIX_NAMEPLATE_CHILD(GetAvatarProgress,     gameObject_avatarProgress)
-    UNIX_NAMEPLATE_CHILD(GetRootObject,         gameObject_root)
-
-    UNIX_NAMEPLATE_MEMBER(IL2CPP::Module::ManagedObject,       GetFragment,       fragment)
-    UNIX_NAMEPLATE_MEMBER(IL2CPP::Module::ManagedObject,       GetContent,        content)
-    UNIX_NAMEPLATE_MEMBER(IL2CPP::Module::ManagedObject,       GetIcons,          icons)
-    UNIX_NAMEPLATE_MEMBER(IL2CPP::Module::ManagedObject,       GetPositioner,     positioner)
-    UNIX_NAMEPLATE_MEMBER(IL2CPP::Module::Unity::RectTransform, GetChatBubbleRect, rectTransform)
-    UNIX_NAMEPLATE_MEMBER(VRCPlayer,                            GetVRCPlayer,      vrcPlayer)
+    UNIX_NAMEPLATE_CHILD(GetContents,           gameobject_contents)
+    UNIX_NAMEPLATE_CHILD(GetMainContainer,      gameobject_main_container)
+    UNIX_NAMEPLATE_CHILD(GetTextContainer,      gameobject_text_container)
+    UNIX_NAMEPLATE_CHILD(GetSubText,            gameobject_sub_text)
+    UNIX_NAMEPLATE_CHILD(GetPronouns,           gameobject_pronouns)
+    UNIX_NAMEPLATE_CHILD(GetIcon,               gameobject_icon)
+    UNIX_NAMEPLATE_CHILD(GetPlatform,           gameobject_platform)
+    UNIX_NAMEPLATE_CHILD(GetFriendIcon,         gameobject_friend_icon)
+    UNIX_NAMEPLATE_CHILD(GetDevBanner,          gameobject_dev_banner)
+    UNIX_NAMEPLATE_CHILD(GetDevIcon,            gameobject_dev_icon)
+    UNIX_NAMEPLATE_CHILD(GetQuickStats,         gameobject_quick_stats)
+    UNIX_NAMEPLATE_CHILD(GetInteractionStatus,  gameobject_interaction_status)
+    UNIX_NAMEPLATE_CHILD(GetPlayerStatusIcons,  gameobject_player_status_icons)
+    UNIX_NAMEPLATE_CHILD(GetUserMuted,          gameobject_user_muted)
+    UNIX_NAMEPLATE_CHILD(GetUserVolume,         gameobject_user_volume)
+    UNIX_NAMEPLATE_CHILD(GetListenBlocked,      gameobject_listen_blocked)
+    UNIX_NAMEPLATE_CHILD(GetEarmuffsIcon,       gameobject_earmuffs_icon)
+    UNIX_NAMEPLATE_CHILD(GetFocusViewIcon,      gameobject_focus_view_icon)
+    UNIX_NAMEPLATE_CHILD(GetGroupInfo,          gameobject_group_info)
+    UNIX_NAMEPLATE_CHILD(GetAvatarProgress,     gameobject_avatar_progress)
 
 #undef UNIX_NAMEPLATE_CHILD
-#undef UNIX_NAMEPLATE_MEMBER
 
     bool PlayerNameplate::HasChildObjects() {
-        const auto* data = nameplate_data();
-        return data && data->gameObject_contents > 0;
+        const auto o = nameplate_table();
+        return o && o->gameobject_contents > 0;
     }
 
 } // namespace IL2CPP::VRChat

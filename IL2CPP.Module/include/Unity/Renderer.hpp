@@ -114,6 +114,17 @@ namespace IL2CPP::Module::Unity {
             MethodHandler::invoke(m, raw(), params);
         }
 
+        /// <summary>Whether the renderer is skipped by normal rendering. Command-buffer draws still reach it.</summary>
+        [[nodiscard]] bool GetForceRenderingOff() const {
+            static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Renderer"), IL2CPP_STR("get_forceRenderingOff"), 0);
+            return MethodHandler::invoke<bool>(m, raw());
+        }
+        void SetForceRenderingOff(bool value) {
+            static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Renderer"), IL2CPP_STR("set_forceRenderingOff"), 1);
+            void* params[] = { &value };
+            MethodHandler::invoke(m, raw(), params);
+        }
+
         [[nodiscard]] int GetShadowCastingMode() const {
             static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Renderer"), IL2CPP_STR("get_shadowCastingMode"), 0);
             return MethodHandler::invoke<int>(m, raw());

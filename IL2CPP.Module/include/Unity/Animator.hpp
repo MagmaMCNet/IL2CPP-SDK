@@ -1,5 +1,6 @@
 #pragma once
 #include "Behaviour.hpp"
+#include "Transform.hpp"
 #include "../MethodHandler.hpp"
 #include <IL2CPP.Common/il2cpp_shared.hpp>
 #include <string>
@@ -80,6 +81,15 @@ namespace IL2CPP::Module::Unity {
         [[nodiscard]] float GetHumanScale() const {
             static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Animator"), IL2CPP_STR("get_humanScale"), 0);
             return MethodHandler::invoke<float>(m, raw());
+        }
+
+        /// <summary>The transform driving a humanoid bone.</summary>
+        /// <param name="humanBone">A UnityEngine.HumanBodyBones value.</param>
+        /// <returns>The bone transform, or an invalid Transform when the rig has none.</returns>
+        [[nodiscard]] Transform GetBoneTransform(int humanBone) const {
+            static auto m = MethodHandler::resolve(IL2CPP_STR("UnityEngine.Animator"), IL2CPP_STR("GetBoneTransform"), 1);
+            void* params[] = { &humanBone };
+            return Transform{ MethodHandler::invoke<void*>(m, raw(), params) };
         }
 
         [[nodiscard]] bool GetIsHuman() const {

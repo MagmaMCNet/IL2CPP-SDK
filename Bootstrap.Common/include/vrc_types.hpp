@@ -15,6 +15,7 @@ namespace Bootstrap {
     };
 
     struct PlayerNameplateData {
+        uint32_t size;
         void* Class;
         int gameObject_contents;
         int gameObject_subText;
@@ -40,7 +41,6 @@ namespace Bootstrap {
         // Rewritten nameplate contents. The child GameObjects moved behind a UI
         // fragment, so on those builds the gameObject_* offsets above stay 0 and
         // these are filled instead -- and the other way round on older builds.
-        // Appended, never reordered: this struct is shared ABI.
         int fragment;
         int content;
         int icons;
@@ -51,6 +51,7 @@ namespace Bootstrap {
     };
 
     struct PlayerData {
+        uint32_t size;
         void* Class;
         void* Singleton;
         int VRCPlayerApi;
@@ -66,6 +67,7 @@ namespace Bootstrap {
     };
 
     struct VRCPlayerData {
+        uint32_t size;
         void* Class;
         void* Singleton;
         int VRCPlayerApi;
@@ -89,7 +91,7 @@ namespace Bootstrap {
         int gameObject_nameplate;
         int gameObject_avatar;
 
-        int Animator;   // appended, never reordered: shared ABI
+        int Animator;
 
         // String property getters as il2cppMethodInfo* -- feed straight to
         // MethodHandler::invoke, no per-call name lookup (the names are
@@ -110,8 +112,11 @@ namespace Bootstrap {
         void* SingletonHolderClass;
         int   singletonHolderStaticOffset;  // offset of the static field within static-data
 
-        // PhotonPeer inherits PeerBase.roundTripTime (Single, ms).
+        // PhotonPeer does not inherit PeerBase - it holds one in a field - so the
+        // ping is two hops: PhotonPeer.peerBase then PeerBase.roundTripTime
+        // (Single, ms).
         void* PhotonPeerClass;
+        int   peerBaseOffset;
         int   roundTripTimeOffset;
     };
 

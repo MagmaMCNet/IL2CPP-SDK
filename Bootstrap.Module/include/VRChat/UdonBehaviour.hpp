@@ -66,6 +66,9 @@ namespace IL2CPP::VRChat {
 
         [[nodiscard]] std::string GetInteractionText();
         void SetInteractionText(std::string_view text);
+        void Interact();
+        [[nodiscard]] bool GetDisableInteractive();
+        void SetDisableInteractive(bool value);
 
         void SetProgramVariable(std::string_view symbolName, void* value);
         [[nodiscard]] void* GetProgramVariable(std::string_view symbolName);
@@ -77,6 +80,22 @@ namespace IL2CPP::VRChat {
 
         /// <summary>Get the live IUdonHeap, preferring the VM's heap over the program's.</summary>
         [[nodiscard]] void* GetHeap() const;
+
+        /// <summary>Get the VRC.Udon.VM.UdonVM this behaviour runs its program on.</summary>
+        [[nodiscard]] void* GetVM() const;
+
+        /// <summary>The authored name of the script this behaviour runs, e.g. the UdonSharp
+        /// class name, rather than the content-hashed name of the serialized asset.</summary>
+        /// <returns>An empty string when neither reflection symbols nor a named program
+        /// asset are available.</returns>
+        [[nodiscard]] std::string GetScriptName() const;
+
+        /// <summary>Copy the VM's processed bytecode, one entry per instruction word.</summary>
+        [[nodiscard]] std::vector<uint32_t> GetByteCode() const;
+
+        /// <summary>Replace the VM's processed bytecode, reallocating when the length differs.</summary>
+        /// <returns>False when the VM or its bytecode array could not be resolved.</returns>
+        bool SetByteCode(const std::vector<uint32_t>& words);
 
         /// <summary>Get the program's instruction set identifier, e.g. "UdonVM".</summary>
         [[nodiscard]] std::string GetInstructionSetIdentifier() const;

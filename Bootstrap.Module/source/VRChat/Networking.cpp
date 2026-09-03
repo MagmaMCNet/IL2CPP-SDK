@@ -212,4 +212,31 @@ namespace IL2CPP::VRChat {
         return MethodHandler::invoke<int>(m, nullptr, params);
     }
 
+    void* Networking::GetPlayerObjectsArray(VRCPlayerApi target) {
+        if (!target) return nullptr;
+        static auto m = MethodHandler::resolve("VRC.SDKBase.Networking", "GetPlayerObjects", 1);
+        if (!m) m = MethodHandler::resolve("VRC.SDKBase.Networking", "GetPlayerObjects", 1);
+        if (!m) return nullptr;
+        void* params[1] = { target.raw() };
+        return MethodHandler::invoke<void*>(m, nullptr, params);
+    }
+
+    bool Networking::IsPlayerObject(IL2CPP::Module::Unity::GameObject obj) {
+        if (!obj) return false;
+        static auto m = MethodHandler::resolve("VRC.SDKBase.Networking", "IsPlayerObject", 1);
+        if (!m) m = MethodHandler::resolve("VRC.SDKBase.Networking", "IsPlayerObject", 1);
+        if (!m) return false;
+        void* params[1] = { obj.raw() };
+        return MethodHandler::invoke<bool>(m, nullptr, params);
+    }
+
+    VRCPlayerApi Networking::GetPlayerObjectOwner(IL2CPP::Module::Unity::GameObject obj) {
+        if (!obj) return {};
+        static auto m = MethodHandler::resolve("VRC.SDKBase.Networking", "GetPlayerObjectOwner", 1);
+        if (!m) m = MethodHandler::resolve("VRC.SDKBase.Networking", "GetPlayerObjectOwner", 1);
+        if (!m) return {};
+        void* params[1] = { obj.raw() };
+        return VRCPlayerApi(MethodHandler::invoke<void*>(m, nullptr, params));
+    }
+
 } // namespace IL2CPP::VRChat

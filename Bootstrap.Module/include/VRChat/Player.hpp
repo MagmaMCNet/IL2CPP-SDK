@@ -1,7 +1,7 @@
 #pragma once
 
 #include <IL2CPP.Module/include/il2cpp_module.hpp>
-#include <Bootstrap.Common/include/bootstrap_shared.hpp>
+#include <unix/unix_types.hpp>
 
 namespace IL2CPP::VRChat {
 
@@ -9,7 +9,7 @@ namespace IL2CPP::VRChat {
     class VRCPlayer;
     class APIUser;
 
-    using PlayerRank = Bootstrap::PlayerRank;
+    using PlayerRank = UNIx::PlayerRank;
 
     class Player : public IL2CPP::Module::Unity::MonoBehaviour {
     public:
@@ -21,7 +21,7 @@ namespace IL2CPP::VRChat {
         [[nodiscard]] IL2CPP::Module::ManagedObject GetUSpeaker();
 
         [[nodiscard]] PlayerRank GetPlayerRank();
-        [[nodiscard]] static Bootstrap::Color GetRankColor(PlayerRank rank);
+        [[nodiscard]] static unix_color GetRankColor(PlayerRank rank);
 
         static Player GetLocalPlayer();
     };

@@ -70,9 +70,14 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="include\bootstrap_shared.hpp" />
-    <ClInclude Include="include\sdk_version.hpp" />
+    <ClInclude Include="include\unix\unix_module_abi.hpp" />
+    <ClInclude Include="include\unix\unix_attrs.hpp" />
+    <ClInclude Include="include\unix\unix_types.hpp" />
+    <ClInclude Include="include\unix\unix_note.hpp" />
     <ClInclude Include="include\vrc_types.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="include\unix\unix_exports.inc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

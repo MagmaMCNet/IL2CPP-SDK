@@ -2,75 +2,66 @@
 #include <VRChat/VRCPlayerApi.hpp>
 #include <VRChat/Player.hpp>
 #include <VRChat/PlayerNameplate.hpp>
-#include <bootstrap_internal.hpp>
-#include <IL2CPP.Module/include/MethodHandler.hpp>
-#include <IL2CPP.Module/include/System/String.hpp>
+#include <VRChat/HostBridge.hpp>
 
 namespace IL2CPP::VRChat {
 
     namespace {
-        std::string invoke_string_getter(void* methodInfo, void* instance) {
-            if (!methodInfo || !instance) return "";
-            void* str = IL2CPP::Module::MethodHandler::invoke<void*>(
-                IL2CPP::Module::Method(methodInfo), instance);
-            return str ? IL2CPP::Module::System::String(str).to_string() : "";
+        std::optional<unix_vrc_player_offsets> vrc_player_table() {
+            return Bridge::Offsets<unix_vrc_player_offsets>(unix_offsets_vrc_player);
         }
     }
 
     VRCPlayer VRCPlayer::GetLocalPlayer() {
-        if (!Bootstrap::Module::is_connected()) return VRCPlayer();
-        return VRCPlayer(Bootstrap::Module::get_vtable()->get_local_vrc_player());
+        return VRCPlayer(Bridge::LocalVrcPlayer());
     }
 
     VRCPlayerApi VRCPlayer::GetVRCPlayerApi() {
-        if (!valid() || !Bootstrap::Module::is_connected()) return VRCPlayerApi();
-        auto* data = Bootstrap::Module::get_vtable()->get_vrc_player_data();
-        return VRCPlayerApi(*reinterpret_cast<void**>(reinterpret_cast<uintptr_t>(raw()) + data->VRCPlayerApi));
+        if (!valid()) return {};
+        const auto o = vrc_player_table();
+        if (!o) return {};
+        return VRCPlayerApi(Bridge::MemberAt(raw(), o->vrc_player_api));
     }
 
     Player VRCPlayer::GetPlayer() {
-        if (!valid() || !Bootstrap::Module::is_connected()) return Player();
-        auto* data = Bootstrap::Module::get_vtable()->get_vrc_player_data();
-        return Player(*reinterpret_cast<void**>(reinterpret_cast<uintptr_t>(raw()) + data->Player));
+        if (!valid()) return {};
+        const auto o = vrc_player_table();
+        if (!o) return {};
+        return Player(Bridge::MemberAt(raw(), o->player));
     }
 
     PlayerNameplate VRCPlayer::GetNameplate() {
-        if (!valid() || !Bootstrap::Module::is_connected()) return {};
-        auto* data = Bootstrap::Module::get_vtable()->get_vrc_player_data();
-        if (!data->PlayerNameplate) return {};
-        return PlayerNameplate(*reinterpret_cast<void**>(reinterpret_cast<uintptr_t>(raw()) + data->PlayerNameplate));
+        if (!valid()) return {};
+        const auto o = vrc_player_table();
+        if (!o) return {};
+        return PlayerNameplate(Bridge::MemberAt(raw(), o->player_nameplate));
     }
 
     std::string VRCPlayer::GetUsername() {
-        if (!valid() || !Bootstrap::Module::is_connected()) return "";
-        return invoke_string_getter(
-            Bootstrap::Module::get_vtable()->get_vrc_player_data()->get_username, raw());
+        if (!valid()) return {};
+        return Bridge::VrcPlayerString(raw(), Bridge::kStrUsername);
     }
 
     std::string VRCPlayer::GetDisplayName() {
-        if (!valid() || !Bootstrap::Module::is_connected()) return "";
-        return invoke_string_getter(
-            Bootstrap::Module::get_vtable()->get_vrc_player_data()->get_displayName, raw());
+        if (!valid()) return {};
+        return Bridge::VrcPlayerString(raw(), Bridge::kStrDisplayName);
     }
 
     std::string VRCPlayer::GetUserId() {
-        if (!valid() || !Bootstrap::Module::is_connected()) return "";
-        return invoke_string_getter(
-            Bootstrap::Module::get_vtable()->get_vrc_player_data()->get_userId, raw());
+        if (!valid()) return {};
+        return Bridge::VrcPlayerString(raw(), Bridge::kStrUserId);
     }
 
     std::string VRCPlayer::GetPronouns() {
-        if (!valid() || !Bootstrap::Module::is_connected()) return "";
-        return invoke_string_getter(
-            Bootstrap::Module::get_vtable()->get_vrc_player_data()->get_pronouns, raw());
+        if (!valid()) return {};
+        return Bridge::VrcPlayerString(raw(), Bridge::kStrPronouns);
     }
 
     IL2CPP::Module::Unity::Animator VRCPlayer::GetAnimator() {
-        if (!valid() || !Bootstrap::Module::is_connected()) return {};
-        auto* data = Bootstrap::Module::get_vtable()->get_vrc_player_data();
-        if (!data->Animator) return {};
-        return IL2CPP::Module::Unity::Animator(
-            *reinterpret_cast<void**>(reinterpret_cast<uintptr_t>(raw()) + data->Animator));
+        if (!valid()) return {};
+        const auto o = vrc_player_table();
+        if (!o) return {};
+        return IL2CPP::Module::Unity::Animator(Bridge::MemberAt(raw(), o->animator));
     }
 
 } // namespace IL2CPP::VRChat

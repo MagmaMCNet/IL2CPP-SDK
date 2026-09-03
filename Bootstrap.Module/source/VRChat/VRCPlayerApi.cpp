@@ -1,9 +1,10 @@
 #include <VRChat/VRCPlayerApi.hpp>
 #include <VRChat/VRCPlayer.hpp>
-#include <bootstrap_internal.hpp>
+#include <VRChat/HostBridge.hpp>
 #include <IL2CPP.Module/include/MethodHandler.hpp>
 #include <IL2CPP.Module/include/Reflection.hpp>
 #include <IL2CPP.Module/include/Unity/GameObject.hpp>
+#include <IL2CPP.Module/include/System/String.hpp>
 
 namespace IL2CPP::VRChat {
 
@@ -453,6 +454,59 @@ namespace IL2CPP::VRChat {
         MethodHandler::invoke<void>(m, raw(), params);
     }
 
+    IL2CPP::Module::ManagedObject VRCPlayerApi::GetPickupInHand(PickupHand hand) {
+        if (!valid()) return {};
+        static auto m = MethodHandler::resolve("VRC.SDKBase.VRCPlayerApi", "GetPickupInHand", 1);
+        if (!m) m = MethodHandler::resolve("VRC.SDKBase.VRCPlayerApi", "GetPickupInHand", 1);
+        if (!m) return {};
+        void* params[1] = { &hand };
+        return IL2CPP::Module::ManagedObject(MethodHandler::invoke<void*>(m, raw(), params));
+    }
+
+    std::string VRCPlayerApi::GetPlayerTag(std::string_view tagName) {
+        if (!valid()) return {};
+        static auto m = MethodHandler::resolve("VRC.SDKBase.VRCPlayerApi", "GetPlayerTag", 1);
+        if (!m) m = MethodHandler::resolve("VRC.SDKBase.VRCPlayerApi", "GetPlayerTag", 1);
+        if (!m) return {};
+        auto str = IL2CPP::Module::System::String::create(tagName);
+        void* params[1] = { str.raw() };
+        void* result = MethodHandler::invoke<void*>(m, raw(), params);
+        return result ? IL2CPP::Module::System::String(result).to_string() : std::string{};
+    }
+
+    void VRCPlayerApi::SetPlayerTag(std::string_view tagName, std::string_view tagValue) {
+        if (!valid()) return;
+        static auto m = MethodHandler::resolve("VRC.SDKBase.VRCPlayerApi", "SetPlayerTag", 2);
+        if (!m) m = MethodHandler::resolve("VRC.SDKBase.VRCPlayerApi", "SetPlayerTag", 2);
+        if (!m) return;
+        auto name = IL2CPP::Module::System::String::create(tagName);
+        auto value = IL2CPP::Module::System::String::create(tagValue);
+        void* params[2] = { name.raw(), value.raw() };
+        MethodHandler::invoke<void>(m, raw(), params);
+    }
+
+    void VRCPlayerApi::ClearPlayerTags() {
+        if (!valid()) return;
+        static auto m = MethodHandler::resolve("VRC.SDKBase.VRCPlayerApi", "ClearPlayerTags", 0);
+        if (!m) m = MethodHandler::resolve("VRC.SDKBase.VRCPlayerApi", "ClearPlayerTags", 0);
+        if (!m) return;
+        MethodHandler::invoke<void>(m, raw());
+    }
+
+    void VRCPlayerApi::PlayHapticEventInHand(PickupHand hand, float duration, float amplitude, float frequency) {
+        if (!valid()) return;
+        static auto m = MethodHandler::resolve("VRC.SDKBase.VRCPlayerApi", "PlayHapticEventInHand", 4);
+        if (!m) m = MethodHandler::resolve("VRC.SDKBase.VRCPlayerApi", "PlayHapticEventInHand", 4);
+        if (!m) return;
+        void* params[4] = { &hand, &duration, &amplitude, &frequency };
+        MethodHandler::invoke<void>(m, raw(), params);
+    }
+
+    bool VRCPlayerApi::IsVRCPlus() {
+        if (!valid()) return false;
+        return get_field<bool>("isVRCPlus");
+    }
+
     IL2CPP::Module::Unity::GameObject VRCPlayerApi::GetGameObject() {
         if (!valid()) return {};
         return get_field<IL2CPP::Module::Unity::GameObject>("gameObject");
@@ -468,20 +522,21 @@ namespace IL2CPP::VRChat {
     }
 
     int VRCPlayerApi::GetPlayerCount() {
-        if (!Bootstrap::Module::is_connected()) return 0;
         static auto m = MethodHandler::resolve("VRC.SDKBase.VRCPlayerApi", "GetPlayerCount", 0);
+        if (!m) return 0;
         return MethodHandler::invoke<int>(m, nullptr);
     }
 
     int VRCPlayerApi::GetPlayerId(VRCPlayerApi p) {
-        if (!Bootstrap::Module::is_connected() || !p) return -1;
+        if (!p) return -1;
         static auto m = MethodHandler::resolve("VRC.SDKBase.VRCPlayerApi", "GetPlayerId", 1);
+        if (!m) return -1;
         void* params[1] = { p.raw() };
         return MethodHandler::invoke<int>(m, nullptr, params);
     }
 
     VRCPlayerApi VRCPlayerApi::GetPlayerByGameObject(IL2CPP::Module::Unity::GameObject o) {
-        if (!Bootstrap::Module::is_connected() || !o) return VRCPlayerApi();
+        if (!o) return VRCPlayerApi();
         static auto m = MethodHandler::resolve("VRC.SDKBase.VRCPlayerApi", "GetPlayerByGameObject", 1);
         void* params[1] = { o.raw() };
         void* result = MethodHandler::invoke<void*>(m, nullptr, params);
@@ -489,7 +544,6 @@ namespace IL2CPP::VRChat {
     }
 
     VRCPlayerApi VRCPlayerApi::GetPlayerById(int id) {
-        if (!Bootstrap::Module::is_connected()) return VRCPlayerApi();
         static auto m = MethodHandler::resolve("VRC.SDKBase.VRCPlayerApi", "GetPlayerById", 1);
         void* params[1] = { &id };
         void* result = MethodHandler::invoke<void*>(m, nullptr, params);
@@ -497,8 +551,7 @@ namespace IL2CPP::VRChat {
     }
 
     VRCPlayerApi VRCPlayerApi::GetLocalPlayer() {
-        if (!Bootstrap::Module::is_connected()) return VRCPlayerApi();
-        return VRCPlayerApi(Bootstrap::Module::get_vtable()->get_local_player_api());
+        return VRCPlayerApi(Bridge::LocalPlayerApi());
     }
 
 } // namespace IL2CPP::VRChat

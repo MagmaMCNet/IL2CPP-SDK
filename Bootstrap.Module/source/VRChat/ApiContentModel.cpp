@@ -1,5 +1,4 @@
 #include <VRChat/ApiContentModel.hpp>
-#include <bootstrap_internal.hpp>
 #include <IL2CPP.Module/include/MethodHandler.hpp>
 #include <IL2CPP.Module/include/System/String.hpp>
 #include <IL2CPP.Module/include/System/List.hpp>

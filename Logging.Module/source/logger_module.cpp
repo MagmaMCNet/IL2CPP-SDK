@@ -1,5 +1,6 @@
 #include <include/logger_module.hpp>
-#include <SharedMemory.Common/shared_memory.hpp>
+#include <Bootstrap.Common/include/unix/unix_module_abi.hpp>
+#include <Bootstrap.Common/include/unix/unix_ctx.hpp>
 #include <windows.h>
 #include <atomic>
 #include <mutex>
@@ -28,7 +29,8 @@ namespace Logger::Module {
             return true;
         }
 
-        auto const* vtable = SharedMemory::Resolve<LoggerVtable>("Logger.Vtable");
+        auto const* vtable = UNIx::detail::g_ctx
+            ? static_cast<LoggerVtable const*>(UNIx::detail::g_ctx->logging) : nullptr;
         if (!vtable || vtable->version != vtable_version) {
             g_conn.vtable = nullptr;
             g_conn.connected.store(false, std::memory_order_release);

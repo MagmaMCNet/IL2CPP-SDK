@@ -1,14 +1,14 @@
 #pragma once
 
 #include "ApiModel.hpp"
-#include <Bootstrap.Common/include/bootstrap_shared.hpp>
+#include <unix/unix_types.hpp>
 #include <string>
 #include <vector>
 
 namespace IL2CPP::VRChat {
 
     class ApiBadge;
-    using PlayerRank = Bootstrap::PlayerRank;
+    using PlayerRank = UNIx::PlayerRank;
 
     class APIUser : public ApiModel {
     public:
